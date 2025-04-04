@@ -16,6 +16,8 @@ blink_speed = 0.05
 is_blinking = False
 shrinking = True
 
+EYE_COLOR = (0,0,0)
+BACKGROUND_COLOR = (255,255,255)
 
 pygame.init()
 
@@ -26,37 +28,39 @@ pygame.display.set_caption("Monkey Eyes")
 
 clock = pygame.time.Clock()
 
-def draw_eyes(eye_height):
+left_eye = pygame.Rect(eye_left_x, eye_y, eye_width, eye_height)
+right_eye = pygame.Rect(eye_right_x, eye_y, eye_width, eye_height)
+
+def draw_eyes():
     # Left eye
-    pygame.draw.rect(screen, (0, 0, 0), 
-                    (eye_left_x, eye_y, eye_width, eye_height),
-                    border_radius=eye_radius)
+    pygame.draw.rect(screen, EYE_COLOR, left_eye, border_radius=eye_radius)
     
     # Right eye
-    pygame.draw.rect(screen, (0, 0, 0), 
-                    (eye_right_x, eye_y, eye_width, eye_height),
-                    border_radius=eye_radius)
+    pygame.draw.rect(screen, EYE_COLOR, right_eye, border_radius=eye_radius)
 
 def animate_blink():
-    global current_height_scale, shrinking, is_blinking
+    global shrinking, is_blinking
     
     if shrinking:
-        current_height_scale -= blink_speed
-        if current_height_scale <= 0.1:  
+        left_eye.inflate_ip(0, -10)
+        right_eye.inflate_ip(0, -10)
+        
+        if left_eye.height <= 10: 
             shrinking = False
     else:
-        current_height_scale += blink_speed
-        if current_height_scale >= 1.0:
-            current_height_scale = 1.0
+        left_eye.inflate_ip(0, 10)
+        right_eye.inflate_ip(0, 10)
+        
+        if left_eye.height >= eye_height:  
+            left_eye.height = eye_height
+            right_eye.height = eye_height
             is_blinking = False
-    
-    draw_eyes(eye_height * current_height_scale)
 
 def main():
     global last_blink_time, blink_interval, is_blinking, shrinking
     
     running = True
-    last_blink_time = time.time() * 1000  
+    last_blink_time = time.time() * 1000  # current time in milliseconds
     
     while running:
         for event in pygame.event.get():
@@ -66,22 +70,21 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     running = False
         
-        screen.fill((255, 255, 255))
-        current_time = time.time() * 1000
+        screen.fill(BACKGROUND_COLOR)  
+        current_time = time.time() * 1000  
         
         if (current_time - last_blink_time > blink_interval) and not is_blinking:
             last_blink_time = current_time
-            blink_interval = random.uniform(500, 2000)
+            blink_interval = random.uniform(500, 2000)  
             is_blinking = True
             shrinking = True
         
         if is_blinking:
-            animate_blink()
-        else:
-            draw_eyes(eye_height)
+            animate_blink()  
         
-        pygame.display.flip()
-        clock.tick(60)
+        draw_eyes() 
+        pygame.display.flip()  
+        clock.tick(60) 
     
     pygame.quit()
 
