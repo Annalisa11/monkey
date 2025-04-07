@@ -2,13 +2,13 @@ import pygame
 import random
 import time
 
-eye_width = 120
-eye_height = 120
-eye_y = 50
-eye_distance = 80  # Distance between the two eyes
-eye_left_x = 80
-eye_right_x = 280
-eye_radius = 10
+eye_width = 240
+eye_height = 240
+eye_y = 100
+eye_distance = 100  # Distance between the two eyes
+eye_left_x = 380
+eye_right_x = 780
+eye_radius = 30
 last_blink_time = 0
 blink_interval = random.uniform(500, 2000)
 current_height_scale = 1.0
@@ -33,9 +33,10 @@ smile_duration = 2000
 
 pygame.init()
 
-screen_width = 480
-screen_height = 320
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+# 1280x720
+screen_width = 1280
+screen_height = 720
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Monkey Eyes")
 
 clock = pygame.time.Clock()
@@ -103,22 +104,66 @@ def animate_blink():
             right_eye.height = eye_height
             is_blinking = False
 
-def move_sideways(right=True):
-    global shrinking, is_blinking
-
+def move_sideways(direction=1):  # 1 for right, -1 for left
+    global shrinking, is_blinking, eye_height
+   
+    direction_movement_amplitude = 10
+    blink_amplitude = 5
+   
+    enlarge_left = direction < 0
+    enlarge_right = direction > 0
+   
     if shrinking:
-        left_eye.move_ip(move_speed, 0)
-        right_eye.move_ip(move_speed, 0)
+        left_eye.move_ip(direction_movement_amplitude * direction, 0)
+        right_eye.move_ip(direction_movement_amplitude * direction, 0)
+       
+        # blink effect
+        if (direction > 0 and left_eye.x < eye_left_x + 100) or (direction < 0 and left_eye.x > eye_left_x - 100):
+            if left_eye.height > eye_height - 40:
+                left_eye.inflate_ip(0, -blink_amplitude)
+                right_eye.inflate_ip(0, -blink_amplitude)
+        else:
+            # make one eye larger
+            if left_eye.height < eye_height:
+                left_eye.inflate_ip(0, blink_amplitude)
+                right_eye.inflate_ip(0, blink_amplitude)
+            if enlarge_right:
+                right_eye.inflate_ip(4, 4)  
+            else:
+                left_eye.inflate_ip(4, 4)   
+       
         
-        if left_eye.x >= 150: 
+        if (direction > 0 and left_eye.x > eye_left_x + 200) or (direction < 0 and left_eye.x < eye_left_x - 200):
             shrinking = False
+            pygame.time.delay(1000)
     else:
-        left_eye.move_ip(-move_speed, 0)
-        right_eye.move_ip(-move_speed, 0)
+        move_direction = -1 if left_eye.x > eye_left_x else 1
         
-        if left_eye.x <= 80:  
-            left_eye.x = eye_left_x
-            right_eye.x = eye_right_x
+        left_eye.move_ip(10 * move_direction, 0)
+        right_eye.move_ip(10 * move_direction, 0)
+       
+        # Restore eye height
+        if left_eye.height < eye_height:
+            left_eye.inflate_ip(0, blink_amplitude)
+        if right_eye.height < eye_height:
+            right_eye.inflate_ip(0, blink_amplitude)
+           
+        # Shrink the bigger eye
+        if enlarge_right and right_eye.width > eye_width:
+            right_eye.inflate_ip(-2, -2)
+        elif enlarge_left and left_eye.width > eye_width:
+            left_eye.inflate_ip(-2, -2)
+       
+        correct_size = (abs(left_eye.height - eye_height) < 5 and
+                       abs(right_eye.height - eye_height) < 5)
+        at_original_pos = (direction > 0 and left_eye.x <= eye_left_x) or (direction < 0 and left_eye.x >= eye_left_x)
+       
+        if at_original_pos or abs(left_eye.x - eye_left_x) < 10:
+            # Reset everything 
+            left_eye.x, left_eye.y = eye_left_x, eye_y
+            left_eye.width, left_eye.height = eye_width, eye_height
+            right_eye.x, right_eye.y = eye_right_x, eye_y
+            right_eye.width, right_eye.height = eye_width, eye_height
             is_blinking = False
 
 def main():
@@ -162,7 +207,8 @@ def main():
                 shrinking = True
             
             if is_blinking:
-                animate_blink()
+                # animate_blink()
+                move_sideways(-1)
                 draw_eyes()
             else:
                 draw_eyes()
