@@ -2,7 +2,27 @@ import pygame
 import random
 import time
 
+"""
+Monkey Eyes Animation System
+
+Classes:
+- Eye: Represents a single eye with drawing and transformation methods.
+- EyePair: Manages and draws a pair of eyes.
+- AnimationManager: Controls different animation states and transitions.
+- MonkeyEyeApp: Main application class that initializes and runs the Pygame loop.
+"""
 class Eye:
+    """
+Represents a single eye with position, size, and rendering logic.
+
+Args:
+    x (int): X (left) position of the eye.
+    y (int): Y (top) position of the eye.
+    width (int): Width of the eye.
+    height (int): Height of the eye.
+    radius (int): Border radius for rounded corners.
+    color (tuple): RGB color of the eye.
+"""
     def __init__(self, x, y, width, height, radius=30, color=(0, 0, 0)):
         self.rect = pygame.Rect(x, y, width, height)
         self.original_rect = pygame.Rect(x, y, width, height)  
@@ -10,30 +30,46 @@ class Eye:
         self.color = color
     
     def draw(self, screen):
+        """Draws the eye as a rounded rectangle."""
         pygame.draw.rect(screen, self.color, self.rect, border_radius=self.radius)
     
     def grow(self, width, height):
+        """Inflates (or shrinks) the eye by width and height."""
         self.rect.inflate_ip(width, height)
     
     def move(self, x, y):
+        """Moves the eye position by the given x and y offsets."""
         self.rect.move_ip(x, y)
     
     def reset_position(self):
+        """Resets the eye to its original position."""
         self.rect.x = self.original_rect.x
         self.rect.y = self.original_rect.y
     
     def reset_size(self):
+        """Resets the eye to its original width and height."""
         self.rect.width = self.original_rect.width
         self.rect.height = self.original_rect.height
     
     def reset(self):
+        """Resets both position and size of the eye."""
         self.reset_position()
         self.reset_size()
         
     def get_center(self):
+        """Returns the (x, y) center of the eye."""
         return (self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2)
 
     def draw_circular(self, screen, background_color, vertical_offset=0, overlay_circle_offset=40):
+        """
+        Draws the eye as a circular laughing/smiling representation.
+
+        Args:
+            screen: Pygame display surface.
+            background_color (tuple): RGB of the second circle that cuts out the first to make it a crescent moon
+            vertical_offset (int): vertical shift of the eye
+            overlay_circle_offset (int): Distance between top and bottom arcs.
+        """
         center_x, center_y = self.get_center()
         center_y += vertical_offset
         radius = self.rect.height // 2
@@ -43,6 +79,19 @@ class Eye:
 
 
 class EyePair:
+    """
+    Manages a pair of eyes and their expressions.
+
+    Args:
+        left_x (int): X position of the left eye.
+        right_x (int): X position of the right eye.
+        y (int): Y position of both eyes.
+        width (int): Width of each eye.
+        height (int): Height of each eye.
+        distance (int): Horizontal space between the eyes.
+        radius (int): Border radius.
+        color (tuple): Eye color.
+    """
     def __init__(self, left_x, right_x, y, width, height, distance, radius=30, color=(0, 0, 0)):
         self.left_eye = Eye(left_x, y, width, height, radius, color)
         self.right_eye = Eye(right_x, y, width, height, radius, color)
@@ -50,23 +99,33 @@ class EyePair:
         self.background_color = (255, 255, 255)
     
     def draw_normal(self, screen):
+        """Draws both eyes normally (rectangular)."""
         self.left_eye.draw(screen)
         self.right_eye.draw(screen)
     
     def draw_laughing(self, screen, vertical_offset=0):
+        """Draws both eyes in laughing state using circles."""
         self.left_eye.draw_circular(screen, self.background_color, vertical_offset)
         self.right_eye.draw_circular(screen, self.background_color, vertical_offset)
     
     def draw_smiling(self, screen):
+        """Draws both eyes in smiling state using circles."""
         self.left_eye.draw_circular(screen, self.background_color, 10)
         self.right_eye.draw_circular(screen, self.background_color, 10)
     
     def reset(self):
+        """Resets both eyes to original size and position."""
         self.left_eye.reset()
         self.right_eye.reset()
 
 
 class AnimationManager:
+    """
+    Controls animation states: blinking, laughing, smiling, and looking.
+
+    Args:
+        eye_pair (EyePair): The pair of eyes to animate.
+    """
     def __init__(self, eye_pair):
         self.eye_pair = eye_pair
         
@@ -101,6 +160,7 @@ class AnimationManager:
         self.moving_away = True
 
     def update(self, current_time):
+        """Updates all active animations based on current time."""
         if self.check_is_idle_animation_required():
             if current_time - self.last_blink_time > self.blink_interval:
                 self.trigger_blinking()
@@ -121,6 +181,7 @@ class AnimationManager:
             self._animate_blink()
 
     def check_is_idle_animation_required(self):
+        """Returns True if no animation is currently active."""
         return not self.is_laughing and not self.is_smiling and not self.is_moving and not self.is_blinking 
     
     def trigger_laugh(self):
@@ -151,6 +212,7 @@ class AnimationManager:
         self.looking_direction = random.choice([1, -1])
     
     def _animate_blink(self):
+        """Internal: Handles blink shrinking and expanding logic."""
         if self.shrinking:
             self.eye_pair.left_eye.grow(0, -self.blink_speed)
             self.eye_pair.right_eye.grow(0, -self.blink_speed)
@@ -167,6 +229,7 @@ class AnimationManager:
                 self.is_blinking = False
     
     def _animate_laugh(self):
+        """Internal: Moves eyes up/down to simulate laughing."""
         if self.laugh_up:
             self.laugh_offset += self.laugh_speed
             if self.laugh_offset >= self.max_laugh_offset:
@@ -183,10 +246,17 @@ class AnimationManager:
                     self.laugh_offset = 0
     
     def _check_smile_timeout(self, current_time):
+        """Internal: Ends smile after duration passes."""
         if current_time - self.smile_start_time > self.smile_duration:
             self.is_smiling = False
     
     def _animate_sideways_look(self, direction):
+        """
+        Internal: Moves eyes sideways, simulating looking left/right.
+
+        Args:
+            direction (int): Direction to look (1 for right, -1 for left).
+        """
         left_eye = self.eye_pair.left_eye
         right_eye = self.eye_pair.right_eye
         original_left_x = left_eye.original_rect.x
@@ -235,6 +305,10 @@ class AnimationManager:
 
 
 class MonkeyEyeApp:
+    """
+    The main Pygame application runner for Monkey Eyes.
+    Initializes eyes, manages events, updates, and renders animations.
+    """
     def __init__(self):
         pygame.init()
         
@@ -262,6 +336,7 @@ class MonkeyEyeApp:
         self.animation = AnimationManager(self.eyes)
     
     def handle_events(self):
+        """Handles Pygame events and triggers animations based on keypresses."""
         current_time = time.time() * 1000
         
         for event in pygame.event.get():
@@ -278,10 +353,12 @@ class MonkeyEyeApp:
         return True
     
     def update(self):
+        """Calls the AnimationManager to update animations."""
         current_time = time.time() * 1000
         self.animation.update(current_time)
     
     def render(self):
+        """Renders the current visual state of the eyes to the screen."""
         self.screen.fill(self.background_color)
         
         if self.animation.is_laughing:
@@ -294,6 +371,7 @@ class MonkeyEyeApp:
         pygame.display.flip()
     
     def run(self):
+        """Starts the Pygame main loop."""
         running = True
         self.animation.last_blink_time = time.time() * 1000 
         while running:
