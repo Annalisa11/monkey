@@ -2,226 +2,309 @@ import pygame
 import random
 import time
 
-eye_width = 240
-eye_height = 240
-eye_y = 100
-eye_distance = 100  # Distance between the two eyes
-eye_left_x = 380
-eye_right_x = 780
-eye_radius = 30
-last_blink_time = 0
-blink_interval = random.uniform(500, 2000)
-current_height_scale = 1.0
-blink_speed = 15
-move_speed = 2
-is_blinking = False
-shrinking = True
+class Eye:
+    def __init__(self, x, y, width, height, radius=30, color=(0, 0, 0)):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.original_rect = pygame.Rect(x, y, width, height)  
+        self.radius = radius
+        self.color = color
+    
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect, border_radius=self.radius)
+    
+    def grow(self, width, height):
+        self.rect.inflate_ip(width, height)
+    
+    def move(self, x, y):
+        self.rect.move_ip(x, y)
+    
+    def reset_position(self):
+        self.rect.x = self.original_rect.x
+        self.rect.y = self.original_rect.y
+    
+    def reset_size(self):
+        self.rect.width = self.original_rect.width
+        self.rect.height = self.original_rect.height
+    
+    def reset(self):
+        self.reset_position()
+        self.reset_size()
+        
+    def get_center(self):
+        return (self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2)
 
-EYE_COLOR = (0,0,0)
-BACKGROUND_COLOR = (255,255,255)
+    def draw_circular(self, screen, background_color, vertical_offset=0, overlay_circle_offset=40):
+        center_x, center_y = self.get_center()
+        center_y += vertical_offset
+        radius = self.rect.height // 2
+        
+        pygame.draw.circle(screen, self.color, (center_x, center_y), radius)
+        pygame.draw.circle(screen, background_color, (center_x, center_y + overlay_circle_offset), radius)
 
-eye_offset = 0
-laugh_speed = 2
-is_laughing = False 
-laugh_up = True
-max_laugh_offset = 20
-laugh_cycle_count = 0
 
-is_smiling = False
-smile_start_time = 0
-smile_duration = 2000 
+class EyePair:
+    def __init__(self, left_x, right_x, y, width, height, distance, radius=30, color=(0, 0, 0)):
+        self.left_eye = Eye(left_x, y, width, height, radius, color)
+        self.right_eye = Eye(right_x, y, width, height, radius, color)
+        self.distance = distance
+        self.background_color = (255, 255, 255)
+    
+    def draw_normal(self, screen):
+        self.left_eye.draw(screen)
+        self.right_eye.draw(screen)
+    
+    def draw_laughing(self, screen, vertical_offset=0):
+        self.left_eye.draw_circular(screen, self.background_color, vertical_offset)
+        self.right_eye.draw_circular(screen, self.background_color, vertical_offset)
+    
+    def draw_smiling(self, screen):
+        self.left_eye.draw_circular(screen, self.background_color, 10)
+        self.right_eye.draw_circular(screen, self.background_color, 10)
+    
+    def reset(self):
+        self.left_eye.reset()
+        self.right_eye.reset()
 
-pygame.init()
 
-# 1280x720
-screen_width = 1280
-screen_height = 720
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Monkey Eyes")
+class AnimationManager:
+    def __init__(self, eye_pair):
+        self.eye_pair = eye_pair
+        
+        # Blinking 
+        self.is_blinking = False
+        self.shrinking = True
+        self.blink_speed = 15
+        self.last_blink_time = 0
+        self.blink_interval = random.uniform(2000, 4000)
+        
+        # Laughing 
+        self.is_laughing = False
+        self.laugh_up = True
+        self.laugh_speed = 2
+        self.laugh_offset = 0
+        self.max_laugh_offset = 20
+        self.laugh_cycle_count = 0
+        
+        # Smiling 
+        self.is_smiling = False
+        self.smile_start_time = 0
+        self.smile_duration = 2000
+        
+        # Movement 
+        self.move_speed = 10
+        self.max_move_distance = 200
+        self.squinting_degree = 5
+        self.is_moving = False
+        self.last_look_time = 0
+        self.look_interval = random.uniform(4000, 8000)
+        self.looking_direction = 1
+        self.moving_away = True
 
-clock = pygame.time.Clock()
+    def update(self, current_time):
+        if self.check_is_idle_animation_required():
+            if current_time - self.last_blink_time > self.blink_interval:
+                self.trigger_blinking()
+                self.last_blink_time = current_time
+                self.blink_interval = random.uniform(2000, 4000)
+            elif current_time - self.last_look_time > self.look_interval:
+                self.trigger_look()
+                self.last_look_time = current_time
+                self.look_interval = random.uniform(10000, 20000)
+        
+        if self.is_laughing:
+            self._animate_laugh()
+        elif self.is_smiling:
+            self._check_smile_timeout(current_time)
+        elif self.is_moving:
+            self._animate_sideways_look(self.looking_direction)
+        elif self.is_blinking:
+            self._animate_blink()
 
-left_eye = pygame.Rect(eye_left_x, eye_y, eye_width, eye_height)
-right_eye = pygame.Rect(eye_right_x, eye_y, eye_width, eye_height)
+    def check_is_idle_animation_required(self):
+        return not self.is_laughing and not self.is_smiling and not self.is_moving and not self.is_blinking 
+    
+    def trigger_laugh(self):
+        self.is_laughing = True
+        self.is_blinking = False
+        self.is_smiling = False
+        self.laugh_up = True
+        self.laugh_cycle_count = 0
+        self.laugh_offset = 0
+    
+    def trigger_smile(self, current_time):
+        self.is_smiling = True
+        self.is_blinking = False
+        self.is_laughing = False
+        self.smile_start_time = current_time
+    
+    def _start_blinking(self, current_time):
+        self.last_blink_time = current_time
+        self.blink_interval = random.uniform(2000, 4000)
+        
+    def trigger_blinking(self):
+        self.is_blinking = True
+        self.shrinking = True
 
-def calculate_right_eye_x(left_x):
-    return left_x + eye_width + eye_distance
-
-def draw_eyes():
-    pygame.draw.rect(screen, EYE_COLOR, left_eye, border_radius=eye_radius)
-    pygame.draw.rect(screen, EYE_COLOR, right_eye, border_radius=eye_radius)
-
-def draw_laughing_eyes():
-    eye_middle_y = (eye_y + (eye_height // 2)) + eye_offset
-    for eye_middle_x in [eye_left_x + eye_width // 2, eye_right_x + eye_width // 2]:
-        pygame.draw.circle(screen, EYE_COLOR, (eye_middle_x, eye_middle_y), eye_height // 2)
-        pygame.draw.circle(screen, BACKGROUND_COLOR, (eye_middle_x, eye_middle_y + 40), eye_height // 2)
-
-def animate_laugh():
-    global laugh_up, is_laughing, eye_offset, laugh_cycle_count
-
-    if laugh_up:
-        eye_offset += laugh_speed
-        if eye_offset >= max_laugh_offset:
-            laugh_up = False
-    else:
-        eye_offset -= laugh_speed
-        if eye_offset <= 0:
-            laugh_up = True
-            laugh_cycle_count += 1
+    def trigger_look(self):
+        self.is_moving = True
+        self.moving_away = True
+        self.looking_direction = random.choice([1, -1])
+    
+    def _animate_blink(self):
+        if self.shrinking:
+            self.eye_pair.left_eye.grow(0, -self.blink_speed)
+            self.eye_pair.right_eye.grow(0, -self.blink_speed)
             
-            if laugh_cycle_count >= 4:
-                is_laughing = False
-                laugh_cycle_count = 0
-                eye_offset = 0
-
-def draw_smiling_eyes():
-    eye_middle_y = (eye_y + (eye_height // 2)) + 10 
-    for eye_middle_x in [eye_left_x + eye_width // 2, eye_right_x + eye_width // 2]:
-        pygame.draw.circle(screen, EYE_COLOR, (eye_middle_x, eye_middle_y), eye_height // 2)
-        pygame.draw.circle(screen, BACKGROUND_COLOR, (eye_middle_x, eye_middle_y + 40), eye_height // 2)
-
-def check_smile_timeout(current_time):
-    global is_smiling
-    if is_smiling and current_time - smile_start_time > smile_duration:
-        is_smiling = False
-
-def animate_blink():
-    global shrinking, is_blinking
-    
-    if shrinking:
-        left_eye.inflate_ip(0, -blink_speed)
-        right_eye.inflate_ip(0, -blink_speed)
-        
-        if left_eye.height <= 10: 
-            shrinking = False
-    else:
-        left_eye.inflate_ip(0, blink_speed)
-        right_eye.inflate_ip(0, blink_speed)
-        
-        if left_eye.height >= eye_height:  
-            left_eye.height = eye_height
-            right_eye.height = eye_height
-            is_blinking = False
-
-def move_sideways(direction=1):  # 1 for right, -1 for left
-    global shrinking, is_blinking, eye_height
-   
-    direction_movement_amplitude = 10
-    blink_amplitude = 5
-   
-    enlarge_left = direction < 0
-    enlarge_right = direction > 0
-   
-    if shrinking:
-        left_eye.move_ip(direction_movement_amplitude * direction, 0)
-        right_eye.move_ip(direction_movement_amplitude * direction, 0)
-       
-        # blink effect
-        if (direction > 0 and left_eye.x < eye_left_x + 100) or (direction < 0 and left_eye.x > eye_left_x - 100):
-            if left_eye.height > eye_height - 40:
-                left_eye.inflate_ip(0, -blink_amplitude)
-                right_eye.inflate_ip(0, -blink_amplitude)
+            if self.eye_pair.left_eye.rect.height <= 10:
+                self.shrinking = False
         else:
-            # make one eye larger
-            if left_eye.height < eye_height:
-                left_eye.inflate_ip(0, blink_amplitude)
-                right_eye.inflate_ip(0, blink_amplitude)
-            if enlarge_right:
-                right_eye.inflate_ip(4, 4)  
+            self.eye_pair.left_eye.grow(0, self.blink_speed)
+            self.eye_pair.right_eye.grow(0, self.blink_speed)
+            
+            if self.eye_pair.left_eye.rect.height >= self.eye_pair.left_eye.original_rect.height:
+                self.eye_pair.left_eye.reset_size()
+                self.eye_pair.right_eye.reset_size()
+                self.is_blinking = False
+    
+    def _animate_laugh(self):
+        if self.laugh_up:
+            self.laugh_offset += self.laugh_speed
+            if self.laugh_offset >= self.max_laugh_offset:
+                self.laugh_up = False
+        else:
+            self.laugh_offset -= self.laugh_speed
+            if self.laugh_offset <= 0:
+                self.laugh_up = True
+                self.laugh_cycle_count += 1
+                
+                if self.laugh_cycle_count >= 4:
+                    self.is_laughing = False
+                    self.laugh_cycle_count = 0
+                    self.laugh_offset = 0
+    
+    def _check_smile_timeout(self, current_time):
+        if current_time - self.smile_start_time > self.smile_duration:
+            self.is_smiling = False
+    
+    def _animate_sideways_look(self, direction):
+        left_eye = self.eye_pair.left_eye
+        right_eye = self.eye_pair.right_eye
+        original_left_x = left_eye.original_rect.x
+        original_height = left_eye.original_rect.height
+        
+        if self.moving_away:
+            left_eye.move(self.move_speed * direction, 0)
+            right_eye.move(self.move_speed * direction, 0)
+            
+            current_distance = abs(left_eye.rect.x - original_left_x)
+            if current_distance < 100:
+                if left_eye.rect.height > original_height - 40:
+                    left_eye.grow(0, -self.squinting_degree)
+                    right_eye.grow(0, -self.squinting_degree)
             else:
-                left_eye.inflate_ip(4, 4)   
-       
-        
-        if (direction > 0 and left_eye.x > eye_left_x + 200) or (direction < 0 and left_eye.x < eye_left_x - 200):
-            shrinking = False
-            pygame.time.delay(1000)
-    else:
-        move_direction = -1 if left_eye.x > eye_left_x else 1
-        
-        left_eye.move_ip(10 * move_direction, 0)
-        right_eye.move_ip(10 * move_direction, 0)
-       
-        # Restore eye height
-        if left_eye.height < eye_height:
-            left_eye.inflate_ip(0, blink_amplitude)
-        if right_eye.height < eye_height:
-            right_eye.inflate_ip(0, blink_amplitude)
-           
-        # Shrink the bigger eye
-        if enlarge_right and right_eye.width > eye_width:
-            right_eye.inflate_ip(-2, -2)
-        elif enlarge_left and left_eye.width > eye_width:
-            left_eye.inflate_ip(-2, -2)
-       
-        correct_size = (abs(left_eye.height - eye_height) < 5 and
-                       abs(right_eye.height - eye_height) < 5)
-        at_original_pos = (direction > 0 and left_eye.x <= eye_left_x) or (direction < 0 and left_eye.x >= eye_left_x)
-       
-        if at_original_pos or abs(left_eye.x - eye_left_x) < 10:
-            # Reset everything 
-            left_eye.x, left_eye.y = eye_left_x, eye_y
-            left_eye.width, left_eye.height = eye_width, eye_height
-            right_eye.x, right_eye.y = eye_right_x, eye_y
-            right_eye.width, right_eye.height = eye_width, eye_height
-            is_blinking = False
+                if left_eye.rect.height < original_height:
+                    left_eye.grow(0, self.squinting_degree)
+                    right_eye.grow(0, self.squinting_degree)
+                
+                if direction > 0: 
+                    right_eye.grow(4, 4)
+                else:  
+                    left_eye.grow(4, 4)
+            
+            if current_distance > self.max_move_distance:
+                self.moving_away = False
+                pygame.time.delay(1000)  
+        else:
+            move_direction = -1 if left_eye.rect.x > original_left_x else 1
+            left_eye.move(self.move_speed * move_direction, 0)
+            right_eye.move(self.move_speed * move_direction, 0)
+            
+            if left_eye.rect.height < original_height:
+                left_eye.grow(0, self.squinting_degree)
+            if right_eye.rect.height < original_height:
+                right_eye.grow(0, self.squinting_degree)
+            
+            if direction > 0 and right_eye.rect.width > right_eye.original_rect.width:
+                right_eye.grow(-2, -2)
+            elif direction < 0 and left_eye.rect.width > left_eye.original_rect.width:
+                left_eye.grow(-2, -2)
+            
+            if abs(left_eye.rect.x - original_left_x) < 10:
+                self.eye_pair.reset()
+                self.is_moving = False
 
-def main():
-    global last_blink_time, blink_interval, is_blinking, shrinking
-    global is_laughing, is_smiling, smile_start_time, laugh_cycle_count, laugh_up
+
+class MonkeyEyeApp:
+    def __init__(self):
+        pygame.init()
+        
+        self.screen_width = 1280
+        self.screen_height = 720
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.FULLSCREEN)
+        pygame.display.set_caption("Monkey Eyes")
+        self.clock = pygame.time.Clock()
+        self.background_color = (255, 255, 255)
+        
+        eye_width = 240
+        eye_height = 240
+        eye_y = 100
+        eye_distance = 100
+        eye_left_x = 380
+        eye_right_x = 780
+        eye_radius = 30
+        eye_color = (0, 0, 0)
+        
+        self.eyes = EyePair(
+            eye_left_x, eye_right_x, eye_y, 
+            eye_width, eye_height, eye_distance, 
+            eye_radius, eye_color
+        )
+        self.animation = AnimationManager(self.eyes)
     
-    running = True
-    last_blink_time = time.time() * 1000  # current time in milliseconds
-    
-    while running:
+    def handle_events(self):
+        current_time = time.time() * 1000
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                return False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False
-                elif event.key == pygame.K_l:  
-                    is_laughing = True
-                    is_blinking = False
-                    is_smiling = False
-                    laugh_up = True
-                    laugh_cycle_count = 0
-                elif event.key == pygame.K_s: 
-                    is_smiling = True
-                    is_blinking = False
-                    is_laughing = False
-                    smile_start_time = time.time() * 1000
+                    return False
+                elif event.key == pygame.K_l:
+                    self.animation.trigger_laugh()
+                elif event.key == pygame.K_s:
+                    self.animation.trigger_smile(current_time)
         
-        screen.fill(BACKGROUND_COLOR)  
-        current_time = time.time() * 1000  
-        
-        # Check if smiling has timed out
-        check_smile_timeout(current_time)
-        
-        # Only trigger blinking if not in other animation modes
-        if not is_laughing and not is_smiling:
-            if (current_time - last_blink_time > blink_interval) and not is_blinking:
-                last_blink_time = current_time
-                blink_interval = random.uniform(2000, 4000)  
-                is_blinking = True
-                shrinking = True
-            
-            if is_blinking:
-                # animate_blink()
-                move_sideways(-1)
-                draw_eyes()
-            else:
-                draw_eyes()
-        elif is_laughing:
-            animate_laugh()
-            draw_laughing_eyes()
-        elif is_smiling:
-            draw_smiling_eyes()
-            
-        pygame.display.flip()  
-        clock.tick(60) 
+        return True
     
-    pygame.quit()
+    def update(self):
+        current_time = time.time() * 1000
+        self.animation.update(current_time)
+    
+    def render(self):
+        self.screen.fill(self.background_color)
+        
+        if self.animation.is_laughing:
+            self.eyes.draw_laughing(self.screen, self.animation.laugh_offset)
+        elif self.animation.is_smiling:
+            self.eyes.draw_smiling(self.screen)
+        else:
+            self.eyes.draw_normal(self.screen)
+        
+        pygame.display.flip()
+    
+    def run(self):
+        running = True
+        self.animation.last_blink_time = time.time() * 1000 
+        while running:
+            running = self.handle_events()
+            self.update()
+            self.render()
+            self.clock.tick(60)
+        
+        pygame.quit()
+
 
 if __name__ == "__main__":
-    main()
+    app = MonkeyEyeApp()
+    app.run()
