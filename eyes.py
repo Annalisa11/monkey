@@ -22,16 +22,20 @@ BACKGROUND_COLOR = (255,255,255)
 
 eye_offset = 0
 laugh_speed = 2
-is_laughing = True
+is_laughing = False 
 laugh_up = True
 max_laugh_offset = 20
 laugh_cycle_count = 0
+
+is_smiling = False
+smile_start_time = 0
+smile_duration = 2000 
 
 pygame.init()
 
 screen_width = 480
 screen_height = 320
-screen = pygame.display.set_mode((screen_width, screen_height))
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
 pygame.display.set_caption("Monkey Eyes")
 
 clock = pygame.time.Clock()
@@ -47,22 +51,19 @@ def draw_eyes():
     pygame.draw.rect(screen, EYE_COLOR, right_eye, border_radius=eye_radius)
 
 def draw_laughing_eyes():
-    eye_middle_y = (screen_height // 2) + eye_offset
-    print(f"eye y: {eye_middle_y}, {screen_height // 2}, {eye_offset}")
+    eye_middle_y = (eye_y + (eye_height // 2)) + eye_offset
     for eye_middle_x in [eye_left_x + eye_width // 2, eye_right_x + eye_width // 2]:
         pygame.draw.circle(screen, EYE_COLOR, (eye_middle_x, eye_middle_y), eye_height // 2)
-        pygame.draw.circle(screen, BACKGROUND_COLOR, (eye_middle_x, eye_middle_y  + 40), eye_height // 2)
+        pygame.draw.circle(screen, BACKGROUND_COLOR, (eye_middle_x, eye_middle_y + 40), eye_height // 2)
 
 def animate_laugh():
     global laugh_up, is_laughing, eye_offset, laugh_cycle_count
 
     if laugh_up:
-        print("UP")
         eye_offset += laugh_speed
         if eye_offset >= max_laugh_offset:
             laugh_up = False
     else:
-        print("DOWN")
         eye_offset -= laugh_speed
         if eye_offset <= 0:
             laugh_up = True
@@ -70,8 +71,19 @@ def animate_laugh():
             
             if laugh_cycle_count >= 4:
                 is_laughing = False
+                laugh_cycle_count = 0
                 eye_offset = 0
 
+def draw_smiling_eyes():
+    eye_middle_y = (eye_y + (eye_height // 2)) + 10 
+    for eye_middle_x in [eye_left_x + eye_width // 2, eye_right_x + eye_width // 2]:
+        pygame.draw.circle(screen, EYE_COLOR, (eye_middle_x, eye_middle_y), eye_height // 2)
+        pygame.draw.circle(screen, BACKGROUND_COLOR, (eye_middle_x, eye_middle_y + 40), eye_height // 2)
+
+def check_smile_timeout(current_time):
+    global is_smiling
+    if is_smiling and current_time - smile_start_time > smile_duration:
+        is_smiling = False
 
 def animate_blink():
     global shrinking, is_blinking
@@ -111,6 +123,7 @@ def move_sideways(right=True):
 
 def main():
     global last_blink_time, blink_interval, is_blinking, shrinking
+    global is_laughing, is_smiling, smile_start_time, laugh_cycle_count, laugh_up
     
     running = True
     last_blink_time = time.time() * 1000  # current time in milliseconds
@@ -122,25 +135,43 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                elif event.key == pygame.K_l:  
+                    is_laughing = True
+                    is_blinking = False
+                    is_smiling = False
+                    laugh_up = True
+                    laugh_cycle_count = 0
+                elif event.key == pygame.K_s: 
+                    is_smiling = True
+                    is_blinking = False
+                    is_laughing = False
+                    smile_start_time = time.time() * 1000
         
         screen.fill(BACKGROUND_COLOR)  
         current_time = time.time() * 1000  
         
-        if (current_time - last_blink_time > blink_interval) and not is_blinking:
-            last_blink_time = current_time
-            blink_interval = random.uniform(2000, 4000)  
-            is_blinking = True
-            shrinking = True
+        # Check if smiling has timed out
+        check_smile_timeout(current_time)
         
-        if is_blinking:
-            return
-            # animate_blink()
-            # move_sideways()
-        
-        # draw_eyes() 
-        if is_laughing:
+        # Only trigger blinking if not in other animation modes
+        if not is_laughing and not is_smiling:
+            if (current_time - last_blink_time > blink_interval) and not is_blinking:
+                last_blink_time = current_time
+                blink_interval = random.uniform(2000, 4000)  
+                is_blinking = True
+                shrinking = True
+            
+            if is_blinking:
+                animate_blink()
+                draw_eyes()
+            else:
+                draw_eyes()
+        elif is_laughing:
             animate_laugh()
             draw_laughing_eyes()
+        elif is_smiling:
+            draw_smiling_eyes()
+            
         pygame.display.flip()  
         clock.tick(60) 
     
