@@ -8,21 +8,10 @@
 | ----- | ---------------- |
 | `L`   | Trigger laughing |
 | `S`   | Trigger smiling  |
+| `T`   | Trigger stars    |
 | `ESC` | Exit application |
 
 _Blinking and looking happen automatically when idle._
-
-## 🌐 API Documentation
-
-You can now trigger animations over HTTP using a built-in FastAPI server.
-
-Start the app (see below), then access:
-
-- **GET** `/smile`  
-  → Triggers a smiling animation
-
-- **POST** `/laugh`  
-  → Triggers a laughing animation
 
 ## 🔮 Setting Up a Virtual Environment
 
@@ -94,12 +83,19 @@ curl -X POST http://192.168.1.42:8000/laugh
 Or open the interactive docs at:  
 📘 http://192.168.1.42:8000/docs
 
+## Run only the Eyes
+
+This command starts only the animation of the eyes. The server is not started
+
+```bash
+python eyes.py
+```
+
 ## 🛠️ Requirements
 
 - Python 3.7+
 - Pygame
 - FastAPI
-- Uvicorn
 
 Install dependencies:
 
@@ -112,6 +108,7 @@ pip install pygame fastapi[standard]
 - **Blinking**: Eyes shrink and restore naturally.
 - **Laughing**: Eyes bounce up and down in 4 cycles.
 - **Smiling**: Circular eyes with lifted top arc.
+- **Star**: Star eyes that come out of the background.
 - **Look Sideways**: Eyes move left/right with directional stretch.
 - **API Control**: Trigger animations remotely via HTTP endpoints.
 

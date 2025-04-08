@@ -426,7 +426,7 @@ class MonkeyEyeApp:
                     self.animation.trigger_laugh()
                 elif event.key == pygame.K_s:
                     self.animation.trigger_smile(current_time)
-                elif event.key == pygame.K_t:  # Added key for star animation
+                elif event.key == pygame.K_t:  
                     self.animation.trigger_star(current_time)
         
         return True

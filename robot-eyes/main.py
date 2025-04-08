@@ -16,16 +16,23 @@ def run_pygame_eye_app():
     eye_app = MonkeyEyeApp()
     eye_app.run()
 
+def get_current_time():
+    return time.time() * 1000
+
 @app.get("/smile")
 def smile():
-    current_time = time.time() * 1000
-    eye_app.animation.trigger_smile(current_time)
+    eye_app.animation.trigger_smile(get_current_time())
     return {"status": "Smiling animation triggered"}
 
-@app.post("/laugh")
+@app.get("/laugh")
 def laugh():
     eye_app.animation.trigger_laugh()
     return {"status": "Laughing animation triggered"}
+
+@app.get("/star")
+def star():
+    eye_app.animation.trigger_star(get_current_time())
+    return {"status": "Star eyes animation triggered"}
 
 
 if __name__ == "__main__":
