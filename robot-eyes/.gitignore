@@ -1,5 +1,5 @@
 /pro_eyes
 /other
 *.pdf
-.venv
+/venv
 /__pycache__

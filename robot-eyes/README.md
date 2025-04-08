@@ -30,12 +30,21 @@ check out more info on virtual environments in python [here](https://fastapi.tia
 
 ```bash
 # Create a virtual environment
-python3 -m venv venv
+python -m venv venv
 
 # Activate it
 source venv/bin/activate
 
+# On windows Powershell
+# You might need to activate scripts before:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+# Activate
+.\venv\Scripts\Activate.ps1
+
 # Install project dependencies inside the venv (see below)
+
+# Deactivate
+deactivate
 ```
 
 Your terminal will show something like this when activated:
