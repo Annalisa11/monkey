@@ -9,7 +9,7 @@ app = FastAPI()
 eye_app = None
 
 def run_api_server():
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 def run_pygame_eye_app():
     global eye_app
