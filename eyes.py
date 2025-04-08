@@ -380,6 +380,9 @@ class MonkeyEyeApp:
             self.render()
             self.clock.tick(60)
         
+        self.quit()
+        
+    def quit():
         pygame.quit()
 
 
