@@ -26,6 +26,32 @@ Start the app (see below), then access:
 - **POST** `/laugh`  
   → Triggers a laughing animation
 
+## 🔮 Setting Up a Virtual Environment
+
+check out more info on virtual environments in python [here](https://fastapi.tiangolo.com/virtual-environments/#create-a-virtual-environment)
+
+```bash
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate it
+source venv/bin/activate
+
+# Install project dependencies inside the venv (see below)
+```
+
+Your terminal will show something like this when activated:
+
+```
+(venv) pi@raspberrypi:~/monkey-eyes $
+```
+
+Then start your app as usual (within the venv):
+
+```bash
+python main.py
+```
+
 ## ▶️ Running the App
 
 ### Step 1: Find your Pi's local IP
