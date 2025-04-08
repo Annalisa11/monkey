@@ -1,3 +1,4 @@
+import math
 import pygame
 import random
 import time
@@ -77,6 +78,32 @@ Args:
         pygame.draw.circle(screen, self.color, (center_x, center_y), radius)
         pygame.draw.circle(screen, background_color, (center_x, center_y + overlay_circle_offset), radius)
 
+    def draw_star(self, screen, color=None, scale=1.0):
+        """
+        Draws the eye as a star shape.
+        
+        Args:
+            screen: Pygame display surface.
+            outer_radius (int): Radius for outer points of star. Defaults to half of eye height.
+            inner_radius (int): Radius for inner points of star. Defaults to half of outer_radius.
+            color (tuple): RGB color for the star. Defaults to yellow.
+        """
+        center_x, center_y = self.get_center()
+        
+        outer_radius = self.rect.height // 2
+        inner_radius = outer_radius // 2
+
+        if color is None:
+            color = (255, 255, 0)  
+            
+        points = []
+        for i in range(10):
+            angle = math.pi / 2 + (2 * math.pi * i / 10)
+            radius = outer_radius if i % 2 == 0 else inner_radius
+            x = center_x + radius * math.cos(angle) * scale
+            y = center_y - radius * math.sin(angle) * scale
+            points.append((x, y))
+        pygame.draw.polygon(screen, color, points)
 
 class EyePair:
     """
@@ -97,6 +124,7 @@ class EyePair:
         self.right_eye = Eye(right_x, y, width, height, radius, color)
         self.distance = distance
         self.background_color = (255, 255, 255)
+        self.star_color = (255, 255, 0)  # Yellow color for stars
     
     def draw_normal(self, screen):
         """Draws both eyes normally (rectangular)."""
@@ -112,6 +140,17 @@ class EyePair:
         """Draws both eyes in smiling state using circles."""
         self.left_eye.draw_circular(screen, self.background_color, 10)
         self.right_eye.draw_circular(screen, self.background_color, 10)
+
+    def draw_stars(self, screen, scale=1.0):
+        """
+        Draws both eyes as stars.
+        
+        Args:
+            screen: Pygame display surface.
+            scale (float): Scale factor for the star size (1.0 = full size).
+        """
+        self.left_eye.draw_star(screen, self.star_color, scale)
+        self.right_eye.draw_star(screen, self.star_color, scale)
     
     def reset(self):
         """Resets both eyes to original size and position."""
@@ -149,6 +188,14 @@ class AnimationManager:
         self.smile_start_time = 0
         self.smile_duration = 2000
         
+        # Star 
+        self.is_star = False
+        self.star_start_time = 0
+        self.star_duration = 3000
+        self.star_growing = True
+        self.star_scale = 0.0
+        self.star_speed = 0.05
+        
         # Movement 
         self.move_speed = 10
         self.max_move_distance = 200
@@ -175,6 +222,8 @@ class AnimationManager:
             self._animate_laugh()
         elif self.is_smiling:
             self._check_smile_timeout(current_time)
+        elif self.is_star:
+            self._animate_star(current_time)
         elif self.is_moving:
             self._animate_sideways_look(self.looking_direction)
         elif self.is_blinking:
@@ -182,12 +231,13 @@ class AnimationManager:
 
     def check_is_idle_animation_required(self):
         """Returns True if no animation is currently active."""
-        return not self.is_laughing and not self.is_smiling and not self.is_moving and not self.is_blinking 
+        return not self.is_laughing and not self.is_smiling and not self.is_moving and not self.is_blinking and not self.is_star
     
     def trigger_laugh(self):
         self.is_laughing = True
         self.is_blinking = False
         self.is_smiling = False
+        self.is_star = False
         self.laugh_up = True
         self.laugh_cycle_count = 0
         self.laugh_offset = 0
@@ -196,7 +246,18 @@ class AnimationManager:
         self.is_smiling = True
         self.is_blinking = False
         self.is_laughing = False
+        self.is_star = False
         self.smile_start_time = current_time
+    
+    def trigger_star(self, current_time):
+        """Triggers the star eyes animation."""
+        self.is_star = True
+        self.is_blinking = False
+        self.is_laughing = False
+        self.is_smiling = False
+        self.star_start_time = current_time
+        self.star_growing = True
+        self.star_scale = 0.0
     
     def _start_blinking(self, current_time):
         self.last_blink_time = current_time
@@ -249,6 +310,22 @@ class AnimationManager:
         """Internal: Ends smile after duration passes."""
         if current_time - self.smile_start_time > self.smile_duration:
             self.is_smiling = False
+    
+    def _animate_star(self, current_time):
+        """Internal: Handles star animation with growing and shrinking animation"""
+        if current_time - self.star_start_time > self.star_duration:
+            self.star_growing = False
+        
+        if self.star_growing:
+            self.star_scale += self.star_speed
+            if self.star_scale >= 1.0:
+                self.star_scale = 1.0
+        else:
+            self.star_scale -= self.star_speed
+            if self.star_scale <= 0.0:
+                self.star_scale = 0.0
+                self.is_star = False
+                self.eye_pair.reset()
     
     def _animate_sideways_look(self, direction):
         """
@@ -314,7 +391,7 @@ class MonkeyEyeApp:
         
         self.screen_width = 1280
         self.screen_height = 720
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption("Monkey Eyes")
         self.clock = pygame.time.Clock()
         self.background_color = (255, 255, 255)
@@ -349,6 +426,8 @@ class MonkeyEyeApp:
                     self.animation.trigger_laugh()
                 elif event.key == pygame.K_s:
                     self.animation.trigger_smile(current_time)
+                elif event.key == pygame.K_t:  # Added key for star animation
+                    self.animation.trigger_star(current_time)
         
         return True
     
@@ -365,6 +444,8 @@ class MonkeyEyeApp:
             self.eyes.draw_laughing(self.screen, self.animation.laugh_offset)
         elif self.animation.is_smiling:
             self.eyes.draw_smiling(self.screen)
+        elif self.animation.is_star:
+            self.eyes.draw_stars(self.screen, self.animation.star_scale)
         else:
             self.eyes.draw_normal(self.screen)
         
@@ -380,9 +461,9 @@ class MonkeyEyeApp:
             self.render()
             self.clock.tick(60)
         
-        self.quit()
+        pygame.quit()
         
-    def quit():
+    def quit(self):
         pygame.quit()
 
 

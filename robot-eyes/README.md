@@ -39,7 +39,7 @@ source venv/bin/activate
 # You might need to activate scripts before:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 # Activate
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 
 # Install project dependencies inside the venv (see below)
 
