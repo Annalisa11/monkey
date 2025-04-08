@@ -206,6 +206,11 @@ class AnimationManager:
         self.looking_direction = 1
         self.moving_away = True
 
+        # Concnetrate
+        self.is_concentrating = False
+        self.concentrate_duration = 2000
+        self.concentrate_start_time = 0
+
     def update(self, current_time):
         """Updates all active animations based on current time."""
         if self.check_is_idle_animation_required():
@@ -226,12 +231,14 @@ class AnimationManager:
             self._animate_star(current_time)
         elif self.is_moving:
             self._animate_sideways_look(self.looking_direction)
+        elif self.is_concentrating:
+            self._animate_concentrate(current_time)
         elif self.is_blinking:
             self._animate_blink()
 
     def check_is_idle_animation_required(self):
         """Returns True if no animation is currently active."""
-        return not self.is_laughing and not self.is_smiling and not self.is_moving and not self.is_blinking and not self.is_star
+        return not self.is_laughing and not self.is_smiling and not self.is_moving and not self.is_blinking and not self.is_star and not self.is_concentrating
     
     def trigger_laugh(self):
         self.is_laughing = True
@@ -239,6 +246,7 @@ class AnimationManager:
         self.is_smiling = False
         self.is_star = False
         self.laugh_up = True
+        self.is_concentrating = True
         self.laugh_cycle_count = 0
         self.laugh_offset = 0
     
@@ -247,7 +255,17 @@ class AnimationManager:
         self.is_blinking = False
         self.is_laughing = False
         self.is_star = False
+        self.is_concentrating = True
         self.smile_start_time = current_time
+
+    def trigger_concentrate(self, current_time):
+        self.is_concentrating = True
+        self.is_blinking = False
+        self.is_blinking = False
+        self.is_laughing = False
+        self.is_star = False
+        self.shrinking = True
+        self.concentrate_start_time = current_time
     
     def trigger_star(self, current_time):
         """Triggers the star eyes animation."""
@@ -255,6 +273,7 @@ class AnimationManager:
         self.is_blinking = False
         self.is_laughing = False
         self.is_smiling = False
+        self.is_concentrating = True
         self.star_start_time = current_time
         self.star_growing = True
         self.star_scale = 0.0
@@ -289,6 +308,27 @@ class AnimationManager:
                 self.eye_pair.right_eye.reset_size()
                 self.is_blinking = False
     
+    def _animate_concentrate(self, current_time):
+        """Internal: Handles concentrating shrinking and expanding logic."""
+        if self.shrinking:
+            self.eye_pair.left_eye.grow(0, -self.blink_speed)
+            self.eye_pair.right_eye.grow(0, -self.blink_speed)
+
+            if self.eye_pair.left_eye.rect.height <= 60:
+                self.shrinking = False
+        elif not self.shrinking and not self._check_concentrate_timeout(current_time): 
+            return
+        else:
+            self.eye_pair.left_eye.grow(0, self.blink_speed)
+            self.eye_pair.right_eye.grow(0, self.blink_speed)
+            
+            if self.eye_pair.left_eye.rect.height >= self.eye_pair.left_eye.original_rect.height:
+                self.eye_pair.left_eye.reset_size()
+                self.eye_pair.right_eye.reset_size()
+                self.is_concentrating = False
+
+
+
     def _animate_laugh(self):
         """Internal: Moves eyes up/down to simulate laughing."""
         if self.laugh_up:
@@ -310,6 +350,11 @@ class AnimationManager:
         """Internal: Ends smile after duration passes."""
         if current_time - self.smile_start_time > self.smile_duration:
             self.is_smiling = False
+
+    def _check_concentrate_timeout(self, current_time):
+        """Internal: returns if it's time to end the animation"""
+        return current_time - self.concentrate_start_time > self.concentrate_duration
+            
     
     def _animate_star(self, current_time):
         """Internal: Handles star animation with growing and shrinking animation"""
@@ -428,6 +473,8 @@ class MonkeyEyeApp:
                     self.animation.trigger_smile(current_time)
                 elif event.key == pygame.K_t:  
                     self.animation.trigger_star(current_time)
+                elif event.key == pygame.K_c:  
+                    self.animation.trigger_concentrate(current_time)
         
         return True
     

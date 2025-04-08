@@ -34,6 +34,11 @@ def star():
     eye_app.animation.trigger_star(get_current_time())
     return {"status": "Star eyes animation triggered"}
 
+@app.get("/concentrate")
+def concentrate():
+    eye_app.animation.trigger_concentrate(get_current_time())
+    return {"status": "Concentrating eyes animation triggered"}
+
 
 if __name__ == "__main__":
     api_thread = threading.Thread(target=run_api_server, daemon=True)
