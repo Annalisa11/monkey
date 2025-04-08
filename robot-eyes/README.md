@@ -4,12 +4,13 @@
 
 ## 🕹️ Controls (Keyboard)
 
-| Key   | Action           |
-| ----- | ---------------- |
-| `L`   | Trigger laughing |
-| `S`   | Trigger smiling  |
-| `T`   | Trigger stars    |
-| `ESC` | Exit application |
+| Key   | Action                |
+| ----- | --------------------- |
+| `L`   | Trigger laughing      |
+| `S`   | Trigger smiling       |
+| `T`   | Trigger stars         |
+| `C`   | Trigger concentrating |
+| `ESC` | Exit application      |
 
 _Blinking and looking happen automatically when idle._
 
@@ -109,6 +110,7 @@ pip install pygame fastapi[standard]
 - **Laughing**: Eyes bounce up and down in 4 cycles.
 - **Smiling**: Circular eyes with lifted top arc.
 - **Star**: Star eyes that come out of the background.
+- **Concentrating**: Eyes squint for a period of time.
 - **Look Sideways**: Eyes move left/right with directional stretch.
 - **API Control**: Trigger animations remotely via HTTP endpoints.
 
