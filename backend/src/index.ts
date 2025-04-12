@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
 
+const { swaggerUi, swaggerDocs } = require('./swagger/swagger');
+
 const monkeyRoutes = require('./routes/monkeyRoutes');
 
 const { db } = require('../db/db');
@@ -24,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(helmet());
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/v1/monkeys', monkeyRoutes);
 
 app.listen(PORT, (): void => {
