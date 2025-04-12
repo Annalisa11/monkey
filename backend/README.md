@@ -1,6 +1,6 @@
-# 🐵 Monkey Hospital Assistant – Backend
+# 🐵 Monkey – Backend
 
-An Express + TypeScript API for managing interactive monkey robots that assist hospital visitors using speech, QR codes, text-to-speech, dynamic displays, and mini-printers.
+An Express + TypeScript API for managing interactive monkey robots that assist hospital visitors in finding their way through the hospital.
 
 ## 🚀 Tech Stack
 
