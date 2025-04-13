@@ -101,23 +101,25 @@ Database file: `db/monkey.db`
 
 Tables auto-initialize on server start.
 
-If you want to populate the db with sample data on first run then add this code to the `db.ts` file inside the `initDB()` function right after the command to create the monkeys table.
+If you want to start with sample data (not an empty database) on first run then uncomment the line in `db.ts` which says `SeedAndPrintMonkeyTable()`.
 
-```js
-// Check if data already exists
-db.get(`SELECT COUNT(*) as count FROM monkeys`, [], (err, result) => {
-  if (err) {
-    console.error('Error checking monkey count:', err);
-    return;
+```ts
+db.run(
+  `CREATE TABLE IF NOT EXISTS monkeys(
+    monkey_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    location TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT 0
+  )`,
+  [],
+  (err: Error | null) => {
+    if (err) {
+      console.error('Error creating monkeys table:', err.message);
+      return;
+    }
+    // SeedAndPrintMonkeyTable();  <-- uncomment this line right here
   }
-
-  // Only insert if table is empty
-  if (result.count === 0) {
-    db.run(`INSERT INTO monkeys (name, location, status) VALUES 
-              ('George', 'Main Lobby', 'active'),
-              ('Bonzo', 'Optometrist', 'active')`);
-  }
-});
+);
 ```
 
 ## 📦 Scripts

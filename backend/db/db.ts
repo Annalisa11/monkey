@@ -1,3 +1,5 @@
+import { Monkey } from './schema';
+
 const sqlite3 = require('sqlite3');
 const path = require('path');
 
@@ -18,14 +20,66 @@ const db = new sql3.Database(
   connected
 );
 
+const SeedAndPrintMonkeyTable = () => {
+  db.get(
+    `SELECT COUNT(*) as count FROM monkeys`,
+    [],
+    (err: Error | null, result: any) => {
+      if (err) {
+        console.error('❌ Error checking monkey count:', err.message);
+        return;
+      }
+
+      if (result.count === 0) {
+        createMonkeyDataIfEmpty();
+      } else {
+        console.log('🌱 Database already seeded. Skipping insert.');
+        fetchAndLogMonkeys();
+      }
+    }
+  );
+};
+
+const createMonkeyDataIfEmpty = () => {
+  db.run(
+    `INSERT INTO monkeys (name, location, is_active) VALUES 
+                  ('George', 'Main Lobby', 0),
+                  ('Bonzo', 'Optometrist', 1)`,
+    [],
+    (err: Error) => {
+      if (err) return console.error('❌ Failed to insert monkeys:', err);
+      console.log('🦍 Inserted default monkeys');
+      fetchAndLogMonkeys();
+    }
+  );
+};
+
+const fetchAndLogMonkeys = () => {
+  db.all(`SELECT * FROM monkeys`, [], (err: Error, rows: Monkey[]) => {
+    if (err) return console.error('❌ Failed to fetch monkeys:', err);
+    console.log('📋 Current monkeys in database:');
+    console.table(rows);
+  });
+};
+
 const initDb = () => {
   // Monkeys table
-  db.run(`CREATE TABLE IF NOT EXISTS monkeys(
+  db.run(
+    `CREATE TABLE IF NOT EXISTS monkeys(
     monkey_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     location TEXT NOT NULL,
-    status TEXT DEFAULT 'active'
-  )`);
+    is_active BOOLEAN DEFAULT 0
+  )`,
+    [],
+    (err: Error | null) => {
+      if (err) {
+        console.error('Error creating monkeys table:', err.message);
+        return;
+      }
+      SeedAndPrintMonkeyTable();
+    }
+  );
 
   // QR codes table
   db.run(`CREATE TABLE IF NOT EXISTS qr_codes(
