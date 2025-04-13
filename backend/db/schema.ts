@@ -2,11 +2,8 @@ export interface Monkey {
   monkey_id: number;
   name: string;
   location: string;
-  status: MonkeyStatus;
+  isActive: boolean;
 }
-
-type MonkeyStatus = 'active' | 'offline';
-
 export interface QRCode {
   qr_id: string;
   created_at: Date;

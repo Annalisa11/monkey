@@ -48,6 +48,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
+console.log('check the database connection');
 db.get('SELECT 1', [], (err: Error) => {
   if (err) {
     console.error('❌ Database connection error:', err.message);
