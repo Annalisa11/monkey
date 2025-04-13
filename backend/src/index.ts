@@ -1,15 +1,11 @@
-import { NextFunction, Response, Request } from 'express';
-
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const helmet = require('helmet');
-
-const { swaggerUi, swaggerDocs } = require('./swagger/swagger');
-
-const monkeyRoutes = require('./routes/monkeyRoutes');
-
-const { db } = require('../db/db');
+import { type ErrorRequestHandler, type RequestHandler } from 'express';
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import helmet from 'helmet';
+import { swaggerUi, swaggerDocs } from './swagger/swagger.js';
+import monkeyRoutes from './routes/monkeyRoutes.js';
+import db from '../db/db.js';
 
 dotenv.config();
 
@@ -18,7 +14,6 @@ if (!process.env.PORT) {
 }
 
 const PORT: number = parseInt((process.env.PORT as string) || '3000', 10);
-
 const app = express();
 
 app.use(express.json());
@@ -33,20 +28,23 @@ app.listen(PORT, (): void => {
   console.log(`Server is listening on port ${PORT}`);
 });
 
-app.use((req: Request, res: Response) => {
+const notFoundHandler: RequestHandler = (req, res) => {
   res.status(404).json({
     error: 'Not found',
     message: `Route ${req.method} ${req.url} not found`,
   });
-});
+};
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     error: 'Server error',
     message: err.message || 'Something went wrong',
   });
-});
+};
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 console.log('check the database connection');
 db.get('SELECT 1', [], (err: Error) => {
@@ -56,5 +54,3 @@ db.get('SELECT 1', [], (err: Error) => {
     console.log('✅ Database connection successful');
   }
 });
-
-export {};

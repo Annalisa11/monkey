@@ -1,8 +1,8 @@
-import { Response, Request } from 'express';
+import { RequestHandler } from 'express';
 
-const monkeyService = require('../services/monkeyService');
+import monkeyService from '../services/monkeyService.js';
 
-const getAllMonkeys = async (req: Request, res: Response) => {
+const getAllMonkeys: RequestHandler = async (req, res) => {
   try {
     const monkeys = await monkeyService.getAllMonkeys();
     console.log('MOnkeys: ', monkeys);
@@ -12,4 +12,4 @@ const getAllMonkeys = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = { getAllMonkeys };
+export { getAllMonkeys };

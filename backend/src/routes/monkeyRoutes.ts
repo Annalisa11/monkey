@@ -1,5 +1,5 @@
-const express = require('express');
-const monkeyController = require('../controllers/monkeyController');
+import express from 'express';
+import { getAllMonkeys } from '../controllers/monkeyController.js';
 
 const router = express.Router();
 
@@ -23,6 +23,6 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.get('/', monkeyController.getAllMonkeys);
+router.get('/', getAllMonkeys);
 
-module.exports = router;
+export default router;

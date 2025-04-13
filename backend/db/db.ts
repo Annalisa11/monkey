@@ -1,7 +1,13 @@
-import { Monkey } from './schema';
+import { Monkey } from './schema.js';
+import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const sqlite3 = require('sqlite3');
-const path = require('path');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+type ErrorCallback = (err: Error | null) => void;
 
 const connected: ErrorCallback = (err) => {
   if (err) {
@@ -13,7 +19,6 @@ const connected: ErrorCallback = (err) => {
 
 const sql3 = sqlite3.verbose();
 const dbPath = path.resolve(__dirname, 'monkey.db');
-
 const db = new sql3.Database(
   dbPath,
   sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
@@ -26,10 +31,9 @@ const SeedAndPrintMonkeyTable = () => {
     [],
     (err: Error | null, result: any) => {
       if (err) {
-        console.error('❌ Error checking monkey count:', err.message);
+        console.error('Error checking monkey count:', err.message);
         return;
       }
-
       if (result.count === 0) {
         createMonkeyDataIfEmpty();
       } else {
@@ -42,12 +46,12 @@ const SeedAndPrintMonkeyTable = () => {
 
 const createMonkeyDataIfEmpty = () => {
   db.run(
-    `INSERT INTO monkeys (name, location, is_active) VALUES 
+    `INSERT INTO monkeys (name, location, is_active) VALUES
                   ('George', 'Main Lobby', 0),
                   ('Bonzo', 'Optometrist', 1)`,
     [],
     (err: Error) => {
-      if (err) return console.error('❌ Failed to insert monkeys:', err);
+      if (err) return console.error('Failed to insert monkeys:', err);
       console.log('🦍 Inserted default monkeys');
       fetchAndLogMonkeys();
     }
@@ -56,7 +60,7 @@ const createMonkeyDataIfEmpty = () => {
 
 const fetchAndLogMonkeys = () => {
   db.all(`SELECT * FROM monkeys`, [], (err: Error, rows: Monkey[]) => {
-    if (err) return console.error('❌ Failed to fetch monkeys:', err);
+    if (err) return console.error('Failed to fetch monkeys:', err);
     console.log('📋 Current monkeys in database:');
     console.table(rows);
   });
@@ -125,10 +129,9 @@ const initDb = () => {
     rewards_issued INTEGER DEFAULT 0,
     FOREIGN KEY (monkey_id) REFERENCES monkeys(monkey_id)
   )`);
-
   console.log('Database initialized');
 };
 
 initDb();
 
-export { db };
+export default db;

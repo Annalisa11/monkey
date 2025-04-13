@@ -1,23 +1,29 @@
-import { Monkey } from '../../db/schema';
+import { Monkey } from '../../db/schema.js';
 
-const { db } = require('../../db/db');
+import db from '../../db/db.js';
 
-const getAllMonkeys = (): Promise<Monkey[]> => {
-  return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM monkeys', [], (err: Error, rows: Monkey[]) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(rows);
+interface MonkeyService {
+  getAllMonkeys(): Promise<Monkey[]>;
+}
+
+const monkeyService: MonkeyService = {
+  getAllMonkeys: (): Promise<Monkey[]> => {
+    return new Promise((resolve, reject) => {
+      db.all('SELECT * FROM monkeys', [], (err: Error, rows: Monkey[]) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(rows);
+      });
     });
-  });
+  },
+
+  // Get monkey by ID
+
+  // Create a new monkey
+
+  // ...
 };
 
-// Get monkey by ID
-
-// Create a new monkey
-
-// ...
-
-module.exports = { getAllMonkeys };
+export default monkeyService;
