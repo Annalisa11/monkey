@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { swaggerUi, swaggerDocs } from './swagger/swagger.js';
 import monkeyRoutes from './routes/monkeyRoutes.js';
+import eventRoutes from './routes/eventRoutes.js';
 import db from '../db/db.js';
 
 dotenv.config();
@@ -13,7 +14,7 @@ if (!process.env.PORT) {
   console.log(`No port value specified...`);
 }
 
-const PORT: number = parseInt((process.env.PORT as string) || '3000', 10);
+const PORT: number = parseInt((process.env.PORT as string) || '7000', 10);
 const app = express();
 
 app.use(express.json());
@@ -23,6 +24,7 @@ app.use(helmet());
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/v1/monkeys', monkeyRoutes);
+app.use('/v1/events', eventRoutes);
 
 app.listen(PORT, (): void => {
   console.log(`Server is listening on port ${PORT}`);

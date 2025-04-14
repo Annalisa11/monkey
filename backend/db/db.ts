@@ -120,15 +120,14 @@ const initDb = () => {
   )`);
 
   // Stats table
-  db.run(`CREATE TABLE IF NOT EXISTS stats(
-    stat_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date DATE NOT NULL,
-    monkey_id INTEGER NOT NULL,
-    qr_scans_count INTEGER DEFAULT 0,
-    successful_navigations INTEGER DEFAULT 0,
-    rewards_issued INTEGER DEFAULT 0,
-    FOREIGN KEY (monkey_id) REFERENCES monkeys(monkey_id)
-  )`);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS button_press_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      monkey_id INTEGER NOT NULL,
+      timestamp TEXT NOT NULL,
+      location TEXT NOT NULL
+    )
+  `);
   console.log('Database initialized');
 };
 
