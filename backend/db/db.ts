@@ -3,6 +3,7 @@ import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import seedData from './seed.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -85,38 +86,33 @@ const initDb = () => {
     }
   );
 
-  // QR codes table
-  db.run(`CREATE TABLE IF NOT EXISTS qr_codes(
-    qr_id TEXT PRIMARY KEY,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    created_by_monkey_id INTEGER NOT NULL,
-    destination_monkey_id INTEGER NOT NULL,
-    destination_location TEXT NOT NULL,
-    scanned BOOLEAN DEFAULT 0,
-    scanned_at DATETIME,
-    scanned_by_monkey_id INTEGER,
-    journey_completed BOOLEAN DEFAULT 0,
-    FOREIGN KEY (created_by_monkey_id) REFERENCES monkeys(monkey_id),
-    FOREIGN KEY (destination_monkey_id) REFERENCES monkeys(monkey_id)
+  // Navigation QR codes table for verification
+  db.run(`
+CREATE TABLE IF NOT EXISTS navigation_qr_codes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token TEXT NOT NULL UNIQUE,
+  route_id INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  is_verified BOOLEAN DEFAULT 0,
+  scanned INTEGER DEFAULT 0,
+  FOREIGN KEY (route_id) REFERENCES routes (id) ON DELETE CASCADE
+)`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS locations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
   )`);
 
-  // Rewards table
-  db.run(`CREATE TABLE IF NOT EXISTS rewards(
-    reward_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    qr_id TEXT NOT NULL,
-    issued BOOLEAN DEFAULT 0,
-    issued_at DATETIME,
-    FOREIGN KEY (qr_id) REFERENCES qr_codes(qr_id)
-  )`);
-
-  // Settings table
-  db.run(`CREATE TABLE IF NOT EXISTS settings(
-    setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    monkey_id INTEGER NOT NULL,
-    key TEXT NOT NULL,
-    value TEXT NOT NULL,
-    description TEXT,
-    FOREIGN KEY (monkey_id) REFERENCES monkeys(monkey_id)
+  // Routes table to store directed routes between locations
+  db.run(`CREATE TABLE IF NOT EXISTS routes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_location_name TEXT NOT NULL,
+    destination_location_name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    is_accessible BOOLEAN DEFAULT 1,
+    FOREIGN KEY (source_location_name) REFERENCES locations (name) ON DELETE CASCADE,
+    FOREIGN KEY (destination_location_name) REFERENCES locations (name) ON DELETE CASCADE,
+    UNIQUE(source_location_name, destination_location_name)
   )`);
 
   // Stats table

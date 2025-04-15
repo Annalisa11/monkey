@@ -7,6 +7,7 @@ import { swaggerUi, swaggerDocs } from './swagger/swagger.js';
 import monkeyRoutes from './routes/monkeyRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import db from '../db/db.js';
+import seedData from '../db/seed.js';
 
 dotenv.config();
 
@@ -49,10 +50,14 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 console.log('check the database connection');
-db.get('SELECT 1', [], (err: Error) => {
-  if (err) {
-    console.error('❌ Database connection error:', err.message);
-  } else {
-    console.log('✅ Database connection successful');
-  }
+
+db.serialize(() => {
+  db.get('SELECT 1', [], (err) => {
+    if (err) {
+      console.error('❌ Database connection error:', err.message);
+    } else {
+      console.log('✅ Database connection successful');
+      seedData();
+    }
+  });
 });
