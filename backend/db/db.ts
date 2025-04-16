@@ -1,4 +1,3 @@
-import { Monkey } from './schema.js';
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -25,65 +24,18 @@ const db = new sql3.Database(
   connected
 );
 
-const SeedAndPrintMonkeyTable = () => {
-  db.get(
-    `SELECT COUNT(*) as count FROM monkeys`,
-    [],
-    (err: Error | null, result: any) => {
-      if (err) {
-        console.error('Error checking monkey count:', err.message);
-        return;
-      }
-      if (result.count === 0) {
-        createMonkeyDataIfEmpty();
-      } else {
-        console.log('🌱 Database already seeded. Skipping insert.');
-        fetchAndLogMonkeys();
-      }
-    }
-  );
-};
-
-const createMonkeyDataIfEmpty = () => {
-  db.run(
-    `INSERT INTO monkeys (name, location, is_active) VALUES
-                  ('George', 'Main Lobby', 0),
-                  ('Bonzo', 'Optometrist', 1)`,
-    [],
-    (err: Error) => {
-      if (err) return console.error('Failed to insert monkeys:', err);
-      console.log('🦍 Inserted default monkeys');
-      fetchAndLogMonkeys();
-    }
-  );
-};
-
-const fetchAndLogMonkeys = () => {
-  db.all(`SELECT * FROM monkeys`, [], (err: Error, rows: Monkey[]) => {
-    if (err) return console.error('Failed to fetch monkeys:', err);
-    console.log('📋 Current monkeys in database:');
-    console.table(rows);
-  });
-};
-
 const initDb = () => {
   // Monkeys table
   db.run(
     `CREATE TABLE IF NOT EXISTS monkeys(
     monkey_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    location TEXT NOT NULL,
+    location_id INTEGER NOT NULL,
     is_active BOOLEAN DEFAULT 0,
-    address TEXT
-  )`,
-    [],
-    (err: Error | null) => {
-      if (err) {
-        console.error('Error creating monkeys table:', err.message);
-        return;
-      }
-      SeedAndPrintMonkeyTable();
-    }
+    address TEXT,
+    FOREIGN KEY (location_id) REFERENCES locations(id)
+
+  )`
   );
 
   // Navigation QR codes table for verification
@@ -104,16 +56,18 @@ CREATE TABLE IF NOT EXISTS navigation_qr_codes (
   )`);
 
   // Routes table to store directed routes between locations
-  db.run(`CREATE TABLE IF NOT EXISTS routes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    source_location_name TEXT NOT NULL,
-    destination_location_name TEXT NOT NULL,
-    description TEXT NOT NULL,
-    is_accessible BOOLEAN DEFAULT 1,
-    FOREIGN KEY (source_location_name) REFERENCES locations (name) ON DELETE CASCADE,
-    FOREIGN KEY (destination_location_name) REFERENCES locations (name) ON DELETE CASCADE,
-    UNIQUE(source_location_name, destination_location_name)
-  )`);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS routes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source_location_id INTEGER NOT NULL,
+      destination_location_id INTEGER NOT NULL,
+      description TEXT NOT NULL,
+      is_accessible BOOLEAN DEFAULT 1,
+      FOREIGN KEY (source_location_id) REFERENCES locations(id) ON DELETE CASCADE,
+      FOREIGN KEY (destination_location_id) REFERENCES locations(id) ON DELETE CASCADE,
+      UNIQUE(source_location_id, destination_location_id)
+    )
+  `);
 
   // Stats table
   db.run(`
@@ -121,7 +75,8 @@ CREATE TABLE IF NOT EXISTS navigation_qr_codes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       monkey_id INTEGER NOT NULL,
       timestamp TEXT NOT NULL,
-      location TEXT NOT NULL
+      location_id INTEGER NOT NULL,
+      FOREIGN KEY (location_id) REFERENCES locations(id)
     )
   `);
 
