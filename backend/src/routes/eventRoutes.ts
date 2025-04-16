@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  reactToJourneyComplete,
   reactToQRCodeScan,
   storeButtonPressData,
 } from '../controllers/eventController.js';
@@ -98,5 +99,37 @@ router.post('/button-press', storeButtonPressData);
  *                   example: Failed to trigger monkey emotion
  */
 router.post('/:id/qr-code-scan', reactToQRCodeScan);
+
+/**
+ * @swagger
+ * /v1/events/journey-complete:
+ *   post:
+ *     summary: Register a completed monkey journey
+ *     description: Records a timestamped entry in the database indicating that a patient has completed its journey successfully. (from taking on the wayfinind mission to brining back the banana to the first monkey)
+ *     tags:
+ *       - Events
+ *     responses:
+ *       200:
+ *         description: Journey successfully recorded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: successfully registered completed journey
+ *       500:
+ *         description: Server error while recording journey completion
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to insert journey completion
+ */
+router.post('/journey-complete', reactToJourneyComplete);
 
 export default router;

@@ -8,6 +8,7 @@ interface ButtonPressData {
 
 interface EventService {
   recordButtonPressData(data: ButtonPressData): Promise<number>;
+  recordJourneyCompletion(): Promise<boolean>;
 }
 
 const eventService: EventService = {
@@ -26,6 +27,23 @@ const eventService: EventService = {
         }
         resolve(this.lastID);
       });
+    });
+  },
+
+  recordJourneyCompletion: (): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      const timestamp = new Date().toISOString();
+      db.run(
+        `INSERT INTO journey_completions (timestamp) VALUES (?)`,
+        [timestamp],
+        (err: Error | null) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(true);
+        }
+      );
     });
   },
 };

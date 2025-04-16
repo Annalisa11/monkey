@@ -124,6 +124,12 @@ CREATE TABLE IF NOT EXISTS navigation_qr_codes (
       location TEXT NOT NULL
     )
   `);
+
+  db.run(`CREATE TABLE IF NOT EXISTS journey_completions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL
+  )`);
+
   console.log('Database initialized');
 };
 

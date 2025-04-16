@@ -34,4 +34,17 @@ const reactToQRCodeScan: RequestHandler = async (req, res) => {
     res.status(500).json({ error: 'Failed to trigger monkey emotion' });
   }
 };
-export { storeButtonPressData, reactToQRCodeScan };
+
+const reactToJourneyComplete: RequestHandler = async (req, res) => {
+  try {
+    await eventService.recordJourneyCompletion();
+
+    res
+      .status(200)
+      .json({ message: 'successfully registered completed journey' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export { storeButtonPressData, reactToQRCodeScan, reactToJourneyComplete };
