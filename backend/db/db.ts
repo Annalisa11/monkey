@@ -3,7 +3,6 @@ import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import seedData from './seed.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -74,7 +73,8 @@ const initDb = () => {
     monkey_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     location TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT 0
+    is_active BOOLEAN DEFAULT 0,
+    address TEXT
   )`,
     [],
     (err: Error | null) => {

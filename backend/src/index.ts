@@ -8,6 +8,7 @@ import monkeyRoutes from './routes/monkeyRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import db from '../db/db.js';
 import seedData from '../db/seed.js';
+import addPrivateData from '../db/ip.js';
 
 dotenv.config();
 
@@ -60,4 +61,5 @@ db.serialize(() => {
       seedData();
     }
   });
+  addPrivateData();
 });

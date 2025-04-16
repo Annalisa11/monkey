@@ -3,6 +3,7 @@ export interface Monkey {
   name: string;
   location: string;
   isActive: boolean;
+  address?: string;
 }
 export interface QRCode {
   qr_id: string;
