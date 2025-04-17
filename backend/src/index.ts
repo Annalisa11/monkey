@@ -1,6 +1,5 @@
 import { type ErrorRequestHandler, type RequestHandler } from 'express';
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import { swaggerUi, swaggerDocs } from './swagger/swagger.js';
@@ -8,14 +7,7 @@ import monkeyRoutes from './routes/monkeyRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import { pingDB } from '../db/db.js';
 import seedData from '../db/seed.js';
-
-dotenv.config();
-
-if (!process.env.PORT) {
-  console.log(`No port value specified...`);
-}
-
-const PORT = Number(process.env.PORT) || 7000;
+import { PORT } from './config.js';
 
 const app = express();
 
