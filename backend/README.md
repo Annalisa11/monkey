@@ -7,11 +7,12 @@ An Express + TypeScript API for managing interactive monkey robots that assist h
 - **Express** (v5)
 - **TypeScript**
 - **SQLite** (local file DB)
+- **Drizzle ORM**
 - **Swagger (OpenAPI)** docs
 
 ### Prerequisites
 
-- Node.js (v14+)
+- Node.js (v20 recommended)
 - npm
 
 ## 📁 Project Structure
@@ -23,18 +24,28 @@ backend/
 ├── .gitignore                  # Git ignored files
 ├── tsconfig.json               # TypeScript configuration
 ├── package.json
+│
 ├── db/
-│   ├── db.ts                   # Database connection
-│   └── schema.ts               # Database schema definitions
+│   ├── db.ts                   # Drizzle DB connection
+│   ├── schema.ts               # Table definitions
+│   ├── seed.ts                 # Seed function & sample data
+│   └── ip.ts                   # Add local network monkey addresses
+│
 ├── src/
-│   ├── swagger/                # Swagger config & schemas
+│   ├── swagger/                # Swagger config
 │   ├── routes/
-│   │   └── monkeyRoutes.ts     # Monkey endpoints
+│   │   ├── monkeyRoutes.ts     # Monkey endpoints
+│   │   └── eventRoutes.ts      # Event endpoints
 │   ├── services/
-│   │   └── monkeyService.ts    # Monkey business logic
+│   │   ├── monkeyService.ts    # Monkey logic
+│   │   └── eventService.ts     # Event logic
 │   ├── controllers/
 │   │   └── monkeyController.ts # Monkey request handlers
+│   │   └── eventController.ts  # Event request handlers
 │   └── index.ts                # Application entry point
+│   └── types.ts                # All exported type definitions
+│   └── config.ts               # Application configuration consts
+
 ```
 
 ## ⚙️ Setup
@@ -42,7 +53,7 @@ backend/
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/your-org/backend
+git clone https://github.com/Annalisa11/monkey
 cd backend
 npm install
 ```
@@ -52,7 +63,8 @@ npm install
 create a `.env` file in the project root and fill it with following variables (values are only examples)
 
 ```env
-PORT=7000
+PORT=7000             # Port your backend will listen on
+ROBOT_API_PORT=8000   # Port of the api your monkey robots are using
 ```
 
 ### 3. Start the server (dev)
@@ -65,13 +77,13 @@ npm run dev
 
 ## 🧠 API Overview
 
-### ✅ Base URL
+### Base URL
 
 ```
 http://localhost:7000
 ```
 
-### 📚 Swagger Docs
+### Swagger Docs
 
 ```
 http://localhost:7000/api-docs
@@ -87,43 +99,43 @@ curl -X GET "http://localhost:7000/v1/monkeys" -H "Content-Type: application/jso
 
 ## 🗃️ SQLite Database
 
-The database will be automatically initialized with sample data when the application starts. If you want to reset the database, delete the SQLite file and restart the application.
+Database file is created automatically.
 
-Database file: `db/monkey.db`
+📄 File: `db/monkey.db`
 
-### Tables Created
+If you want to initialize the db with empty tables on first run, run following command
 
-- `monkeys` – all monkey bots
-- `qr_codes` – scanned/created QR codes
-- `rewards` – banana/candy tracking
-- `settings` – monkey behavior config
-- `stats` – daily usage metrics
+```bash
+npm run push-db
+```
 
-Tables auto-initialize on server start.
+### ✅ Tables created
 
-If you want to start with sample data (not an empty database) on first run then uncomment the line in `db.ts` which says `SeedAndPrintMonkeyTable()`.
+- `monkeys` – interactive monkey robots
+- `locations` – places in the hospital
+- `routes` – directions between locations
+- `navigation_qr_codes` – generated QR codes with tokens
+- `button_press_events` – monkey button press logs
+- `journey_completions` – end-of-journey logs
+
+All tables are initialized on startup, with foreign key relationships where needed.
+
+If you want to **populate with demo data**, make sure the seed is called in `index.ts`:
 
 ```ts
-db.run(
-  `CREATE TABLE IF NOT EXISTS monkeys(
-    monkey_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    location TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT 0
-  )`,
-  [],
-  (err: Error | null) => {
-    if (err) {
-      console.error('Error creating monkeys table:', err.message);
-      return;
-    }
-    // SeedAndPrintMonkeyTable();  <-- uncomment this line right here
-  }
-);
+// index.ts
+
+const initDB = async () => {
+  pingDB();
+  await seedData(); // 👈 enable or comment out this to auto-seed or not
+};
 ```
 
 ## 📦 Scripts
 
-| Script        | Description                           |
-| ------------- | ------------------------------------- |
-| `npm run dev` | Run dev server with auto-reload (tsx) |
+| Script            | Description                                   |
+| ----------------- | --------------------------------------------- |
+| `npm run dev`     | Run dev server with auto-reload (tsx)         |
+| `npm run build`   | Compile to `dist/`                            |
+| `npm run start`   | Run compiled app from `dist/index.js`         |
+| `npm run push-db` | Push latest Drizzle schema directly to the DB |
