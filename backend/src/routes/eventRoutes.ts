@@ -22,16 +22,11 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - monkeyId
- *               - timestamp
  *               - location
  *             properties:
  *               monkeyId:
  *                 type: integer
  *                 example: 1
- *               timestamp:
- *                 type: string
- *                 format: date-time
- *                 example: 2025-04-14T10:15:30Z
  *               location:
  *                 type: string
  *                 example: "Main Lobby"
@@ -43,7 +38,7 @@ const router = express.Router();
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 insertedId:
  *                   type: integer
  *                   example: 42
  *       400:
@@ -52,7 +47,6 @@ const router = express.Router();
  *         description: Server error
  */
 router.post('/button-press', storeButtonPressData);
-
 /**
  * @swagger
  * /v1/events/{id}/qr-code-scan:
@@ -81,6 +75,7 @@ router.post('/button-press', storeButtonPressData);
  *                   example: Emotion triggered on monkey successfully
  *                 emotion:
  *                   type: string
+ *                   enum: [concentrate, smile, laugh, star]
  *                   example: concentrate
  *                 monkeyResponse:
  *                   type: object
@@ -99,13 +94,12 @@ router.post('/button-press', storeButtonPressData);
  *                   example: Failed to trigger monkey emotion
  */
 router.post('/:id/qr-code-scan', reactToQRCodeScan);
-
 /**
  * @swagger
  * /v1/events/journey-complete:
  *   post:
  *     summary: Register a completed monkey journey
- *     description: Records a timestamped entry in the database indicating that a patient has completed its journey successfully. (from taking on the wayfinind mission to brining back the banana to the first monkey)
+ *     description: Records a timestamped entry in the database indicating that a monkey journey was completed successfully.
  *     tags:
  *       - Events
  *     responses:

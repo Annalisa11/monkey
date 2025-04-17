@@ -11,13 +11,11 @@ const router = express.Router();
  * @swagger
  * /v1/monkeys:
  *   get:
- *     summary: Returns all monkeys
- *     description: Retrieves a list of all monkeys from the database
- *     tags:
- *       - Monkeys
+ *     summary: Get all monkeys
+ *     tags: [Monkeys]
  *     responses:
  *       200:
- *         description: A list of monkeys
+ *         description: List of monkeys
  *         content:
  *           application/json:
  *             schema:
@@ -26,127 +24,87 @@ const router = express.Router();
  *                 $ref: '#/components/schemas/Monkey'
  *       500:
  *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorMessage'
  */
+
 router.get('/', getAllMonkeys);
 
 /**
  * @swagger
  * /v1/monkeys/{id}/navigation:
  *   post:
- *     summary: Generate navigation data for a monkey
- *     description: Returns navigation instructions and a QR code for the given destination
- *     tags:
- *       - Monkeys
+ *     summary: Generate navigation QR code
+ *     tags: [Monkeys]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID of the monkey requesting navigation
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - destinationLocation
- *             properties:
- *               destinationLocation:
- *                 type: string
- *                 example: "Optometrist"
+ *             $ref: '#/components/schemas/NavigationRequest'
  *     responses:
  *       200:
- *         description: Navigation instructions and QR code
+ *         description: Navigation response
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 qrCode:
- *                   type: string
- *                   format: uri
- *                   description: Base64-encoded QR code image
- *                 destinationId:
- *                   type: integer
- *                 destinationName:
- *                   type: string
- *                 routeDescription:
- *                   type: string
- *                 verificationToken:
- *                   type: string
- *       400:
- *         description: Invalid destination or monkey ID
+ *               $ref: '#/components/schemas/NavigationResponse'
+ *       404:
+ *         description: Monkey or destination not found
  *       500:
  *         description: Server error
  */
+
 router.post('/:id/navigation', createNavigation);
 
 /**
  * @swagger
  * /v1/monkeys/{id}/qr-check:
  *   post:
- *     summary: Verify QR code data from a scanned QR
- *     description: Checks if the provided QR code contains a valid token and destination. Returns confirmation if the token is valid and unused and if the patient has scanned it at the right location.
- *     tags:
- *       - Monkeys
+ *     summary: Verify a scanned QR code
+ *     tags: [Monkeys]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID of the monkey that scanned the QR code
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - token
- *               - destinationId
- *             properties:
- *               token:
- *                 type: string
- *                 example: "205299c9467fcd596f3d629f99364602"
- *               destinationId:
- *                 type: integer
- *                 example: 2
+ *             $ref: '#/components/schemas/QRCodeVerificationRequest'
  *     responses:
  *       200:
- *         description: QR code verified successfully
+ *         description: QR code verified
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Destination verified successfully.
+ *               $ref: '#/components/schemas/SuccessMessage'
  *       400:
- *         description: Invalid input format (e.g., missing or malformed qrData)
+ *         description: Invalid input
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: Invalid QR code format or malformed JSON.
+ *               $ref: '#/components/schemas/ErrorMessage'
  *       403:
- *         description: QR token or destination is invalid or already used
+ *         description: Token or destination invalid
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: Wrong destination or token is invalid/used.
+ *               $ref: '#/components/schemas/ErrorMessage'
+ *       500:
+ *         description: Server error
  */
-
 router.post('/:id/qr-check', verifyQRCode);
 
 export default router;
