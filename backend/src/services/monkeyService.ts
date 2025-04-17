@@ -3,7 +3,7 @@ import {
   locations,
   routes,
   navigationQrCodes,
-} from '../../db/dbSchema.js';
+} from '../../db/schema.js';
 import db from '../../db/db.js';
 import QRCode from 'qrcode';
 import crypto from 'crypto';

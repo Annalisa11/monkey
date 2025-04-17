@@ -15,7 +15,8 @@ if (!process.env.PORT) {
   console.log(`No port value specified...`);
 }
 
-const PORT: number = parseInt((process.env.PORT as string) || '7000', 10);
+const PORT = Number(process.env.PORT) || 7000;
+
 const app = express();
 
 app.use(express.json());
@@ -51,9 +52,9 @@ app.use(errorHandler);
 
 console.log('check the database connection');
 
-const checkDB = async () => {
+const initDB = async () => {
   pingDB();
-  seedData();
+  await seedData();
 };
 
-checkDB();
+initDB();

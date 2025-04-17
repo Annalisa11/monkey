@@ -1,5 +1,5 @@
 import db from '../../db/db.js';
-import { buttonPressEvents, journeyCompletions } from '../../db/dbSchema.js';
+import { buttonPressEvents, journeyCompletions } from '../../db/schema.js';
 import { InferInsertModel } from 'drizzle-orm';
 
 type ButtonPressInsert = InferInsertModel<typeof buttonPressEvents>;
