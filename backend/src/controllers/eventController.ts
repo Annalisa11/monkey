@@ -5,7 +5,16 @@ import monkeyService from '../services/monkeyService.js';
 
 const storeButtonPressData: RequestHandler = async (req, res) => {
   try {
-    const newRowId = await eventService.recordButtonPressData(req.body);
+    const locationId = await monkeyService.getLocationIdByName(
+      req.body.location
+    );
+
+    const payload = {
+      monkeyId: req.body.monkeyId,
+      timestamp: req.body.timestamp,
+      locationId: locationId,
+    };
+    const newRowId = await eventService.recordButtonPressData(payload);
     res.json(newRowId);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

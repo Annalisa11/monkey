@@ -1,20 +1,24 @@
-import { Monkey } from '../../db/schema.js';
+import {
+  monkeys,
+  locations,
+  routes,
+  navigationQrCodes,
+} from '../../db/dbSchema.js';
 import db from '../../db/db.js';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
+import { eq, and } from 'drizzle-orm';
 
-interface Location {
-  id: number;
-  name: string;
-}
+import type { InferSelectModel } from 'drizzle-orm';
 
-interface Route {
-  id: number;
-  source_location_name: string;
-  destination_location_name: string;
-  description: string;
-  is_accessible: boolean;
-}
+type MonkeyBase = InferSelectModel<typeof monkeys>;
+type Location = InferSelectModel<typeof locations>;
+type Route = InferSelectModel<typeof routes>;
+type NavigationQrCode = InferSelectModel<typeof navigationQrCodes>;
+
+type Monkey = Omit<MonkeyBase, 'locationId'> & {
+  location: Location;
+};
 
 interface NavigationData {
   routeDescription: string;
@@ -22,7 +26,7 @@ interface NavigationData {
 }
 
 interface NavigationRequest {
-  currentLocation: string;
+  currentLocation: number;
   destinationLocation: string;
   monkeyId: number;
 }
@@ -34,39 +38,36 @@ interface MonkeyService {
   getAllLocations(): Promise<Location[]>;
   getLocationById(id: number): Promise<Location | null>;
   getMonkeyById(monkeyId: number): Promise<Monkey | null>;
+  getLocationIdByName(name: string): Promise<number>;
 }
 
-function getLocationByName(locationName: string): Promise<Location | null> {
-  return new Promise((resolve, reject) => {
-    db.get(
-      'SELECT * FROM locations WHERE name = ?',
-      [locationName],
-      (err: Error | null, row: Location | undefined) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(row || null);
-      }
-    );
-  });
+async function getLocationByName(
+  locationName: string
+): Promise<Location | null> {
+  const [location] = await db
+    .select()
+    .from(locations)
+    .where(eq(locations.name, locationName));
+  return location || null;
 }
+
+const monkeyWithLocationSelect = {
+  monkeyId: monkeys.monkeyId,
+  name: monkeys.name,
+  isActive: monkeys.isActive,
+  address: monkeys.address,
+  location: {
+    id: locations.id,
+    name: locations.name,
+  },
+};
 
 const monkeyService: MonkeyService = {
   getAllMonkeys: async (): Promise<Monkey[]> => {
-    return new Promise((resolve, reject) => {
-      db.all(
-        'SELECT * FROM monkeys',
-        [],
-        (err: Error | null, rows: Monkey[]) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(rows);
-        }
-      );
-    });
+    return await db
+      .select(monkeyWithLocationSelect)
+      .from(monkeys)
+      .innerJoin(locations, eq(monkeys.locationId, locations.id));
   },
 
   getNavigationInformation: async (
@@ -76,52 +77,39 @@ const monkeyService: MonkeyService = {
       const { currentLocation, destinationLocation } = request;
 
       const destination = await getLocationByName(destinationLocation);
-      if (!destination) {
+      console.log('destinations: ', currentLocation, destinationLocation);
+
+      if (!destination || !currentLocation) {
         throw new Error(
-          `Destination location ${destinationLocation} not found`
+          `Destination location ${destinationLocation} or current location ${currentLocation} not found`
         );
       }
 
       const verificationToken = crypto.randomBytes(16).toString('hex');
 
-      const { id: routeId, description } = await new Promise<Route>(
-        (resolve, reject) => {
-          db.get(
-            'SELECT * FROM routes WHERE source_location_name = ? AND destination_location_name = ?',
-            [currentLocation, destinationLocation],
-            (err: Error | null, row: Route | undefined) => {
-              if (err) {
-                reject(err);
-                return;
-              }
-
-              if (row) {
-                console.table(row);
-                console.log(row.description);
-                resolve(row);
-              } else {
-                throw new Error(
-                  `Route information ${currentLocation} - ${destinationLocation} not found`
-                );
-              }
-            }
-          );
-        }
-      );
-
-      // Store the token with the destination in the database for verification
-      await new Promise<void>((resolve, reject) => {
-        db.run(
-          'INSERT INTO navigation_qr_codes (token, route_id, created_at) VALUES (?, ?, ?)',
-          [verificationToken, routeId, Date.now()],
-          (err: Error | null) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve();
-          }
+      const [route] = await db
+        .select()
+        .from(routes)
+        .where(
+          and(
+            eq(routes.sourceLocationId, currentLocation),
+            eq(routes.destinationLocationId, destination.id)
+          )
         );
+
+      if (!route) {
+        throw new Error(
+          `Route information ${currentLocation} - ${destinationLocation} not found`
+        );
+      }
+
+      console.table(route);
+      console.log(route.description);
+
+      await db.insert(navigationQrCodes).values({
+        token: verificationToken,
+        routeId: route.id,
+        createdAt: Date.now(),
       });
 
       const qrData = JSON.stringify({
@@ -136,110 +124,90 @@ const monkeyService: MonkeyService = {
 
       return {
         qrCode: qrCodeImage,
-        routeDescription: description,
+        routeDescription: route.description,
       };
     } catch (error) {
       throw error;
     }
   },
 
-  verifyDestination: (token: string, locationId: number): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      db.get(
-        `SELECT nqc.id, r.destination_location_name, nqc.scanned 
-         FROM navigation_qr_codes nqc
-         JOIN routes r ON nqc.route_id = r.id
-         JOIN locations l ON r.destination_location_name = l.name
-         WHERE nqc.token = ? AND l.id = ?`,
-        [token, locationId],
-        (
-          err: Error | null,
-          row: { id: number; scanned: boolean } | undefined
-        ) => {
-          if (err) {
-            reject(err);
-            return;
-          }
+  verifyDestination: async (
+    token: string,
+    locationId: number
+  ): Promise<boolean> => {
+    try {
+      const qrCodeResults = await db
+        .select({
+          qrCode: navigationQrCodes,
+          route: routes,
+        })
+        .from(navigationQrCodes)
+        .innerJoin(routes, eq(navigationQrCodes.routeId, routes.id))
+        .where(eq(navigationQrCodes.token, token));
 
-          if (!row) {
-            // route doesn't exist (token is not right or patient scanned qr code at wrong destination)
-            resolve(false);
-            return;
-          }
+      if (qrCodeResults.length === 0) {
+        // Route doesn't exist (token is not right or patient scanned QR code at wrong destination)
+        return false;
+      }
 
-          if (row.scanned) {
-            // the qr code has been already scanned before
-            reject(false);
-          }
+      const qrCodeResult = qrCodeResults[0];
 
-          if (row.id === locationId) {
-            // patient is at right destination, mission success
-            resolve(true);
-            return;
-          }
+      if (qrCodeResult.qrCode.scanned) {
+        // The QR code has already been scanned before
+        return false;
+      }
 
-          // Mark as scanned
-          db.run(
-            'UPDATE navigation_qr_codes SET scanned = ? WHERE id = ?',
-            [1, row.id],
-            (updateErr: Error | null) => {
-              if (updateErr) {
-                reject(updateErr);
-                return;
-              }
-              resolve(true);
-            }
-          );
-        }
-      );
-    });
+      if (qrCodeResult.route.destinationLocationId !== locationId) {
+        // Patient is at the wrong destination
+        return false;
+      }
+
+      // Mark as scanned
+      await db
+        .update(navigationQrCodes)
+        .set({ scanned: 1 })
+        .where(eq(navigationQrCodes.id, qrCodeResult.qrCode.id));
+
+      return true;
+    } catch (error) {
+      console.error('Error verifying destination:', error);
+      return false;
+    }
   },
 
-  getAllLocations: (): Promise<Location[]> => {
-    return new Promise((resolve, reject) => {
-      db.all(
-        'SELECT * FROM locations',
-        [],
-        (err: Error | null, rows: Location[]) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(rows);
-        }
-      );
-    });
+  getAllLocations: async (): Promise<Location[]> => {
+    return await db.select().from(locations);
   },
 
-  getLocationById: (id: number): Promise<Location | null> => {
-    return new Promise((resolve, reject) => {
-      db.get(
-        'SELECT * FROM locations WHERE id = ?',
-        [id],
-        (err: Error | null, row: Location | undefined) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(row || null);
-        }
-      );
-    });
+  getLocationById: async (id: number): Promise<Location | null> => {
+    const [location] = await db
+      .select()
+      .from(locations)
+      .where(eq(locations.id, id));
+    return location || null;
   },
-  getMonkeyById: async (monkeyId) => {
-    return new Promise((resolve, reject) => {
-      db.get(
-        `SELECT * FROM monkeys WHERE monkey_id = ?`,
-        [monkeyId],
-        (err: Error | null, row: Monkey) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(row);
-        }
-      );
-    });
+
+  getLocationIdByName: async (name: string): Promise<number> => {
+    const [location] = await db
+      .select()
+      .from(locations)
+      .where(eq(locations.name, name));
+
+    if (!location) {
+      throw new Error(`Location ${name} not found`);
+    }
+
+    return location.id;
+  },
+
+  getMonkeyById: async (monkeyId: number): Promise<Monkey | null> => {
+    const [monkey] = await db
+      .select(monkeyWithLocationSelect)
+      .from(monkeys)
+      .innerJoin(locations, eq(monkeys.locationId, locations.id))
+      .where(eq(monkeys.monkeyId, monkeyId));
+
+    return monkey || null;
   },
 };
 

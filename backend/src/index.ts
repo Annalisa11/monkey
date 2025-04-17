@@ -6,9 +6,8 @@ import helmet from 'helmet';
 import { swaggerUi, swaggerDocs } from './swagger/swagger.js';
 import monkeyRoutes from './routes/monkeyRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
-import db from '../db/db.js';
+import { pingDB } from '../db/db.js';
 import seedData from '../db/seed.js';
-import addPrivateData from '../db/ip.js';
 
 dotenv.config();
 
@@ -52,14 +51,9 @@ app.use(errorHandler);
 
 console.log('check the database connection');
 
-db.serialize(() => {
-  db.get('SELECT 1', [], (err) => {
-    if (err) {
-      console.error('❌ Database connection error:', err.message);
-    } else {
-      console.log('✅ Database connection successful');
-      seedData();
-    }
-  });
-  addPrivateData();
-});
+const checkDB = async () => {
+  pingDB();
+  seedData();
+};
+
+checkDB();

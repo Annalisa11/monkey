@@ -17,17 +17,25 @@ const createNavigation: RequestHandler = async (req, res) => {
     const { id } = req.params;
     const monkeyId = parseInt(id);
     const monkey = await monkeyService.getMonkeyById(monkeyId);
-    if (!monkey || !monkey.location) {
+    console.log('-> fetched monkey: ', monkey);
+    if (!monkey || !monkey.location.id) {
       throw Error('Monkey or its location not found');
     }
-    const currentLocation = monkey.location;
+    const currentLocationId = monkey.location.id;
+    const currentLocationName = await monkeyService.getLocationById(
+      currentLocationId
+    );
     const { destinationLocation } = req.body;
     const navigationData = await monkeyService.getNavigationInformation({
       monkeyId,
       destinationLocation,
-      currentLocation,
+      currentLocation: currentLocationId,
     });
-    res.json(navigationData);
+    res.json({
+      monkeyId,
+      destinationLocation,
+      currentLocation: currentLocationName,
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
