@@ -11,10 +11,17 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as MonkeysImport } from './routes/monkeys'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const MonkeysRoute = MonkeysImport.update({
+  id: '/monkeys',
+  path: '/monkeys',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AboutRoute = AboutImport.update({
   id: '/about',
@@ -46,6 +53,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/monkeys': {
+      id: '/monkeys'
+      path: '/monkeys'
+      fullPath: '/monkeys'
+      preLoaderRoute: typeof MonkeysImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -54,36 +68,41 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/monkeys': typeof MonkeysRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/monkeys': typeof MonkeysRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/monkeys': typeof MonkeysRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths: '/' | '/about' | '/monkeys'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to: '/' | '/about' | '/monkeys'
+  id: '__root__' | '/' | '/about' | '/monkeys'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  MonkeysRoute: typeof MonkeysRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  MonkeysRoute: MonkeysRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,7 +116,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/about",
+        "/monkeys"
       ]
     },
     "/": {
@@ -105,6 +125,9 @@ export const routeTree = rootRoute
     },
     "/about": {
       "filePath": "about.tsx"
+    },
+    "/monkeys": {
+      "filePath": "monkeys.tsx"
     }
   }
 }

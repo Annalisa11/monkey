@@ -42,38 +42,39 @@
 }
 body {
   @apply bg-background text-foreground;
-  background-image: var(--background);
+  background-image: var(--gradient-background);
   min-height: 100vh;
 }
 :root {
   --radius: 0.625rem;
-  --background: linear-gradient(
+  --gradient-background: linear-gradient(
     140deg,
     rgba(217, 231, 255, 1) 0%,
     rgba(235, 250, 235, 1) 100%
   );
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: white;
+  --foreground: oklch(0.55 0.05 250);
+  --card: white;
+  --card-foreground: oklch(0.55 0.05 250);
+  --popover: white;
+  --popover-foreground: oklch(0.55 0.05 250);
+  --primary: oklch(0.8 0.07 235);
+  --primary-foreground: white;
+  --secondary: oklch(0.94 0.03 230);
+  --secondary-foreground: oklch(0.55 0.05 250);
+  --muted: oklch(0.94 0.03 230);
+  --muted-foreground: oklch(0.7 0.04 240);
+  --accent: oklch(0.94 0.03 230);
+  --accent-foreground: oklch(0.55 0.05 250);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --border: oklch(0.88 0.04 235);
+  --input: oklch(0.88 0.04 235);
+  --ring: oklch(0.8 0.08 235);
+  --chart-1: oklch(0.8 0.07 235);
+  --chart-2: oklch(0.7 0.1 240);
+  --chart-3: oklch(0.6 0.15 245);
+  --chart-4: oklch(0.5 0.2 250);
+  --chart-5: oklch(0.4 0.25 255);
 
   --sidebar: white;
   --sidebar-foreground: oklch(0.55 0.05 250);
@@ -120,6 +121,10 @@ body {
 }
 
 @layer base {
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
   * {
     @apply border-border outline-ring/50;
   }

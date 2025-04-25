@@ -32,8 +32,8 @@ const menuItems = [
     icon: User,
   },
   {
-    title: 'Activity',
-    url: '#',
+    title: 'Monkeys',
+    url: '/monkeys',
     icon: MessageSquare,
   },
   {
