@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { createFileRoute } from '@tanstack/react-router';
 import MonkeyItem from '@/components/features/MonkeyItem';
-import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -23,39 +22,57 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DialogTitle } from '@radix-ui/react-dialog';
-
-type Monkey = {
-  id: string;
-  name: string;
-  location: string;
-  ip: string;
-  active: boolean;
-};
-
-type MonkeyForm = z.infer<typeof monkeySchema>;
-
-const initialMonkeys: Monkey[] = [
-  {
-    id: '1',
-    name: 'Chimpy',
-    location: 'Hospital Entrance',
-    ip: '192.168.0.2',
-    active: true,
-  },
-];
-
-const monkeySchema = z.object({
-  name: z.string().min(2).max(50),
-  location: z.string(),
-  ip: z.string().ip(),
-  active: z.boolean(),
-});
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { MonkeyForm } from '@/lib/types';
+import { monkeySchema } from '@/lib/schemas';
+import { createMonkey, deleteMonkey, getMonkeys } from '@/lib/api/monkeys';
 
 export const Route = createFileRoute('/monkeys')({
   component: Monkeys,
 });
 
 function Monkeys() {
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const {
+    data: monkeys = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['monkeys'],
+    queryFn: getMonkeys,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: createMonkey,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['monkeys'] });
+      setOpen(false);
+      toast.success('Monkey was successfully added');
+      form.reset();
+    },
+    onError: (error) => {
+      console.log('hallo');
+      toast.error(error.message);
+      console.log(error);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteMonkey,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['monkeys'] });
+      toast.success('Monkey was successfully deleted');
+    },
+    onError: (error) => {
+      toast.error(error.message);
+      console.log(error);
+    },
+  });
+
   const form = useForm<MonkeyForm>({
     resolver: zodResolver(monkeySchema),
     defaultValues: {
@@ -67,11 +84,11 @@ function Monkeys() {
   });
 
   function onSubmit(values: MonkeyForm) {
-    console.log(values);
+    createMutation.mutate(values);
   }
 
   const dialog = (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant='default'>Add Monkey</Button>
       </DialogTrigger>
@@ -140,24 +157,34 @@ function Monkeys() {
                 </FormItem>
               )}
             />
-            <Button type='submit'>Submit</Button>
+            <Button type='submit' disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Submitting...' : 'Submit'}
+            </Button>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
   );
 
+  if (isLoading) {
+    return <div>Loading monkeys...</div>;
+  }
+
+  if (isError) {
+    return <div>Error loading monkeys. Please try again.</div>;
+  }
+
   return (
     <div className='bg-background p-6 rounded-3xl w-full'>
       <h1>Monkeys</h1>
       {dialog}
       <div className='flex gap-2 flex-col'>
-        {initialMonkeys.map((monkey, i) => (
+        {monkeys.map((monkey) => (
           <MonkeyItem
             {...monkey}
-            onDelete={() => console.log('delete')}
+            onDelete={() => deleteMutation.mutate(monkey.id)}
             onEdit={() => console.log('edit')}
-            key={i}
+            key={monkey.id}
           />
         ))}
       </div>

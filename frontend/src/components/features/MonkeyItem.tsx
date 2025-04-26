@@ -1,10 +1,12 @@
 import { Button } from '@/components/ui/button';
+import { Location } from '@/lib/types';
 import clsx from 'clsx';
 
 type MonkeyItemProps = {
+  id: number;
   name: string;
-  location: string;
-  ip: string;
+  location: Location;
+  address: string;
   active: boolean;
   onEdit: () => void;
   onDelete: () => void;
@@ -13,7 +15,7 @@ type MonkeyItemProps = {
 const MonkeyItem = ({
   name,
   location,
-  ip,
+  address,
   active,
   onEdit,
   onDelete,
@@ -22,7 +24,7 @@ const MonkeyItem = ({
     <div className='flex justify-between border-2 border-amber-300 min-w-xl rounded-xl p-4 bg-[hsl(var(--card))]'>
       <div>
         <h2 className='font-bold text-lg'>{name}</h2>
-        <h3 className='text-sm'>{location}</h3>
+        <h3 className='text-sm'>{location.name}</h3>
         <div className='flex gap-2 items-center mt-1'>
           <div
             className={clsx(
@@ -39,7 +41,7 @@ const MonkeyItem = ({
             {active ? 'active' : 'not active'}
           </small>
         </div>
-        <p className='text-xs text-muted-foreground mt-2'>{ip}</p>
+        <p className='text-xs text-muted-foreground mt-2'>{address}</p>
       </div>
 
       <div className='flex justify-between items-end gap-2'>
