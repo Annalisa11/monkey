@@ -1,11 +1,28 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { createFileRoute } from '@tanstack/react-router';
 import MonkeyItem from '@/components/features/MonkeyItem';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DialogTitle } from '@radix-ui/react-dialog';
 
 type Monkey = {
   id: string;
@@ -14,6 +31,8 @@ type Monkey = {
   ip: string;
   active: boolean;
 };
+
+type MonkeyForm = z.infer<typeof monkeySchema>;
 
 const initialMonkeys: Monkey[] = [
   {
@@ -25,31 +44,113 @@ const initialMonkeys: Monkey[] = [
   },
 ];
 
+const monkeySchema = z.object({
+  name: z.string().min(2).max(50),
+  location: z.string(),
+  ip: z.string().ip(),
+  active: z.boolean(),
+});
+
 export const Route = createFileRoute('/monkeys')({
   component: Monkeys,
 });
 
 function Monkeys() {
-  const [monkeys, setMonkeys] = useState<Monkey[]>(initialMonkeys);
+  const form = useForm<MonkeyForm>({
+    resolver: zodResolver(monkeySchema),
+    defaultValues: {
+      name: '',
+      location: '',
+      ip: '',
+      active: true,
+    },
+  });
 
-  const toggleStatus = (id: string) => {
-    setMonkeys((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m))
-    );
-  };
+  function onSubmit(values: MonkeyForm) {
+    console.log(values);
+  }
 
-  const deleteMonkey = (id: string) => {
-    setMonkeys((prev) => prev.filter((m) => m.id !== id));
-  };
-
-  const addMonkey = () => {};
+  const dialog = (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant='default'>Add Monkey</Button>
+      </DialogTrigger>
+      <DialogContent className='space-y-4'>
+        <DialogTitle>Add New Monkey Robot</DialogTitle>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Chimpy' {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    This is the name of the new Monkey robot
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='location'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className='w-[180px]'>
+                        <SelectValue placeholder='Select a location' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value='Entrance'>Entrance</SelectItem>
+                      <SelectItem value='Optometrist'>Optometrist</SelectItem>
+                      <SelectItem value='Psych Ward'>Psych Ward</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    The location the monkey will be standing at <br />
+                    You can manage locations in the location
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='ip'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>IP Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder='149.234.1.1' {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    The IP address of the monkey robot you want to connect
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type='submit'>Submit</Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <div className='bg-background p-6 rounded-3xl w-full'>
       <h1>Monkeys</h1>
-      <Button variant='default' onClick={}>
-        Add Monkey
-      </Button>
+      {dialog}
       <div className='flex gap-2 flex-col'>
         {initialMonkeys.map((monkey, i) => (
           <MonkeyItem
@@ -61,52 +162,5 @@ function Monkeys() {
         ))}
       </div>
     </div>
-  );
-}
-
-function EditMonkeyDialog({
-  monkey,
-  onSave,
-}: {
-  monkey: Monkey;
-  onSave: (m: Monkey) => void;
-}) {
-  const [form, setForm] = useState(monkey);
-
-  const handleChange = (key: keyof Monkey, value: string | boolean) => {
-    setForm((f) => ({ ...f, [key]: value }));
-  };
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button size='sm' variant='outline'>
-          Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent className='space-y-4'>
-        <Label>Name</Label>
-        <Input
-          value={form.name}
-          onChange={(e) => handleChange('name', e.target.value)}
-        />
-        <Label>Location</Label>
-        <Input
-          value={form.location}
-          onChange={(e) => handleChange('location', e.target.value)}
-        />
-        <Label>IP Address</Label>
-        <Input
-          value={form.ip}
-          onChange={(e) => handleChange('ip', e.target.value)}
-        />
-        <Label>Active</Label>
-        <Switch
-          checked={form.active}
-          onCheckedChange={(val) => handleChange('active', val)}
-        />
-        <Button onClick={() => onSave(form)}>Save</Button>
-      </DialogContent>
-    </Dialog>
   );
 }
