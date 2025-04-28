@@ -13,7 +13,7 @@ export function validateRequest<T>(schema: ZodSchema<T>) {
       return;
     }
 
-    (req as any).validatedBody = result.data;
+    req.body = result.data;
     next();
   };
 }

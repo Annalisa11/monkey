@@ -1,6 +1,11 @@
 import express from 'express';
+import { validateRequest } from 'middleware/validateRequest.js';
+import { createMonkeySchema, updateMonkeySchema } from 'validation';
 import {
+  createMonkey,
   createNavigation,
+  deleteMonkey,
+  editMonkey,
   getAllMonkeys,
   verifyQRCode,
 } from '../controllers/monkeyController.js';
@@ -31,6 +36,12 @@ const router = express.Router();
  */
 
 router.get('/', getAllMonkeys);
+
+router.post('/', validateRequest(createMonkeySchema), createMonkey);
+
+router.delete('/:id', deleteMonkey);
+
+router.patch('/:id', validateRequest(updateMonkeySchema), editMonkey);
 
 /**
  * @swagger

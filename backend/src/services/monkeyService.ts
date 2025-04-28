@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { and, eq } from 'drizzle-orm';
 import QRCode from 'qrcode';
 import { NavigationData, NavigationRequest } from 'src/types.js';
-import { Location, Monkey } from 'validation';
+import { CreateMonkey, Location, Monkey, UpdateMonkey } from 'validation';
 import db from '../../db/db.js';
 import {
   locations,
@@ -19,6 +19,9 @@ interface MonkeyService {
   getLocationById(id: number): Promise<Location | null>;
   getLocationByName(locationName: string): Promise<Location | null>;
   getMonkeyById(monkeyId: number): Promise<Monkey | null>;
+  createMonkey(newMonkey: CreateMonkey): Promise<void>;
+  deleteMonkey(id: number): Promise<void>;
+  updateMonkey(id: number, data: UpdateMonkey): Promise<void>;
   getLocationIdByName(name: string): Promise<number>;
 }
 
@@ -39,6 +42,18 @@ const monkeyService: MonkeyService = {
       .select(monkeyWithLocationSelect)
       .from(monkeys)
       .innerJoin(locations, eq(monkeys.locationId, locations.id));
+  },
+
+  updateMonkey: async (id: number, data: UpdateMonkey): Promise<void> => {
+    await db
+      .update(monkeys)
+      .set({
+        ...(data.name && { name: data.name }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+        ...(data.address && { address: data.address }),
+        ...(data.location && { locationId: data.location.id }),
+      })
+      .where(eq(monkeys.monkeyId, id));
   },
 
   getNavigationInformation: async (
@@ -171,6 +186,18 @@ const monkeyService: MonkeyService = {
     }
 
     return location.id;
+  },
+  createMonkey: async (newMonkey: CreateMonkey): Promise<void> => {
+    await db.insert(monkeys).values({
+      name: newMonkey.name,
+      isActive: newMonkey.isActive,
+      address: newMonkey.address,
+      locationId: newMonkey.location.id,
+    });
+  },
+
+  deleteMonkey: async (id: number): Promise<void> => {
+    await db.delete(monkeys).where(eq(monkeys.monkeyId, id));
   },
 
   getMonkeyById: async (monkeyId: number): Promise<Monkey | null> => {

@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express';
+import { CreateMonkey, UpdateMonkey } from 'validation';
 import monkeyService from '../services/monkeyService.js';
 
 type CreateNavigationParams = {
@@ -24,6 +25,48 @@ const getAllMonkeys: RequestHandler = async (req, res) => {
     res.json(monkeys);
   } catch (error: any) {
     console.error('Failed to get all monkeys', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const createMonkey: RequestHandler<any, any, CreateMonkey> = async (
+  req,
+  res
+) => {
+  try {
+    await monkeyService.createMonkey(req.body);
+
+    res.status(201).json({ message: 'Monkey created successfully' });
+  } catch (error: any) {
+    console.error('Failed to create new monkey', error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const deleteMonkey: RequestHandler<{ id: string }> = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const monkeyId = parseInt(id, 10);
+
+    await monkeyService.deleteMonkey(monkeyId);
+
+    res.status(200).json({ message: 'Monkey deleted successfully' });
+  } catch (error: any) {
+    console.error('Failed to delete monkey', error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const editMonkey: RequestHandler<any, any, UpdateMonkey> = async (req, res) => {
+  try {
+    const monkeyId = parseInt(req.params.id, 10);
+    const updateData = req.body;
+
+    await monkeyService.updateMonkey(monkeyId, updateData);
+
+    res.status(200).json({ message: 'Monkey updated successfully' });
+  } catch (error: any) {
+    console.error('Failed to update monkey', error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -84,4 +127,11 @@ const verifyQRCode: RequestHandler<
   }
 };
 
-export { createNavigation, getAllMonkeys, verifyQRCode };
+export {
+  createMonkey,
+  createNavigation,
+  deleteMonkey,
+  editMonkey,
+  getAllMonkeys,
+  verifyQRCode,
+};
