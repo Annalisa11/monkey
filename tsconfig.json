@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@validation": ["validation/dist"],
+      "@validation/*": ["validation/dist/*"]
+    }
+  }
+}

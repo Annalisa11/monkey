@@ -50,6 +50,9 @@ importers:
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@5.1.0)
+      validation:
+        specifier: workspace:*
+        version: link:../validation
     devDependencies:
       '@types/axios':
         specifier: ^0.14.4
@@ -159,6 +162,9 @@ importers:
       tw-animate-css:
         specifier: ^1.2.8
         version: 1.2.8
+      validation:
+        specifier: workspace:*
+        version: link:../validation
       zod:
         specifier: ^3.24.3
         version: 3.24.3
@@ -205,6 +211,12 @@ importers:
       vite:
         specifier: 5.2.10
         version: 5.2.10(@types/node@22.15.3)(lightningcss@1.29.2)
+
+  validation:
+    dependencies:
+      zod:
+        specifier: ^3.24.3
+        version: 3.24.3
 
 packages:
 
