@@ -4,6 +4,6 @@
   "typescript.preferences.importModuleSpecifier": "shortest",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    "source.organizeImports": "explicit"
   }
 }
