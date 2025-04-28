@@ -1,13 +1,13 @@
-import {
-  monkeys,
-  locations,
-  routes,
-  navigationQrCodes,
-} from '../../db/schema.js';
-import db from '../../db/db.js';
-import QRCode from 'qrcode';
 import crypto from 'crypto';
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import QRCode from 'qrcode';
+import db from '../../db/db.js';
+import {
+  locations,
+  monkeys,
+  navigationQrCodes,
+  routes,
+} from '../../db/schema.js';
 import {
   Location,
   Monkey,

@@ -23,7 +23,8 @@
     "helmet": "^8.1.0",
     "qrcode": "^1.5.4",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "validation": "workspace:*"
   },
   "devDependencies": {
     "@types/axios": "^0.14.4",

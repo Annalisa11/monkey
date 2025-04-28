@@ -1,0 +1,24 @@
+{
+  "name": "validation",
+  "version": "1.0.0",
+  "description": "",
+  "private": "true",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.9.0",
+  "dependencies": {
+    "zod": "^3.24.3"
+  }
+}
