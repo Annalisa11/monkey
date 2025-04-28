@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/helmet": "^4.0.0",
     "axios": "^1.8.4",
     "better-sqlite3": "^11.9.1",
     "cors": "^2.8.5",
@@ -27,10 +26,8 @@
     "validation": "workspace:*"
   },
   "devDependencies": {
-    "@types/axios": "^0.14.4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.17",
-    "@types/dotenv": "^8.2.3",
     "@types/express": "^5.0.1",
     "@types/qrcode": "^1.5.5",
     "@types/swagger-jsdoc": "^6.0.4",

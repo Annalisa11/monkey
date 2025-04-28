@@ -1,4 +1,9 @@
 packages:
-  - 'frontend'
-  - 'backend'
-  - 'validation'
+  - frontend
+  - backend
+  - validation
+
+onlyBuiltDependencies:
+  - '@scarf/scarf'
+  - better-sqlite3
+  - esbuild
