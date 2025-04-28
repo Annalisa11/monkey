@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Location } from '@/lib/types';
+import { Location } from '@validation';
 import clsx from 'clsx';
 
 type MonkeyItemProps = {

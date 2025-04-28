@@ -1,6 +1,6 @@
-import { sqliteTable, text, integer, unique } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 import { customType } from 'drizzle-orm/pg-core';
+import { integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
 
 export const locations = sqliteTable('locations', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -13,8 +13,10 @@ export const monkeys = sqliteTable('monkeys', {
   locationId: integer('location_id')
     .notNull()
     .references(() => locations.id),
-  isActive: integer('is_active', { mode: 'boolean' }).default(sql`0`),
-  address: text('address'),
+  isActive: integer('is_active', { mode: 'boolean' })
+    .notNull()
+    .default(sql`0`),
+  address: text('address').notNull(),
 });
 
 export const routes = sqliteTable(

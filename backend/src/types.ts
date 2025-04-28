@@ -1,32 +1,21 @@
 import { InferSelectModel } from 'drizzle-orm';
+import { Location } from 'validation';
 import { locations, monkeys, navigationQrCodes, routes } from '../db/schema.js';
 
 // ---------------------------
-// Base models from schema
+// Database models infered from drizzle
 // ---------------------------
 
-export type MonkeyBase = InferSelectModel<typeof monkeys>;
-export type Location = InferSelectModel<typeof locations>;
-export type Route = InferSelectModel<typeof routes>;
-export type NavigationQrCode = InferSelectModel<typeof navigationQrCodes>;
+export type DBMonkey = InferSelectModel<typeof monkeys>;
+export type DBLocation = InferSelectModel<typeof locations>;
+export type DBRoute = InferSelectModel<typeof routes>;
+export type DBNavigationQrCode = InferSelectModel<typeof navigationQrCodes>;
 
 // ---------------------------
 // Enums / constants
 // ---------------------------
 
 export type Emotion = 'concentrate' | 'smile' | 'laugh' | 'star';
-
-// ---------------------------
-// App-level domain models
-// ---------------------------
-
-export type Monkey = Omit<MonkeyBase, 'locationId'> & {
-  location: Location;
-};
-
-// ---------------------------
-// Service interfaces
-// ---------------------------
 
 export interface NavigationData {
   routeDescription: string;

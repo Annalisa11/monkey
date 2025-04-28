@@ -23,7 +23,8 @@
     "qrcode": "^1.5.4",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "validation": "workspace:*"
+    "validation": "workspace:*",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

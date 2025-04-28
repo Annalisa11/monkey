@@ -1,38 +1,51 @@
-import { RequestHandler } from 'express';
-import eventService from '../services/eventService.js';
 import axios from 'axios';
-import monkeyService from '../services/monkeyService.js';
+import { RequestHandler } from 'express';
+import type { StoreButtonPressData } from 'validation';
 import { ROBOT_API_PORT } from '../config.js';
+import eventService from '../services/eventService.js';
+import monkeyService from '../services/monkeyService.js';
 import { Emotion } from '../types.js';
+
+type QRCodeScanParams = {
+  id: string;
+};
 
 const storeButtonPressData: RequestHandler = async (req, res) => {
   try {
-    const locationId = await monkeyService.getLocationIdByName(
-      req.body.location
-    );
+    const { monkeyId, location } = req.body as StoreButtonPressData;
+
+    const locationId = await monkeyService.getLocationIdByName(location);
 
     const payload = {
-      monkeyId: req.body.monkeyId,
-      timestamp: req.body.timestamp,
-      locationId: locationId,
+      monkeyId,
+      timestamp: new Date(),
+      locationId,
     };
+
     const newRowId = await eventService.recordButtonPressData(payload);
-    res.json(newRowId);
+    res.json({ insertedId: newRowId });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
 
-const reactToQRCodeScan: RequestHandler = async (req, res) => {
+const reactToQRCodeScan: RequestHandler<QRCodeScanParams> = async (
+  req,
+  res
+) => {
   try {
     const emotion: Emotion = 'concentrate';
     const id = parseInt(req.params.id);
 
     const monkey = await monkeyService.getMonkeyById(id);
-    if (!monkey) res.status(500).json(`Monkey with id ${id} not found`);
+    if (!monkey) {
+      res.status(404).json({ error: `Monkey with id ${id} not found` });
+      return;
+    }
 
     const monkeyApiUrl = `http://${monkey.address}:${ROBOT_API_PORT}`;
     console.log('🔹 MONKEY API URL: ', monkeyApiUrl);
+
     const response = await axios.get(`${monkeyApiUrl}/${emotion}`);
 
     res.status(200).json({
@@ -59,4 +72,4 @@ const reactToJourneyComplete: RequestHandler = async (req, res) => {
   }
 };
 
-export { storeButtonPressData, reactToQRCodeScan, reactToJourneyComplete };
+export { reactToJourneyComplete, reactToQRCodeScan, storeButtonPressData };

@@ -21,7 +21,7 @@ import { createMonkey } from '@/lib/api/monkeys';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { MonkeyForm, monkeySchema } from '@validation';
+import { CreateMonkey, createMonkeySchema } from '@validation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -30,13 +30,13 @@ export function AddMonkeyDialog() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const form = useForm<MonkeyForm>({
-    resolver: zodResolver(monkeySchema),
+  const form = useForm<CreateMonkey>({
+    resolver: zodResolver(createMonkeySchema),
     defaultValues: {
       name: '',
-      location: '',
-      ip: '',
-      active: true,
+      location: { name: '', id: 2 },
+      address: '',
+      isActive: true,
     },
   });
 
@@ -54,7 +54,7 @@ export function AddMonkeyDialog() {
     },
   });
 
-  function onSubmit(values: MonkeyForm) {
+  function onSubmit(values: CreateMonkey) {
     createMutation.mutate(values);
   }
 
@@ -85,7 +85,7 @@ export function AddMonkeyDialog() {
             />
             <FormField
               control={form.control}
-              name='location'
+              name='location.name'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Location</FormLabel>
@@ -111,7 +111,7 @@ export function AddMonkeyDialog() {
             />
             <FormField
               control={form.control}
-              name='ip'
+              name='address'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>IP Address</FormLabel>

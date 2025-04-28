@@ -1,5 +1,11 @@
 import express from 'express';
 import {
+  CreateNavigationSchema,
+  StoreButtonPressDataSchema,
+  VerifyQRCodeSchema,
+} from 'validation';
+import { validateRequest } from '../../middleware/validateRequest.js';
+import {
   reactToJourneyComplete,
   reactToQRCodeScan,
   storeButtonPressData,
@@ -46,7 +52,11 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.post('/button-press', storeButtonPressData);
+router.post(
+  '/button-press',
+  validateRequest(StoreButtonPressDataSchema),
+  storeButtonPressData
+);
 /**
  * @swagger
  * /v1/events/{id}/qr-code-scan:
@@ -93,7 +103,11 @@ router.post('/button-press', storeButtonPressData);
  *                   type: string
  *                   example: Failed to trigger monkey emotion
  */
-router.post('/:id/qr-code-scan', reactToQRCodeScan);
+router.post(
+  '/:id/navigation',
+  validateRequest(CreateNavigationSchema),
+  reactToQRCodeScan
+);
 /**
  * @swagger
  * /v1/events/journey-complete:
@@ -124,6 +138,10 @@ router.post('/:id/qr-code-scan', reactToQRCodeScan);
  *                   type: string
  *                   example: Failed to insert journey completion
  */
-router.post('/journey-complete', reactToJourneyComplete);
+router.post(
+  '/:id/qr-check',
+  validateRequest(VerifyQRCodeSchema),
+  reactToJourneyComplete
+);
 
 export default router;

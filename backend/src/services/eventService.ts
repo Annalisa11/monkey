@@ -1,15 +1,8 @@
+import { InferInsertModel } from 'drizzle-orm';
 import db from '../../db/db.js';
 import { buttonPressEvents, journeyCompletions } from '../../db/schema.js';
-import { InferInsertModel } from 'drizzle-orm';
 
 type ButtonPressInsert = InferInsertModel<typeof buttonPressEvents>;
-
-interface ButtonPressData {
-  monkeyId: number;
-  timestamp: Date;
-  locationId: number;
-}
-
 interface EventService {
   recordButtonPressData(data: ButtonPressInsert): Promise<number>;
   recordJourneyCompletion(): Promise<boolean>;

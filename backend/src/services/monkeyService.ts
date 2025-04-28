@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 import { and, eq } from 'drizzle-orm';
 import QRCode from 'qrcode';
+import { NavigationData, NavigationRequest } from 'src/types.js';
+import { Location, Monkey } from 'validation';
 import db from '../../db/db.js';
 import {
   locations,
@@ -8,12 +10,6 @@ import {
   navigationQrCodes,
   routes,
 } from '../../db/schema.js';
-import {
-  Location,
-  Monkey,
-  NavigationData,
-  NavigationRequest,
-} from '../types.js';
 
 interface MonkeyService {
   getAllMonkeys(): Promise<Monkey[]>;
@@ -27,7 +23,7 @@ interface MonkeyService {
 }
 
 const monkeyWithLocationSelect = {
-  monkeyId: monkeys.monkeyId,
+  id: monkeys.monkeyId,
   name: monkeys.name,
   isActive: monkeys.isActive,
   address: monkeys.address,

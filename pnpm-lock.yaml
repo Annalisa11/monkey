@@ -50,6 +50,9 @@ importers:
       validation:
         specifier: workspace:*
         version: link:../validation
+      zod:
+        specifier: ^3.24.3
+        version: 3.24.3
     devDependencies:
       '@types/better-sqlite3':
         specifier: ^7.6.13
