@@ -1,15 +1,3 @@
-import type * as React from 'react';
-import { Link } from '@tanstack/react-router';
-import {
-  Home,
-  Settings,
-  User,
-  Leaf,
-  Users,
-  MessageSquare,
-  Flag,
-  Calendar,
-} from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +7,18 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { Link } from '@tanstack/react-router';
+import {
+  Banana,
+  Compass,
+  Flag,
+  Home,
+  Leaf,
+  MapPinned,
+  Settings,
+  User,
+} from 'lucide-react';
+import type * as React from 'react';
 
 const menuItems = [
   {
@@ -34,17 +34,17 @@ const menuItems = [
   {
     title: 'Monkeys',
     url: '/monkeys',
-    icon: MessageSquare,
+    icon: Banana,
   },
   {
-    title: 'Calendar',
-    url: '#',
-    icon: Calendar,
+    title: 'Locations',
+    url: '/locations',
+    icon: MapPinned,
   },
   {
-    title: 'Users',
-    url: '#',
-    icon: Users,
+    title: 'Routes',
+    url: '/routes',
+    icon: Compass,
   },
   {
     title: 'Reports',
