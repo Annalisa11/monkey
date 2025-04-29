@@ -12,7 +12,7 @@ const MonkeyItem = ({ monkey, onDelete }: MonkeyItemProps) => {
   const { name, location, address, isActive } = monkey;
 
   return (
-    <div className='flex justify-between border-2 border-amber-300 min-w-xl rounded-xl p-4 bg-[hsl(var(--card))]'>
+    <div className='flex justify-between border-2 border-gray-200  min-w-xl rounded-xl p-4 bg-background'>
       <div>
         <h2 className='font-bold text-lg'>{name}</h2>
         <h3 className='text-sm'>{location.name}</h3>

@@ -8,12 +8,13 @@ type MonkeyItemProps = {
 };
 
 const LocationItem = ({ location, onDelete }: MonkeyItemProps) => {
-  const { name } = location;
+  const { name, id } = location;
 
   return (
-    <div className='flex justify-between border-2 border-amber-300 min-w-xl rounded-xl p-4 bg-[hsl(var(--card))]'>
-      <div>
+    <div className='flex justify-between border-2 border-gray-200 min-w-xl rounded-xl p-4 bg-[hsl(var(--card))]'>
+      <div className='flex gap-2 '>
         <h2 className='font-bold text-lg'>{name}</h2>
+        <span className='text-gray-400'>{`id: ${id}`}</span>
       </div>
 
       <div className='flex justify-between items-end gap-2'>

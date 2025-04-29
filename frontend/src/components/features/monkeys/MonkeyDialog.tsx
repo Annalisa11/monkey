@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useLocations } from '@/hooks/useLocations';
 import { createMonkey, updateMonkey } from '@/lib/api/monkeys';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
@@ -38,9 +39,11 @@ export function MonkeyDialog({
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
+  const { data: locations = [] } = useLocations();
+
   const defaultValues = {
     name: '',
-    location: { name: '', id: 2 },
+    location: { name: '', id: undefined },
     address: '',
     isActive: true,
   };
@@ -57,6 +60,7 @@ export function MonkeyDialog({
   const form = useForm<CreateMonkey>({
     resolver: zodResolver(createMonkeySchema),
     defaultValues: monkey ? filledDefaultValues(monkey) : defaultValues,
+    mode: 'onChange',
   });
 
   const createMutation = useMutation({
@@ -135,13 +139,23 @@ export function MonkeyDialog({
             />
             <FormField
               control={form.control}
-              name='location.name'
+              name='location.id'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    onValueChange={(value) => {
+                      const selectedId = Number(value);
+                      const selectedLocation = locations.find(
+                        (loc) => loc.id === selectedId
+                      );
+
+                      field.onChange(selectedId);
+                      form.setValue(
+                        'location.name',
+                        selectedLocation?.name || ''
+                      );
+                    }}
                   >
                     <FormControl>
                       <SelectTrigger className='w-[180px]'>
@@ -149,12 +163,20 @@ export function MonkeyDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='Entrance'>Entrance</SelectItem>
-                      <SelectItem value='Optometrist'>Optometrist</SelectItem>
-                      <SelectItem value='Psych Ward'>Psych Ward</SelectItem>
+                      {locations.map((location) => (
+                        <SelectItem
+                          key={location.id}
+                          value={location.id.toString()}
+                        >
+                          {location.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>Where the monkey will stand</FormDescription>
+                  <FormDescription>
+                    Department name where a monkey stands or can direct people
+                    to
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

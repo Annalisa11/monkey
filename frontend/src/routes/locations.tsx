@@ -1,7 +1,8 @@
 import { LocationDialog } from '@/components/features/locations/LocationDialog';
 import LocationItem from '@/components/features/locations/LocationItem';
-import { deleteLocation, getLocations } from '@/lib/api/monkeys';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocations } from '@/hooks/useLocations';
+import { deleteLocation } from '@/lib/api/monkeys';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
@@ -12,14 +13,7 @@ export const Route = createFileRoute('/locations')({
 function Locations() {
   const queryClient = useQueryClient();
 
-  const {
-    data: locations = [],
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['locations'],
-    queryFn: getLocations,
-  });
+  const { data: locations = [], isLoading, isError } = useLocations();
 
   const deleteMutation = useMutation({
     mutationFn: deleteLocation,
