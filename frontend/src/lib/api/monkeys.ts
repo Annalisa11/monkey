@@ -1,5 +1,5 @@
 import { API_URL } from '@/constants';
-import type { CreateMonkey, Monkey } from '@validation';
+import type { CreateMonkey, Location, LocationForm, Monkey } from '@validation';
 
 export async function getMonkeys(): Promise<Monkey[]> {
   const response = await fetch(`${API_URL}/v1/monkeys`);
@@ -48,5 +48,55 @@ export async function updateMonkey(
 
   if (!response.ok) {
     throw new Error('Failed to edit monkey');
+  }
+}
+
+export async function getLocations(): Promise<Location[]> {
+  const response = await fetch(`${API_URL}/v1/monkeys/locations`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch locations');
+  }
+  return response.json();
+}
+
+export async function createLocation(data: LocationForm): Promise<Location> {
+  const response = await fetch(`${API_URL}/v1/monkeys/locations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create location');
+  }
+  return response.json();
+}
+
+export async function deleteLocation(id: number): Promise<void> {
+  const response = await fetch(`${API_URL}/v1/monkeys/locations/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete location');
+  }
+}
+
+export async function updateLocation(
+  id: number,
+  data: LocationForm
+): Promise<void> {
+  const response = await fetch(`${API_URL}/v1/monkeys/locations/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to edit location');
   }
 }

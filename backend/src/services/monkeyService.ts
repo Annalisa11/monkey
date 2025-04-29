@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { and, eq } from 'drizzle-orm';
 import QRCode from 'qrcode';
 import { NavigationData, NavigationRequest } from 'src/types.js';
-import { CreateMonkey, Location, Monkey, UpdateMonkey } from 'validation';
+import { CreateMonkey, Location, LocationForm, Monkey } from 'validation';
 import db from '../../db/db.js';
 import {
   locations,
@@ -21,8 +21,12 @@ interface MonkeyService {
   getMonkeyById(monkeyId: number): Promise<Monkey | null>;
   createMonkey(newMonkey: CreateMonkey): Promise<void>;
   deleteMonkey(id: number): Promise<void>;
-  updateMonkey(id: number, data: UpdateMonkey): Promise<void>;
+  updateMonkey(id: number, data: CreateMonkey): Promise<void>;
   getLocationIdByName(name: string): Promise<number>;
+  createLocation(newLocation: LocationForm): Promise<void>;
+  deleteLocation(id: number): Promise<void>;
+  updateLocation(id: number, data: LocationForm): Promise<void>;
+  getLocations(): Promise<Location[]>;
 }
 
 const monkeyWithLocationSelect = {
@@ -44,14 +48,14 @@ const monkeyService: MonkeyService = {
       .innerJoin(locations, eq(monkeys.locationId, locations.id));
   },
 
-  updateMonkey: async (id: number, data: UpdateMonkey): Promise<void> => {
+  updateMonkey: async (id: number, data: CreateMonkey): Promise<void> => {
     await db
       .update(monkeys)
       .set({
-        ...(data.name && { name: data.name }),
-        ...(data.isActive !== undefined && { isActive: data.isActive }),
-        ...(data.address && { address: data.address }),
-        ...(data.location && { locationId: data.location.id }),
+        name: data.name,
+        isActive: data.isActive,
+        address: data.address,
+        locationId: data.location.id,
       })
       .where(eq(monkeys.monkeyId, id));
   },
@@ -208,6 +212,30 @@ const monkeyService: MonkeyService = {
       .where(eq(monkeys.monkeyId, monkeyId));
 
     return monkey || null;
+  },
+
+  getLocations: async (): Promise<Location[]> => {
+    return await db.select().from(locations);
+  },
+
+  updateLocation: async (id, data) => {
+    await db
+      .update(locations)
+      .set({ name: data.name })
+      .where(eq(locations.id, id));
+  },
+
+  createLocation: async (newLocation) => {
+    await db
+      .insert(locations)
+      .values({
+        name: newLocation.name,
+      })
+      .returning();
+  },
+
+  deleteLocation: async (id) => {
+    await db.delete(locations).where(eq(locations.id, id));
   },
 };
 

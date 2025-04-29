@@ -14,7 +14,8 @@ export const monkeySchema = z.object({
 });
 
 export const createMonkeySchema = monkeySchema.omit({ id: true });
-export const updateMonkeySchema = monkeySchema.partial().omit({ id: true });
+
+export const locationFormSchema = locationSchema.omit({ id: true });
 
 export const StoreButtonPressDataSchema = z.object({
   monkeyId: z.number().int().min(1),

@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { CreateMonkey, UpdateMonkey } from 'validation';
+import { CreateMonkey, LocationForm } from 'validation';
 import monkeyService from '../services/monkeyService.js';
 
 type CreateNavigationParams = {
@@ -57,7 +57,7 @@ const deleteMonkey: RequestHandler<{ id: string }> = async (req, res) => {
   }
 };
 
-const editMonkey: RequestHandler<any, any, UpdateMonkey> = async (req, res) => {
+const editMonkey: RequestHandler<any, any, CreateMonkey> = async (req, res) => {
   try {
     const monkeyId = parseInt(req.params.id, 10);
     const updateData = req.body;
@@ -67,6 +67,61 @@ const editMonkey: RequestHandler<any, any, UpdateMonkey> = async (req, res) => {
     res.status(200).json({ message: 'Monkey updated successfully' });
   } catch (error: any) {
     console.error('Failed to update monkey', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getLocations: RequestHandler = async (req, res) => {
+  try {
+    const locations = await monkeyService.getLocations();
+    res.json(locations);
+  } catch (error: any) {
+    console.error('Failed to get all locations', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const createLocation: RequestHandler<any, any, LocationForm> = async (
+  req,
+  res
+) => {
+  try {
+    await monkeyService.createLocation(req.body);
+
+    res.status(201).json({ message: 'Location created successfully' });
+  } catch (error: any) {
+    console.error('Failed to create new location', error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const deleteLocation: RequestHandler<{ id: string }> = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const locId = parseInt(id, 10);
+
+    await monkeyService.deleteLocation(locId);
+
+    res.status(200).json({ message: 'Location deleted successfully' });
+  } catch (error: any) {
+    console.error('Failed to delete location', error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const editLocation: RequestHandler<any, any, LocationForm> = async (
+  req,
+  res
+) => {
+  try {
+    const locId = parseInt(req.params.id, 10);
+    const updateData = req.body;
+
+    await monkeyService.updateLocation(locId, updateData);
+
+    res.status(200).json({ message: 'Location updated successfully' });
+  } catch (error: any) {
+    console.error('Failed to update location', error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -128,10 +183,14 @@ const verifyQRCode: RequestHandler<
 };
 
 export {
+  createLocation,
   createMonkey,
   createNavigation,
+  deleteLocation,
   deleteMonkey,
+  editLocation,
   editMonkey,
   getAllMonkeys,
+  getLocations,
   verifyQRCode,
 };
