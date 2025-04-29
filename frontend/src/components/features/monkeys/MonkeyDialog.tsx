@@ -17,27 +17,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { createMonkey } from '@/lib/api/monkeys';
+import { createMonkey, updateMonkey } from '@/lib/api/monkeys';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CreateMonkey, createMonkeySchema } from '@validation';
+import { CreateMonkey, createMonkeySchema, Monkey } from '@validation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-export function AddMonkeyDialog() {
+interface MonkeyDialogProps {
+  isEdit?: boolean;
+  monkey?: Monkey;
+}
+
+export function MonkeyDialog({
+  isEdit = false,
+  monkey = undefined,
+}: MonkeyDialogProps) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
+  const defaultValues = {
+    name: '',
+    location: { name: '', id: 2 },
+    address: '',
+    isActive: true,
+  };
+
+  const filledDefaultValues = (monkey: Monkey) => {
+    return {
+      name: monkey.name,
+      location: { name: monkey.location.name, id: monkey.location.id },
+      address: monkey.address,
+      isActive: monkey.isActive,
+    };
+  };
+
   const form = useForm<CreateMonkey>({
     resolver: zodResolver(createMonkeySchema),
-    defaultValues: {
-      name: '',
-      location: { name: '', id: 2 },
-      address: '',
-      isActive: true,
-    },
+    defaultValues: monkey ? filledDefaultValues(monkey) : defaultValues,
   });
 
   const createMutation = useMutation({
@@ -54,17 +73,48 @@ export function AddMonkeyDialog() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: (values: CreateMonkey) => updateMonkey(monkey!.id, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['monkeys'] });
+      setOpen(false);
+      toast.success('Monkey was successfully updated');
+    },
+    onError: (error) => {
+      toast.error(error.message);
+      console.log(error);
+    },
+  });
+
   function onSubmit(values: CreateMonkey) {
-    createMutation.mutate(values);
+    if (isEdit && monkey) {
+      updateMutation.mutate(values);
+    } else {
+      createMutation.mutate(values);
+    }
   }
+
+  const isPending = isEdit
+    ? updateMutation.isPending
+    : createMutation.isPending;
+  const buttonText = isEdit
+    ? isPending
+      ? 'Updating Monkey...'
+      : 'Update Monkey'
+    : isPending
+    ? 'Adding Monkey...'
+    : 'Add Monkey';
+  const dialogTitle = isEdit ? 'Edit Monkey Robot' : 'Add New Monkey Robot';
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant='default'>Add Monkey</Button>
+        <Button variant='default'>
+          {isEdit ? 'Edit Monkey' : 'Add Monkey'}
+        </Button>
       </DialogTrigger>
       <DialogContent className='space-y-4'>
-        <DialogTitle>Add New Monkey Robot</DialogTitle>
+        <DialogTitle>{dialogTitle}</DialogTitle>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
             <FormField
@@ -123,8 +173,8 @@ export function AddMonkeyDialog() {
                 </FormItem>
               )}
             />
-            <Button type='submit' disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Submitting...' : 'Submit'}
+            <Button type='submit' disabled={isPending}>
+              {buttonText}
             </Button>
           </form>
         </Form>

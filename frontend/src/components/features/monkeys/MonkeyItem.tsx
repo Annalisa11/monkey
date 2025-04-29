@@ -1,25 +1,16 @@
 import { Button } from '@/components/ui/button';
-import { Location } from '@validation';
+import { Monkey } from '@validation';
 import clsx from 'clsx';
+import { MonkeyDialog } from './MonkeyDialog';
 
 type MonkeyItemProps = {
-  id: number;
-  name: string;
-  location: Location;
-  address: string;
-  active: boolean;
-  onEdit: () => void;
+  monkey: Monkey;
   onDelete: () => void;
 };
 
-const MonkeyItem = ({
-  name,
-  location,
-  address,
-  active,
-  onEdit,
-  onDelete,
-}: MonkeyItemProps) => {
+const MonkeyItem = ({ monkey, onDelete }: MonkeyItemProps) => {
+  const { name, location, address, isActive } = monkey;
+
   return (
     <div className='flex justify-between border-2 border-amber-300 min-w-xl rounded-xl p-4 bg-[hsl(var(--card))]'>
       <div>
@@ -29,25 +20,23 @@ const MonkeyItem = ({
           <div
             className={clsx(
               'w-3 h-3 rounded-full',
-              active ? 'bg-green-400' : 'bg-red-400'
+              isActive ? 'bg-green-400' : 'bg-red-400'
             )}
           />
           <small
             className={clsx(
               'uppercase text-xs font-medium',
-              active ? 'text-green-500' : 'text-red-400'
+              isActive ? 'text-green-500' : 'text-red-400'
             )}
           >
-            {active ? 'active' : 'not active'}
+            {isActive ? 'active' : 'not active'}
           </small>
         </div>
         <p className='text-xs text-muted-foreground mt-2'>{address}</p>
       </div>
 
       <div className='flex justify-between items-end gap-2'>
-        <Button variant='secondary' onClick={onEdit}>
-          Edit
-        </Button>
+        <MonkeyDialog isEdit monkey={monkey} />
         <Button variant='destructive' onClick={onDelete}>
           Delete
         </Button>

@@ -1,9 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { AddMonkeyDialog } from '@/components/features/monkeys/AddMonkeyDialog';
-import { getMonkeys, deleteMonkey } from '@/lib/api/monkeys';
+import { MonkeyDialog } from '@/components/features/monkeys/MonkeyDialog';
 import MonkeyItem from '@/components/features/monkeys/MonkeyItem';
+import { deleteMonkey, getMonkeys } from '@/lib/api/monkeys';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute('/monkeys')({
   component: Monkeys,
@@ -35,7 +35,7 @@ function Monkeys() {
   return (
     <div className='bg-background p-6 rounded-3xl w-full'>
       <h1 className='text-2xl font-bold mb-4'>Monkeys</h1>
-      <AddMonkeyDialog />
+      <MonkeyDialog />
       <div className='flex flex-col gap-2 mt-6'>
         {isLoading && (
           <div className='p-4 text-muted-foreground'>Loading monkeys...</div>
@@ -47,10 +47,9 @@ function Monkeys() {
         )}
         {monkeys.map((monkey) => (
           <MonkeyItem
-            {...monkey}
+            monkey={monkey}
             key={monkey.id}
             onDelete={() => deleteMutation.mutate(monkey.id)}
-            onEdit={() => console.log('edit')}
           />
         ))}
       </div>
