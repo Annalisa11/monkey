@@ -1,3 +1,9 @@
+/.git
+/.vscode
+/.idea
+node_modules
+**/*_pb.js
+
 public
 dist
 pnpm-lock.yaml
