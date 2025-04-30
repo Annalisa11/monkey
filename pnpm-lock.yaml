@@ -11,6 +11,9 @@ importers:
       '@types/node':
         specifier: ^22.15.2
         version: 22.15.3
+      prettier:
+        specifier: ^3.5.3
+        version: 3.5.3
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

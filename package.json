@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "b-validation": "pnpm --filter validation build"
+    "b-validation": "pnpm --filter validation build",
+    "b-validation-w": "pnpm --filter validation build --watch",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -17,6 +19,7 @@
   "type": "module",
   "devDependencies": {
     "@types/node": "^22.15.2",
+    "prettier": "^3.5.3",
     "typescript": "^5.8.3"
   }
 }

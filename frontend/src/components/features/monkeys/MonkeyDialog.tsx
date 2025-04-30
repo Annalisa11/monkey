@@ -106,8 +106,8 @@ export function MonkeyDialog({
       ? 'Updating Monkey...'
       : 'Update Monkey'
     : isPending
-    ? 'Adding Monkey...'
-    : 'Add Monkey';
+      ? 'Adding Monkey...'
+      : 'Add Monkey';
   const dialogTitle = isEdit ? 'Edit Monkey Robot' : 'Add New Monkey Robot';
 
   return (
