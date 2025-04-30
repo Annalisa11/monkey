@@ -1,16 +1,24 @@
 import express from 'express';
 import { validateRequest } from 'middleware/validateRequest.js';
-import { createMonkeySchema, locationFormSchema } from 'validation';
+import {
+  createMonkeySchema,
+  locationFormSchema,
+  routeFormSchema,
+} from 'validation';
 import {
   createLocation,
   createMonkey,
   createNavigation,
+  createRoute,
   deleteLocation,
   deleteMonkey,
+  deleteRoute,
   editLocation,
   editMonkey,
+  editRoute,
   getAllMonkeys,
   getLocations,
+  getRoutes,
   verifyQRCode,
 } from '../controllers/monkeyController.js';
 
@@ -47,9 +55,9 @@ router.delete('/:id', deleteMonkey);
 
 router.patch('/:id', validateRequest(createMonkeySchema), editMonkey);
 
-router.get('/locations/', getLocations);
+router.get('/locations', getLocations);
 
-router.post('/locations/', validateRequest(locationFormSchema), createLocation);
+router.post('/locations', validateRequest(locationFormSchema), createLocation);
 
 router.delete('/locations/:id', deleteLocation);
 
@@ -58,6 +66,14 @@ router.patch(
   validateRequest(locationFormSchema),
   editLocation
 );
+
+router.get('/routes/:sourceLocationId', getRoutes);
+
+router.post('/routes', validateRequest(routeFormSchema), createRoute);
+
+router.delete('/routes/:startId/:destId', deleteRoute);
+
+router.patch('/routes', validateRequest(routeFormSchema), editRoute);
 
 /**
  * @swagger

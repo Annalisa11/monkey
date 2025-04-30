@@ -108,8 +108,10 @@ export async function updateLocation(
   }
 }
 
-export async function getRoutes(): Promise<Route[]> {
-  const response = await fetch(`${API_URL}/v1/monkeys/routes`);
+export async function getRoutes(sourceLocationId: number): Promise<Route[]> {
+  const response = await fetch(
+    `${API_URL}/v1/monkeys/routes/${sourceLocationId}`
+  );
   if (!response.ok) {
     throw new Error('Failed to fetch routes');
   }
@@ -139,7 +141,7 @@ export async function deleteRoute({
   destinationId: number;
 }): Promise<void> {
   const response = await fetch(
-    `${API_URL}/v1/monkeys/routes/${startId}?destination=${destinationId}`,
+    `${API_URL}/v1/monkeys/routes/${startId}/${destinationId}`,
     {
       method: 'DELETE',
     }
@@ -151,16 +153,13 @@ export async function deleteRoute({
 }
 
 export async function updateRoute(data: RouteForm): Promise<void> {
-  const response = await fetch(
-    `${API_URL}/v1/monkeys/routes/${data.sourceLocation.id}/${data.destinationLocation.id}`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch(`${API_URL}/v1/monkeys/routes`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
 
   if (!response.ok) {
     throw new Error('Failed to edit route');

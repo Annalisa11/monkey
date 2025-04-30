@@ -19,6 +19,7 @@ function Locations() {
     mutationFn: deleteLocation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
+      queryClient.invalidateQueries({ queryKey: ['routes'] });
       toast.success('Location deleted successfully');
     },
     onError: (error) => {

@@ -63,10 +63,15 @@ export function LocationDialog({
   const updateMutation = useMutation({
     mutationFn: (values: LocationForm) => updateLocation(location!.id, values),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['locations'] });
-      toast.success('Location was successfully updated');
-      setOpen(false);
-      form.reset();
+      if (location) {
+        queryClient.invalidateQueries({ queryKey: ['locations'] });
+        queryClient.invalidateQueries({
+          queryKey: ['routes'],
+        });
+        toast.success('Location was successfully updated');
+        setOpen(false);
+        form.reset();
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Something went wrong');
@@ -90,8 +95,8 @@ export function LocationDialog({
       ? 'Updating Location...'
       : 'Update Location'
     : isPending
-    ? 'Adding Location...'
-    : 'Add Location';
+      ? 'Adding Location...'
+      : 'Add Location';
   const dialogTitle = isEdit ? 'Edit Location' : 'Add New Location';
 
   return (

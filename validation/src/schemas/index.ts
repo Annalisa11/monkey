@@ -64,7 +64,7 @@ export const routeSchema = z
     description: z
       .string()
       .min(10, { message: 'Description must be at least 10 characters long' }),
-    isAccessible: z.boolean().optional(),
+    isAccessible: z.boolean().nullable(),
   })
   .refine((data) => data.sourceLocation.id !== data.destinationLocation.id, {
     message: 'Source and destination must be different',

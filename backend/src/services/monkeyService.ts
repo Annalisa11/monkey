@@ -1,8 +1,15 @@
 import crypto from 'crypto';
 import { and, eq } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/sqlite-core';
 import QRCode from 'qrcode';
 import { NavigationData, NavigationRequest } from 'src/types.js';
-import { CreateMonkey, Location, LocationForm, Monkey } from 'validation';
+import {
+  CreateMonkey,
+  Location,
+  LocationForm,
+  Monkey,
+  Route,
+} from 'validation';
 import db from '../../db/db.js';
 import {
   locations,
@@ -27,6 +34,13 @@ interface MonkeyService {
   deleteLocation(id: number): Promise<void>;
   updateLocation(id: number, data: LocationForm): Promise<void>;
   getLocations(): Promise<Location[]>;
+  createRoute(newRoute: Route): Promise<void>;
+  deleteRoute(
+    sourceLocationId: number,
+    destinationLocationId: number
+  ): Promise<void>;
+  updateRoute(data: Route): Promise<void>;
+  getRoutesByLocation(sourceLocationId: number): Promise<Route[]>;
 }
 
 const monkeyWithLocationSelect = {
@@ -236,6 +250,70 @@ const monkeyService: MonkeyService = {
 
   deleteLocation: async (id) => {
     await db.delete(locations).where(eq(locations.id, id));
+  },
+
+  getRoutesByLocation: async (sourceLocationId: number) => {
+    const destinationLocations = alias(locations, 'destinationLocations');
+
+    const result = await db
+      .select({
+        sourceLocation: {
+          id: routes.sourceLocationId,
+          name: locations.name,
+        },
+        destinationLocation: {
+          id: routes.destinationLocationId,
+          name: destinationLocations.name,
+        },
+        description: routes.description,
+        isAccessible: routes.isAccessible,
+      })
+      .from(routes)
+      .innerJoin(locations, eq(routes.sourceLocationId, locations.id))
+      .innerJoin(
+        destinationLocations,
+        eq(routes.destinationLocationId, destinationLocations.id)
+      )
+      .where(eq(routes.sourceLocationId, sourceLocationId));
+
+    return result;
+  },
+
+  updateRoute: async (data) => {
+    await db
+      .update(routes)
+      .set({
+        sourceLocationId: data.sourceLocation.id,
+        destinationLocationId: data.destinationLocation.id,
+        description: data.description,
+        isAccessible: data.isAccessible,
+      })
+      .where(
+        and(
+          eq(routes.sourceLocationId, data.sourceLocation.id),
+          eq(routes.destinationLocationId, data.destinationLocation.id)
+        )
+      );
+  },
+
+  createRoute: async (newRoute) => {
+    await db.insert(routes).values({
+      sourceLocationId: newRoute.sourceLocation.id,
+      destinationLocationId: newRoute.destinationLocation.id,
+      description: newRoute.description,
+      isAccessible: newRoute.isAccessible,
+    });
+  },
+
+  deleteRoute: async (sourceLocationId, destinationLocationId) => {
+    await db
+      .delete(routes)
+      .where(
+        and(
+          eq(routes.sourceLocationId, sourceLocationId),
+          eq(routes.destinationLocationId, destinationLocationId)
+        )
+      );
   },
 };
 

@@ -21,8 +21,8 @@ const LocationItem = ({ location, onDelete }: MonkeyItemProps) => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['routes'],
-    queryFn: getRoutes,
+    queryKey: ['routes', id, 'locations'],
+    queryFn: () => getRoutes(id),
   });
 
   const deleteMutation = useMutation({

@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { CreateMonkey, LocationForm } from 'validation';
+import { CreateMonkey, LocationForm, RouteForm } from 'validation';
 import monkeyService from '../services/monkeyService.js';
 
 type CreateNavigationParams = {
@@ -126,6 +126,62 @@ const editLocation: RequestHandler<any, any, LocationForm> = async (
   }
 };
 
+const getRoutes: RequestHandler<{ sourceLocationId: number }> = async (
+  req,
+  res
+) => {
+  try {
+    const sourceLocationId = req.params.sourceLocationId;
+    const locations = await monkeyService.getRoutesByLocation(sourceLocationId);
+    res.json(locations);
+  } catch (error: any) {
+    console.error('Failed to get all locations', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const createRoute: RequestHandler<any, any, RouteForm> = async (req, res) => {
+  try {
+    await monkeyService.createRoute(req.body);
+
+    res.status(201).json({ message: 'Route created successfully' });
+  } catch (error: any) {
+    console.error('Failed to create new route', error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const deleteRoute: RequestHandler<{ startId: string; destId: string }> = async (
+  req,
+  res
+) => {
+  try {
+    const startId = parseInt(req.params.startId);
+    const destId = parseInt(req.params.destId);
+
+    await monkeyService.deleteRoute(startId, destId);
+
+    res.status(200).json({ message: 'Route deleted successfully' });
+  } catch (error: any) {
+    console.error('Failed to delete route', error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const editRoute: RequestHandler<any, any, RouteForm> = async (req, res) => {
+  try {
+    const locId = parseInt(req.params.id, 10);
+    const updateData = req.body;
+
+    await monkeyService.updateRoute(updateData);
+
+    res.status(200).json({ message: 'Route updated successfully' });
+  } catch (error: any) {
+    console.error('Failed to update route', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const createNavigation: RequestHandler<
   CreateNavigationParams,
   any,
@@ -186,11 +242,15 @@ export {
   createLocation,
   createMonkey,
   createNavigation,
+  createRoute,
   deleteLocation,
   deleteMonkey,
+  deleteRoute,
   editLocation,
   editMonkey,
+  editRoute,
   getAllMonkeys,
   getLocations,
+  getRoutes,
   verifyQRCode,
 };
