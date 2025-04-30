@@ -43,7 +43,7 @@ const menuItems = [
   },
   {
     title: 'Routes',
-    url: '/routes',
+    url: '/paths',
     icon: Compass,
   },
   {

@@ -56,3 +56,19 @@ export const VerifyQRCodeSchema = z.object({
   token: z.string().length(32),
   destinationId: z.number().int().min(1),
 });
+
+export const routeSchema = z
+  .object({
+    sourceLocation: locationSchema,
+    destinationLocation: locationSchema,
+    description: z
+      .string()
+      .min(10, { message: 'Description must be at least 10 characters long' }),
+    isAccessible: z.boolean().optional(),
+  })
+  .refine((data) => data.sourceLocation.id !== data.destinationLocation.id, {
+    message: 'Source and destination must be different',
+    path: ['destinationLocation.id'],
+  });
+
+export const routeFormSchema = routeSchema;

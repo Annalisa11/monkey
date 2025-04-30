@@ -1,5 +1,12 @@
 import { API_URL } from '@/constants';
-import type { CreateMonkey, Location, LocationForm, Monkey } from '@validation';
+import type {
+  CreateMonkey,
+  Location,
+  LocationForm,
+  Monkey,
+  Route,
+  RouteForm,
+} from '@validation';
 
 export async function getMonkeys(): Promise<Monkey[]> {
   const response = await fetch(`${API_URL}/v1/monkeys`);
@@ -98,5 +105,64 @@ export async function updateLocation(
 
   if (!response.ok) {
     throw new Error('Failed to edit location');
+  }
+}
+
+export async function getRoutes(): Promise<Route[]> {
+  const response = await fetch(`${API_URL}/v1/monkeys/routes`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch routes');
+  }
+  return response.json();
+}
+
+export async function createRoute(data: RouteForm): Promise<Route> {
+  const response = await fetch(`${API_URL}/v1/monkeys/routes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create route');
+  }
+  return response.json();
+}
+
+export async function deleteRoute({
+  startId,
+  destinationId,
+}: {
+  startId: number;
+  destinationId: number;
+}): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/v1/monkeys/routes/${startId}?destination=${destinationId}`,
+    {
+      method: 'DELETE',
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to delete route');
+  }
+}
+
+export async function updateRoute(data: RouteForm): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/v1/monkeys/routes/${data.sourceLocation.id}/${data.destinationLocation.id}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to edit route');
   }
 }
