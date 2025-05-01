@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 interface RouteDialogProps {
   isEdit?: boolean;
   route?: Route;
+  existingRoutes: Route[];
   startLocation: Location;
 }
 
@@ -37,11 +38,26 @@ const RouteDialog = ({
   isEdit = false,
   route,
   startLocation,
+  existingRoutes,
 }: RouteDialogProps) => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: locations = [] } = useLocations();
+
+  const existingDestinationIds = existingRoutes.map(
+    (route) => route.destinationLocation.id
+  );
+
+  const currentDestinationId = isEdit ? route?.destinationLocation.id : null;
+
+  const possibleDestinations = locations.filter((loc) => {
+    const isNotStart = loc.id !== startLocation.id;
+    const isNotAlreadyUsed =
+      !existingDestinationIds.includes(loc.id) ||
+      loc.id === currentDestinationId;
+    return isNotStart && isNotAlreadyUsed;
+  });
 
   const defaultValues = {
     sourceLocation: {
@@ -155,16 +171,14 @@ const RouteDialog = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {locations
-                          .filter((l) => l.id !== startLocation.id)
-                          .map((location) => (
-                            <SelectItem
-                              key={location.id}
-                              value={location.id.toString()}
-                            >
-                              {location.name}
-                            </SelectItem>
-                          ))}
+                        {possibleDestinations.map((location) => (
+                          <SelectItem
+                            key={location.id}
+                            value={location.id.toString()}
+                          >
+                            {location.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormDescription>

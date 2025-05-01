@@ -53,7 +53,7 @@ const LocationItem = ({ location, onDelete }: MonkeyItemProps) => {
       </div>
 
       <div>
-        <RouteDialog startLocation={location} />
+        <RouteDialog startLocation={location} existingRoutes={routes} />
         <div className='flex flex-col gap-2 mt-6'>
           {isLoading && (
             <div className='p-4 text-muted-foreground'>Loading routes...</div>
@@ -65,6 +65,7 @@ const LocationItem = ({ location, onDelete }: MonkeyItemProps) => {
           )}
           {routes.map((route) => (
             <RouteItem
+              routes={routes}
               route={route}
               key={`${route.sourceLocation.id}-${route.destinationLocation.id}`}
               onDelete={() =>

@@ -5,10 +5,11 @@ import RouteDialog from './RouteDialog';
 
 type RouteItemProps = {
   route: Route;
+  routes: Route[];
   onDelete: () => void;
 };
 
-const RouteItem = ({ route, onDelete }: RouteItemProps) => {
+const RouteItem = ({ route, routes, onDelete }: RouteItemProps) => {
   const { sourceLocation, destinationLocation, description, isAccessible } =
     route;
 
@@ -36,6 +37,7 @@ const RouteItem = ({ route, onDelete }: RouteItemProps) => {
         <RouteDialog
           isEdit
           route={route}
+          existingRoutes={routes}
           startLocation={route.sourceLocation}
         />
         <Button variant='destructive' onClick={onDelete}>
