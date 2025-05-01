@@ -206,7 +206,7 @@ const RouteDialog = ({
                     />
                   </FormControl>
                   <FormDescription>
-                    Include landmarks, instructions, or accessibility notes.
+                    Include landmarks and instructions.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

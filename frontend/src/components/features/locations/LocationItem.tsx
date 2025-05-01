@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useLocations } from '@/hooks/useLocations';
 import { deleteRoute, getRoutes } from '@/lib/api/monkeys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Location } from '@validation';
@@ -25,6 +26,11 @@ const LocationItem = ({ location, onDelete }: MonkeyItemProps) => {
     queryFn: () => getRoutes(id),
   });
 
+  const { data: allLocations } = useLocations();
+  const allLocationsCount = allLocations ? allLocations.length : 0;
+  const alreadyConfiguredRoutesCount =
+    allLocationsCount - (allLocationsCount - routes.length);
+
   const deleteMutation = useMutation({
     mutationFn: deleteRoute,
     onSuccess: () => {
@@ -43,6 +49,7 @@ const LocationItem = ({ location, onDelete }: MonkeyItemProps) => {
           <h2 className='font-bold text-lg'>{name}</h2>
           <span className='text-gray-400'>{`id: ${id}`}</span>
         </div>
+        <span className=''>{`${alreadyConfiguredRoutesCount}/${allLocationsCount} of possible routes configured from this location `}</span>
 
         <div className='flex gap-2 '>
           <LocationDialog isEdit location={location} />
