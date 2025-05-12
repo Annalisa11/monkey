@@ -1,13 +1,16 @@
-import { type ErrorRequestHandler, type RequestHandler } from 'express';
-import express from 'express';
 import cors from 'cors';
+import express, {
+  type ErrorRequestHandler,
+  type RequestHandler,
+} from 'express';
 import helmet from 'helmet';
-import { swaggerUi, swaggerDocs } from './swagger/swagger.js';
-import monkeyRoutes from './routes/monkeyRoutes.js';
-import eventRoutes from './routes/eventRoutes.js';
 import { pingDB } from '../db/db.js';
 import seedData from '../db/seed.js';
 import { PORT } from './config.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+import eventRoutes from './routes/eventRoutes.js';
+import monkeyRoutes from './routes/monkeyRoutes.js';
+import { swaggerDocs, swaggerUi } from './swagger/swagger.js';
 
 const app = express();
 
@@ -19,6 +22,7 @@ app.use(helmet());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/v1/monkeys', monkeyRoutes);
 app.use('/v1/events', eventRoutes);
+app.use('/v1/dashboard', dashboardRoutes);
 
 app.listen(PORT, (): void => {
   console.log(`Server is listening on port ${PORT}`);

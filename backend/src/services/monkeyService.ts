@@ -12,9 +12,10 @@ import {
 } from 'validation';
 import db from '../../db/db.js';
 import {
+  events,
+  journeys,
   locations,
   monkeys,
-  navigationQrCodes,
   routes,
 } from '../../db/schema.js';
 
@@ -108,10 +109,26 @@ const monkeyService: MonkeyService = {
       );
     }
 
-    await db.insert(navigationQrCodes).values({
-      token: verificationToken,
+    const now = new Date();
+
+    await db.insert(journeys).values({
+      startTime: now,
+      status: 'qr_generated',
+      startLocationId: currentLocation.id,
+      requestedDestinationId: destination.id,
       routeId: route.id,
-      createdAt: Date.now(),
+      qrToken: verificationToken,
+      qrGeneratedAt: now,
+    });
+
+    await db.insert(events).values({
+      eventType: 'qr_generated',
+      locationId: currentLocation.id,
+      timestamp: now,
+      metadata: JSON.stringify({
+        destinationId: destination.id,
+        token: verificationToken,
+      }),
     });
 
     const qrData = JSON.stringify({
@@ -135,36 +152,54 @@ const monkeyService: MonkeyService = {
     locationId: number
   ): Promise<boolean> => {
     try {
-      const qrCodeResults = await db
+      const [journey] = await db
         .select({
-          qrCode: navigationQrCodes,
+          journey: journeys,
           route: routes,
         })
-        .from(navigationQrCodes)
-        .innerJoin(routes, eq(navigationQrCodes.routeId, routes.id))
-        .where(eq(navigationQrCodes.token, token));
+        .from(journeys)
+        .innerJoin(routes, eq(journeys.routeId, routes.id))
+        .where(eq(journeys.qrToken, token));
 
-      if (qrCodeResults.length === 0) {
-        // Route doesn't exist (token is not right or patient scanned QR code at wrong destination)
+      if (!journey) {
+        // Journey doesn't exist (token is not right)
         return false;
       }
 
-      const qrCodeResult = qrCodeResults[0];
-
-      if (qrCodeResult.qrCode.scanned) {
+      if (journey.journey.qrScannedAt) {
         // The QR code has already been scanned before
         return false;
       }
 
-      if (qrCodeResult.route.destinationLocationId !== locationId) {
+      if (journey.route.destinationLocationId !== locationId) {
         // Patient is at the wrong destination
         return false;
       }
 
+      const now = new Date();
+
       await db
-        .update(navigationQrCodes)
-        .set({ scanned: 1 })
-        .where(eq(navigationQrCodes.id, qrCodeResult.qrCode.id));
+        .update(journeys)
+        .set({
+          qrScannedAt: now,
+          endTime: now,
+          status: 'completed',
+        })
+        .where(eq(journeys.qrToken, token));
+
+      const startTime = new Date(journey.journey.startTime);
+      const duration = now.getTime() - startTime.getTime();
+
+      await db.insert(events).values({
+        journeyId: journey.journey.id,
+        eventType: 'journey_completed',
+        locationId: locationId,
+        timestamp: now,
+        metadata: JSON.stringify({
+          startLocationId: journey.journey.startLocationId,
+          duration: duration,
+        }),
+      });
 
       return true;
     } catch (error) {

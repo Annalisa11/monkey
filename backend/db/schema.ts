@@ -1,7 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { customType } from 'drizzle-orm/pg-core';
 import { integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
-
+// Core entities
 export const locations = sqliteTable('locations', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().unique(),
@@ -10,9 +9,9 @@ export const locations = sqliteTable('locations', {
 export const monkeys = sqliteTable('monkeys', {
   monkeyId: integer('monkey_id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
-  locationId: integer('location_id')
-    .notNull()
-    .references(() => locations.id),
+  locationId: integer('location_id').references(() => locations.id, {
+    onDelete: 'set null',
+  }),
   isActive: integer('is_active', { mode: 'boolean' })
     .notNull()
     .default(sql`0`),
@@ -35,35 +34,31 @@ export const routes = sqliteTable(
   (table) => [unique().on(table.sourceLocationId, table.destinationLocationId)]
 );
 
-export const navigationQrCodes = sqliteTable('navigation_qr_codes', {
+export const journeys = sqliteTable('journeys', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  token: text('token').notNull().unique(),
-  routeId: integer('route_id')
-    .notNull()
-    .references(() => routes.id, { onDelete: 'cascade' }),
-  createdAt: integer('created_at').notNull(),
-  isVerified: integer('is_verified', { mode: 'boolean' }).default(sql`0`),
-  scanned: integer('scanned').default(sql`0`),
-});
 
-export const buttonPressEvents = sqliteTable('button_press_events', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  monkeyId: integer('monkey_id')
-    .notNull()
-    .references(() => monkeys.monkeyId),
-  createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  locationId: integer('location_id')
+  startTime: integer('start_time', { mode: 'timestamp' }).notNull(),
+  endTime: integer('end_time', { mode: 'timestamp' }),
+  status: text('status'), // 'started', 'qr_generated', 'completed'
+
+  startLocationId: integer('start_location_id')
     .notNull()
     .references(() => locations.id),
+  requestedDestinationId: integer('requested_destination_id').references(
+    () => locations.id
+  ),
+  routeId: integer('route_id').references(() => routes.id),
+
+  qrToken: text('qr_token').unique(),
+  qrGeneratedAt: integer('qr_generated_at', { mode: 'timestamp' }),
+  qrScannedAt: integer('qr_scanned_at', { mode: 'timestamp' }),
 });
 
-export const journeyCompletions = sqliteTable('journey_completions', {
+export const events = sqliteTable('events', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-});
-
-const dateTimestamp = customType<{ data: Date; driverData: string }>({
-  dataType: () => 'text',
-  toDriver: (date: Date) => date.toISOString(),
-  fromDriver: (str: string) => new Date(str),
+  journeyId: integer('journey_id').references(() => journeys.id), // if applicable
+  eventType: text('event_type').notNull(), //'banana_return'
+  locationId: integer('location_id').references(() => locations.id),
+  timestamp: integer('timestamp', { mode: 'timestamp' }).notNull(),
+  metadata: text('metadata'), // JSON string for any additional event-specific data
 });
