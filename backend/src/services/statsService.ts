@@ -30,8 +30,122 @@ import {
 } from 'src/utils/datetime.js';
 import db from '../../db/db.js';
 
-export const statsService = {
-  getOverviewMetrics: async () => {
+export interface OverviewMetrics {
+  qrCodesPrinted: number;
+  qrCodesScanned: number;
+  bananasReturned: number;
+  monkeyInteractions: number;
+  activeMonkeys: number;
+  totalMonkeys: number;
+  abandonedInteractionsStats: AbandonedInteractionsStats;
+}
+
+export interface AbandonedInteractionsStats {
+  total: number;
+  abandonedBeforeQR: number;
+  abandonmentRateBeforeQR: number;
+  abandonedBeforeScan: number;
+  abandonmentRateBeforeScan: number;
+  scannedRate: number;
+  qrPrintedPercentage: number;
+  completedJourneys: number;
+  completionRate: number;
+}
+
+export interface ActiveMonkeysStats {
+  totalMonkeys: number;
+  activeMonkeys: number;
+  percentActive: number;
+}
+
+export interface JourneyCompletionFunnel {
+  segments: {
+    returnedJourneys: number;
+    scannedOnly: number;
+    printedOnly: number;
+    interactionsWithoutPrint: number;
+  };
+  percentages: {
+    returnedPercentage: number;
+    scannedOnlyPercentage: number;
+    printedOnlyPercentage: number;
+    interactionsWithoutPrintPercentage: number;
+  };
+  stats: {
+    totalInteractions: number;
+    totalPrinted: number;
+    scanRate: number;
+    bananasReturnedRate: number;
+  };
+}
+
+export interface RouteLocation {
+  id: number;
+  name: string;
+}
+
+export interface PopularRoute {
+  routeId: number;
+  qrGenerated: number;
+  sourceLocation: RouteLocation;
+  destinationLocation: RouteLocation;
+}
+
+export interface RouteEfficiencyMetric {
+  routeId: number;
+  qrGeneratedCount: number;
+  qrScannedCount: number;
+  avgScanTime: string;
+  avgCompletionTime: string;
+  scanRate: number;
+  sourceLocation: RouteLocation;
+  destinationLocation: RouteLocation;
+}
+
+export interface DailyTrend {
+  date: string;
+  buttonPresses: number;
+  qrCodesGenerated: number;
+  journeysCompleted: number;
+}
+
+export interface WeeklyTrend {
+  weekStartDate: string;
+  weekEndDate: string;
+  buttonPresses: number;
+  qrCodesGenerated: number;
+  journeysCompleted: number;
+}
+
+export interface PeakHourAnalysis {
+  hourRange: string;
+  buttonPresses: number;
+  qrCodesGenerated: number;
+  percentageOfDailyTotal: number;
+}
+
+// StatsService interface
+export interface StatsService {
+  getOverviewMetrics(): Promise<OverviewMetrics>;
+  getJourneyCompletionFunnel(): Promise<JourneyCompletionFunnel>;
+  getPopularRoutesByQRGenerated(): Promise<PopularRoute[]>;
+  getRouteEfficiencyMetrics(): Promise<RouteEfficiencyMetric[]>;
+  getQrCodesPrintedCount(): Promise<number>;
+  getQrCodesScannedCount(): Promise<number>;
+  getBananasReturnedCount(): Promise<number>;
+  getMonkeyInteractionsCount(): Promise<number>;
+  getCompletedJourneysCount(): Promise<number>;
+  getAbandonedInteractionsStats(): Promise<AbandonedInteractionsStats>;
+  getActiveMonkeysStats(): Promise<ActiveMonkeysStats>;
+  getDailyTrends(): Promise<DailyTrend[]>;
+  getWeeklyTrends(): Promise<WeeklyTrend[]>;
+  getPeakHoursAnalysis(): Promise<PeakHourAnalysis[]>;
+  getWeekdayPeakHours(): Promise<any[]>;
+}
+
+// Implementation of the StatsService interface
+export const statsService: StatsService = {
+  getOverviewMetrics: async (): Promise<OverviewMetrics> => {
     const qrCodesPrinted = await statsService.getQrCodesPrintedCount();
     const qrCodesScanned = await statsService.getQrCodesScannedCount();
     const bananasReturned = await statsService.getBananasReturnedCount();
@@ -51,7 +165,7 @@ export const statsService = {
     };
   },
 
-  getJourneyCompletionFunnel: async () => {
+  getJourneyCompletionFunnel: async (): Promise<JourneyCompletionFunnel> => {
     const totalInteractions = await statsService.getMonkeyInteractionsCount();
     const printed = await statsService.getQrCodesPrintedCount();
     const scanned = await statsService.getQrCodesScannedCount();
@@ -104,7 +218,7 @@ export const statsService = {
     };
   },
 
-  getPopularRoutesByQRGenerated: async () => {
+  getPopularRoutesByQRGenerated: async (): Promise<PopularRoute[]> => {
     const sourceLocations = alias(locations, 'sourceLocations');
     const destinationLocations = alias(locations, 'destinationLocations');
 
@@ -142,12 +256,19 @@ export const statsService = {
       .orderBy(desc(count(journeys.qrToken)))
       .execute();
 
-    return {
-      qrGeneratedCountByRouteResult,
-    };
+    // TODO: look at this mess here
+    const isValidRoute = (item: any): item is PopularRoute =>
+      item.routeId !== null &&
+      item.sourceLocation !== null &&
+      item.destinationLocation !== null;
+
+    const filteredItems: PopularRoute[] =
+      qrGeneratedCountByRouteResult.filter(isValidRoute);
+
+    return filteredItems;
   },
 
-  getRouteEfficiencyMetrics: async () => {
+  getRouteEfficiencyMetrics: async (): Promise<RouteEfficiencyMetric[]> => {
     const sourceLocations = alias(locations, 'sourceLocations');
     const destinationLocations = alias(locations, 'destinationLocations');
 
@@ -195,7 +316,16 @@ export const statsService = {
 
     if (!metricsResult.length) return [];
 
-    return metricsResult.map((dataItem) => {
+    // TODO: same here. Check the typing
+    const isValidMetric = (item: any): item is RouteEfficiencyMetric =>
+      item.routeId !== null &&
+      item.sourceLocation !== null &&
+      item.destinationLocation !== null;
+
+    const filteredItems: RouteEfficiencyMetric[] =
+      metricsResult.filter(isValidMetric);
+
+    return filteredItems.map((dataItem) => {
       const {
         qrGeneratedCount,
         qrScannedCount,
@@ -221,7 +351,7 @@ export const statsService = {
     });
   },
 
-  getQrCodesPrintedCount: async () => {
+  getQrCodesPrintedCount: async (): Promise<number> => {
     const result = await db
       .select({ count: count() })
       .from(journeys)
@@ -230,7 +360,7 @@ export const statsService = {
     return result[0].count;
   },
 
-  getQrCodesScannedCount: async () => {
+  getQrCodesScannedCount: async (): Promise<number> => {
     const result = await db
       .select({ count: count() })
       .from(journeys)
@@ -239,7 +369,7 @@ export const statsService = {
     return result[0].count;
   },
 
-  getBananasReturnedCount: async () => {
+  getBananasReturnedCount: async (): Promise<number> => {
     const result = await db
       .select({ count: count() })
       .from(events)
@@ -248,13 +378,13 @@ export const statsService = {
     return result[0].count;
   },
 
-  getMonkeyInteractionsCount: async () => {
+  getMonkeyInteractionsCount: async (): Promise<number> => {
     const result = await db.select({ count: count() }).from(journeys);
 
     return result[0].count;
   },
 
-  getCompletedJourneysCount: async () => {
+  getCompletedJourneysCount: async (): Promise<number> => {
     const result = await db
       .select({ count: count() })
       .from(journeys)
@@ -263,57 +393,58 @@ export const statsService = {
     return result[0].count;
   },
 
-  getAbandonedInteractionsStats: async () => {
-    const [
-      buttonPressesCount,
-      printed,
-      scanned,
-      completedJourneysCount,
-      totalJourneys,
-    ] = await Promise.all([
-      statsService.getMonkeyInteractionsCount(),
-      statsService.getQrCodesPrintedCount(),
-      statsService.getQrCodesScannedCount(),
-      statsService.getCompletedJourneysCount(),
-      db.select({ count: count() }).from(journeys),
-    ]);
+  getAbandonedInteractionsStats:
+    async (): Promise<AbandonedInteractionsStats> => {
+      const [
+        buttonPressesCount,
+        printed,
+        scanned,
+        completedJourneysCount,
+        totalJourneys,
+      ] = await Promise.all([
+        statsService.getMonkeyInteractionsCount(),
+        statsService.getQrCodesPrintedCount(),
+        statsService.getQrCodesScannedCount(),
+        statsService.getCompletedJourneysCount(),
+        db.select({ count: count() }).from(journeys),
+      ]);
 
-    const totalJourneysCount = totalJourneys[0].count;
+      const totalJourneysCount = totalJourneys[0].count;
 
-    const qrPrintedPercentage = calculatePercentage(
-      printed,
-      totalJourneysCount
-    );
-    const scannedRate = calculatePercentage(scanned, printed);
-    const abandonedBeforeScan = printed - scanned;
-    const abandonmentRateBeforeScan = calculatePercentage(
-      abandonedBeforeScan,
-      printed
-    );
-    const abandonedBeforeQR = buttonPressesCount - printed;
-    const abandonmentRateBeforeQR = calculatePercentage(
-      abandonedBeforeQR,
-      buttonPressesCount
-    );
-    const completionRate = calculatePercentage(
-      completedJourneysCount,
-      totalJourneysCount
-    );
+      const qrPrintedPercentage = calculatePercentage(
+        printed,
+        totalJourneysCount
+      );
+      const scannedRate = calculatePercentage(scanned, printed);
+      const abandonedBeforeScan = printed - scanned;
+      const abandonmentRateBeforeScan = calculatePercentage(
+        abandonedBeforeScan,
+        printed
+      );
+      const abandonedBeforeQR = buttonPressesCount - printed;
+      const abandonmentRateBeforeQR = calculatePercentage(
+        abandonedBeforeQR,
+        buttonPressesCount
+      );
+      const completionRate = calculatePercentage(
+        completedJourneysCount,
+        totalJourneysCount
+      );
 
-    return {
-      total: totalJourneysCount,
-      abandonedBeforeQR,
-      abandonmentRateBeforeQR,
-      abandonedBeforeScan,
-      abandonmentRateBeforeScan,
-      scannedRate,
-      qrPrintedPercentage,
-      completedJourneys: completedJourneysCount,
-      completionRate,
-    };
-  },
+      return {
+        total: totalJourneysCount,
+        abandonedBeforeQR,
+        abandonmentRateBeforeQR,
+        abandonedBeforeScan,
+        abandonmentRateBeforeScan,
+        scannedRate,
+        qrPrintedPercentage,
+        completedJourneys: completedJourneysCount,
+        completionRate,
+      };
+    },
 
-  getActiveMonkeysStats: async () => {
+  getActiveMonkeysStats: async (): Promise<ActiveMonkeysStats> => {
     const [total] = await db.select({ count: count() }).from(monkeys);
 
     const [active] = await db
@@ -330,7 +461,7 @@ export const statsService = {
     };
   },
 
-  getDailyTrends: async () => {
+  getDailyTrends: async (): Promise<DailyTrend[]> => {
     try {
       const endDate = new Date();
       const startDate = new Date();
@@ -432,7 +563,7 @@ export const statsService = {
     }
   },
 
-  getWeeklyTrends: async () => {
+  getWeeklyTrends: async (): Promise<WeeklyTrend[]> => {
     try {
       const endDate = new Date();
       const startDate = new Date();
@@ -534,7 +665,7 @@ export const statsService = {
     }
   },
 
-  getPeakHoursAnalysis: async () => {
+  getPeakHoursAnalysis: async (): Promise<PeakHourAnalysis[]> => {
     try {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -624,7 +755,8 @@ export const statsService = {
     }
   },
 
-  getWeekdayPeakHours: async () => {
+  // TODO: get rid of any type
+  getWeekdayPeakHours: async (): Promise<any[]> => {
     try {
       const twelveWeeksAgo = new Date();
       twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 12 * 7);
