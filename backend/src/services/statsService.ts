@@ -18,6 +18,16 @@ import {
   routes,
 } from '../../db/schema.js';
 
+import { alias } from 'drizzle-orm/sqlite-core';
+import { calculatePercentage } from 'src/utils/calculations.js';
+import {
+  formatDate,
+  formatDateToUnix,
+  formatHourRange,
+  formatTime,
+  generateDateRange,
+  generateWeekIntervals,
+} from 'src/utils/datetime.js';
 import db from '../../db/db.js';
 
 export const statsService = {
@@ -45,44 +55,32 @@ export const statsService = {
     const totalInteractions = await statsService.getMonkeyInteractionsCount();
     const printed = await statsService.getQrCodesPrintedCount();
     const scanned = await statsService.getQrCodesScannedCount();
-    const verified = await statsService.getBananasReturnedCount();
+    const returned = await statsService.getBananasReturnedCount();
 
-    const returnedJourneys = verified;
-    const scannedOnly = scanned - verified;
+    const returnedJourneys = returned;
+    const scannedOnly = scanned - returned;
     const printedOnly = printed - scanned;
     const interactionsWithoutPrint = totalInteractions - printed;
 
-    const returnedPercentage =
-      totalInteractions > 0
-        ? Number(((returnedJourneys / totalInteractions) * 100).toFixed(1))
-        : 0;
-
-    const scannedOnlyPercentage =
-      totalInteractions > 0
-        ? Number(((scannedOnly / totalInteractions) * 100).toFixed(1))
-        : 0;
-
-    const printedOnlyPercentage =
-      totalInteractions > 0
-        ? Number(((printedOnly / totalInteractions) * 100).toFixed(1))
-        : 0;
-
-    const interactionsWithoutPrintPercentage =
-      totalInteractions > 0
-        ? Number(
-            ((interactionsWithoutPrint / totalInteractions) * 100).toFixed(1)
-          )
-        : 0;
-
-    const scanRate =
-      printed > 0 ? Number(((scanned / printed) * 100).toFixed(1)) : 0;
-
-    console.log(
-      `--------> ver: ${verified}, scan: ${scanned}, v/s = ${verified / scanned}, % = ${(verified / scanned) * 100}`
+    const returnedPercentage = calculatePercentage(
+      returnedJourneys,
+      totalInteractions
+    );
+    const scannedOnlyPercentage = calculatePercentage(
+      scannedOnly,
+      totalInteractions
+    );
+    const printedOnlyPercentage = calculatePercentage(
+      printedOnly,
+      totalInteractions
+    );
+    const interactionsWithoutPrintPercentage = calculatePercentage(
+      interactionsWithoutPrint,
+      totalInteractions
     );
 
-    const verificationRate =
-      scanned > 0 ? Number(((verified / scanned) * 100).toFixed(1)) : 0;
+    const scanRate = calculatePercentage(scanned, printed);
+    const bananasReturnedRate = calculatePercentage(returned, scanned);
 
     return {
       segments: {
@@ -101,176 +99,121 @@ export const statsService = {
         totalInteractions,
         totalPrinted: printed,
         scanRate,
-        verificationRate,
+        bananasReturnedRate,
       },
     };
   },
 
   getPopularRoutesByQRGenerated: async () => {
-    const result = await db
+    const sourceLocations = alias(locations, 'sourceLocations');
+    const destinationLocations = alias(locations, 'destinationLocations');
+
+    const qrGeneratedCountByRouteResult = await db
       .select({
         routeId: journeys.routeId,
         qrGenerated: count(journeys.qrToken),
+        sourceLocation: {
+          id: sourceLocations.id,
+          name: sourceLocations.name,
+        },
+        destinationLocation: {
+          id: destinationLocations.id,
+          name: destinationLocations.name,
+        },
       })
       .from(journeys)
+      .leftJoin(routes, eq(routes.id, journeys.routeId))
+      .leftJoin(
+        sourceLocations,
+        eq(sourceLocations.id, routes.sourceLocationId)
+      )
+      .leftJoin(
+        destinationLocations,
+        eq(destinationLocations.id, routes.destinationLocationId)
+      )
       .where(isNotNull(journeys.qrGeneratedAt))
-      .groupBy(journeys.routeId)
+      .groupBy(
+        journeys.routeId,
+        routes.sourceLocationId,
+        routes.destinationLocationId,
+        sourceLocations.name,
+        destinationLocations.name
+      )
       .orderBy(desc(count(journeys.qrToken)))
       .execute();
 
-    console.log('QR Code generated: ', result);
-
-    const routeIds = result.map((r) => r.routeId).filter((r) => r != null);
-
-    const routesInfo = await db
-      .select()
-      .from(routes)
-      .where(inArray(routes.id, routeIds))
-      .execute();
-
-    console.log('Routes selected: ', routesInfo);
-
-    const locationIds = [
-      ...routesInfo.map((route) => route.sourceLocationId),
-      ...routesInfo.map((route) => route.destinationLocationId),
-    ];
-
-    const locationsInfo = await db
-      .select({
-        locationId: locations.id,
-        locationName: locations.name,
-      })
-      .from(locations)
-      .where(inArray(locations.id, locationIds))
-      .execute();
-
-    console.log('Locations Info: ', locationsInfo);
-
-    const mostPopularRoutesByQRData = result.map((route) => {
-      const routeInfo = routesInfo.find((r) => r.id === route.routeId);
-
-      if (!routeInfo)
-        throw Error(
-          'error while getting popular routes generated by QR. Route Info not found.'
-        );
-      const sourceLocation = locationsInfo.find(
-        (loc) => loc.locationId === routeInfo.sourceLocationId
-      );
-      const destinationLocation = locationsInfo.find(
-        (loc) => loc.locationId === routeInfo.destinationLocationId
-      );
-
-      return {
-        routeId: route.routeId,
-        sourceLocationName: sourceLocation ? sourceLocation.locationName : '',
-        destinationLocationName: destinationLocation
-          ? destinationLocation.locationName
-          : '',
-        qrGenerated: route.qrGenerated,
-      };
-    });
-    console.log('most popular routes by qr: ', mostPopularRoutesByQRData);
-
-    return mostPopularRoutesByQRData;
+    return {
+      qrGeneratedCountByRouteResult,
+    };
   },
 
   getRouteEfficiencyMetrics: async () => {
-    const qrResult = await db
+    const sourceLocations = alias(locations, 'sourceLocations');
+    const destinationLocations = alias(locations, 'destinationLocations');
+
+    const metricsResult = await db
       .select({
         routeId: journeys.routeId,
         qrGeneratedCount: count(journeys.qrToken),
-      })
-      .from(journeys)
-      .where(isNotNull(journeys.qrToken))
-      .groupBy(journeys.routeId)
-      .execute();
-
-    const scannedResult = await db
-      .select({
-        routeId: journeys.routeId,
         qrScannedCount: count(journeys.qrScannedAt),
-      })
-      .from(journeys)
-      .where(isNotNull(journeys.qrScannedAt))
-      .groupBy(journeys.routeId)
-      .execute();
-
-    const scanTimeResult = await db
-      .select({
-        routeId: journeys.routeId,
         avgScanTime: avg(
           sql`${journeys.qrScannedAt} - ${journeys.qrGeneratedAt}`
         ),
-      })
-      .from(journeys)
-      .where(
-        and(isNotNull(journeys.qrScannedAt), isNotNull(journeys.qrGeneratedAt))
-      )
-      .groupBy(journeys.routeId)
-      .execute();
-
-    const journeyTimeResult = await db
-      .select({
-        routeId: journeys.routeId,
         avgCompletionTime: avg(
           sql`${journeys.endTime} - ${journeys.startTime}`
         ),
+        sourceLocation: {
+          id: sourceLocations.id,
+          name: sourceLocations.name,
+        },
+        destinationLocation: {
+          id: destinationLocations.id,
+          name: destinationLocations.name,
+        },
       })
       .from(journeys)
-      .where(eq(journeys.status, 'completed'))
-      .groupBy(journeys.routeId)
+      .leftJoin(routes, eq(routes.id, journeys.routeId))
+      .leftJoin(
+        sourceLocations,
+        eq(sourceLocations.id, routes.sourceLocationId)
+      )
+      .leftJoin(
+        destinationLocations,
+        eq(destinationLocations.id, routes.destinationLocationId)
+      )
+      .where(
+        and(
+          isNotNull(journeys.qrToken),
+          isNotNull(journeys.qrScannedAt),
+          eq(journeys.status, 'completed')
+        )
+      )
+      .groupBy(journeys.routeId, sourceLocations.id, destinationLocations.id)
       .execute();
 
-    console.log('Journeys time result: ', journeyTimeResult);
+    console.log('Journeys time result: ', metricsResult);
 
-    const routeIds = qrResult.map((r) => r.routeId).filter((r) => r != null);
+    if (!metricsResult.length) return [];
 
-    const routesInfo = await db
-      .select()
-      .from(routes)
-      .where(inArray(routes.id, routeIds))
-      .execute();
+    return metricsResult.map((dataItem) => {
+      const {
+        qrGeneratedCount,
+        qrScannedCount,
+        avgScanTime,
+        avgCompletionTime,
+      } = dataItem;
 
-    return qrResult.map((routeData) => {
-      const routeId = routeData.routeId;
-      const routeInfo = routesInfo.find((r) => r.id === routeId);
+      const scanRate = calculatePercentage(qrScannedCount, qrGeneratedCount);
 
-      const scanned = scannedResult.find((r) => r.routeId === routeId);
-      const scanTime = scanTimeResult.find((r) => r.routeId === routeId);
-      const completionTime = journeyTimeResult.find(
-        (r) => r.routeId === routeId
+      const formattedScanTime = formatTime(
+        avgScanTime ? parseFloat(avgScanTime) : 0
       );
-      const qrGenerated = routeData.qrGeneratedCount;
-      const qrScanned = scanned ? scanned.qrScannedCount : 0;
-
-      const scanRate =
-        qrGenerated > 0
-          ? Number(((qrScanned / qrGenerated) * 100).toFixed(1))
-          : 0;
-
-      function formatTime(seconds: number) {
-        const date = new Date(seconds * 1000);
-        const minutes = date.getUTCMinutes();
-        const secondsRemaining = date.getUTCSeconds();
-        return `${minutes}m ${secondsRemaining}s`;
-      }
-
-      const avgScanTimeSeconds =
-        scanTime && scanTime.avgScanTime ? parseFloat(scanTime.avgScanTime) : 0;
-      const formattedScanTime = formatTime(avgScanTimeSeconds);
-
-      const avgCompletionTimeSeconds =
-        completionTime && completionTime.avgCompletionTime
-          ? parseFloat(completionTime.avgCompletionTime)
-          : 0;
-      const formattedCompletionTime = formatTime(avgCompletionTimeSeconds);
-
-      // TODO: add names of route source and destination
+      const formattedCompletionTime = formatTime(
+        avgCompletionTime ? parseFloat(avgCompletionTime) : 0
+      );
 
       return {
-        routeId,
-        qrGenerated,
-        qrScanned,
+        ...dataItem,
         scanRate,
         avgScanTime: formattedScanTime,
         avgCompletionTime: formattedCompletionTime,
@@ -311,47 +254,51 @@ export const statsService = {
     return result[0].count;
   },
 
-  getAbandonedInteractionsStats: async () => {
-    const buttonPressesCount = await statsService.getMonkeyInteractionsCount();
-    const printed = await statsService.getQrCodesPrintedCount();
-    const scanned = await statsService.getQrCodesScannedCount();
-    const completedJourneys = await db
+  getCompletedJourneysCount: async () => {
+    const result = await db
       .select({ count: count() })
       .from(journeys)
       .where(eq(journeys.status, 'completed'));
 
-    const completedJourneysCount = completedJourneys[0].count;
+    return result[0].count;
+  },
 
-    const totalJourneys = await db.select({ count: count() }).from(journeys);
+  getAbandonedInteractionsStats: async () => {
+    const [
+      buttonPressesCount,
+      printed,
+      scanned,
+      completedJourneysCount,
+      totalJourneys,
+    ] = await Promise.all([
+      statsService.getMonkeyInteractionsCount(),
+      statsService.getQrCodesPrintedCount(),
+      statsService.getQrCodesScannedCount(),
+      statsService.getCompletedJourneysCount(),
+      db.select({ count: count() }).from(journeys),
+    ]);
 
     const totalJourneysCount = totalJourneys[0].count;
 
-    const qrPrintedPercentage =
-      totalJourneysCount > 0
-        ? Number(((printed / totalJourneysCount) * 100).toFixed(2))
-        : 0;
-
-    const scannedRate =
-      printed > 0 ? Number(((scanned / printed) * 100).toFixed(2)) : 0;
-
+    const qrPrintedPercentage = calculatePercentage(
+      printed,
+      totalJourneysCount
+    );
+    const scannedRate = calculatePercentage(scanned, printed);
     const abandonedBeforeScan = printed - scanned;
-    const abandonmentRateBeforeScan =
-      printed > 0
-        ? Number(((abandonedBeforeScan / printed) * 100).toFixed(2))
-        : 0;
-
+    const abandonmentRateBeforeScan = calculatePercentage(
+      abandonedBeforeScan,
+      printed
+    );
     const abandonedBeforeQR = buttonPressesCount - printed;
-    const abandonmentRateBeforeQR =
-      buttonPressesCount > 0
-        ? Number(((abandonedBeforeQR / buttonPressesCount) * 100).toFixed(2))
-        : 0;
-
-    const completionRate =
-      totalJourneysCount > 0
-        ? Number(
-            ((completedJourneysCount / totalJourneysCount) * 100).toFixed(2)
-          )
-        : 0;
+    const abandonmentRateBeforeQR = calculatePercentage(
+      abandonedBeforeQR,
+      buttonPressesCount
+    );
+    const completionRate = calculatePercentage(
+      completedJourneysCount,
+      totalJourneysCount
+    );
 
     return {
       total: totalJourneysCount,
@@ -366,39 +313,19 @@ export const statsService = {
     };
   },
 
-  getMonkeyUsageStats: async () => {
-    const result = await db
-      .select({
-        monkeyName: monkeys.name,
-        interactionCount: count(),
-        location: locations.name,
-      })
-      .from(events)
-      .innerJoin(monkeys, eq(events.metadata, monkeys.monkeyId.toString()))
-      .innerJoin(locations, eq(events.locationId, locations.id))
-      .where(eq(events.eventType, 'button_press'))
-      .groupBy(monkeys.name, locations.name)
-      .orderBy(desc(count()));
-
-    return result;
-  },
-
   getActiveMonkeysStats: async () => {
-    const total = await db.select({ count: count() }).from(monkeys);
+    const [total] = await db.select({ count: count() }).from(monkeys);
 
-    const active = await db
+    const [active] = await db
       .select({ count: count() })
       .from(monkeys)
       .where(eq(monkeys.isActive, true));
 
-    const percentActive =
-      total[0].count > 0
-        ? Number(((active[0].count / total[0].count) * 100).toFixed(2))
-        : 0;
+    const percentActive = calculatePercentage(active.count, total.count);
 
     return {
-      totalMonkeys: total[0].count,
-      activeMonkeys: active[0].count,
+      totalMonkeys: total.count,
+      activeMonkeys: active.count,
       percentActive,
     };
   },
@@ -844,84 +771,3 @@ export const statsService = {
     }
   },
 };
-
-function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
-
-function formatDateForDb(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
-
-function formatHourRange(hourString: string): string {
-  const hour = Number(hourString);
-  const startHour = hour.toString().padStart(2, '0');
-  const nextHour: number = (hour + 1) % 24;
-  const endHour = nextHour.toString().padStart(2, '0');
-  return `${startHour}:00-${endHour}:00`;
-}
-
-function formatDateToUnix(jsDate: Date): number {
-  return Math.floor(jsDate.getTime() / 1000);
-}
-
-function generateDateRange(startDate: Date, endDate: Date): Date[] {
-  const dateArray: Date[] = [];
-  let currentDate = new Date(startDate);
-
-  while (currentDate <= endDate) {
-    dateArray.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  return dateArray;
-}
-
-function generateWeekIntervals(
-  startDate: Date,
-  endDate: Date
-): { startDate: Date; endDate: Date; yearWeek: string }[] {
-  const weekIntervals: { startDate: Date; endDate: Date; yearWeek: string }[] =
-    [];
-  let currentStartDate = new Date(startDate);
-
-  const dayOfWeek = currentStartDate.getDay();
-  const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  currentStartDate.setDate(currentStartDate.getDate() - diff);
-
-  while (currentStartDate < endDate) {
-    const weekEndDate = new Date(currentStartDate);
-    weekEndDate.setDate(currentStartDate.getDate() + 6);
-
-    const year = currentStartDate.getFullYear();
-    const weekNum = getISOWeek(currentStartDate);
-    const yearWeek = `${year}${weekNum.toString().padStart(2, '0')}`;
-
-    weekIntervals.push({
-      startDate: new Date(currentStartDate),
-      endDate: new Date(weekEndDate),
-      yearWeek,
-    });
-
-    currentStartDate.setDate(currentStartDate.getDate() + 7);
-  }
-
-  return weekIntervals;
-}
-
-function getISOWeek(date: Date): number {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-  const yearStart = new Date(d.getFullYear(), 0, 1);
-  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-}
-
-function calculatePercentage(
-  numerator: number,
-  denominator: number,
-  decimalPlaces: number = 1
-): number {
-  if (denominator <= 0) return 0;
-  return Number(((numerator / denominator) * 100).toFixed(decimalPlaces));
-}
