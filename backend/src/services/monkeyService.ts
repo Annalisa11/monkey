@@ -21,8 +21,12 @@ import {
 
 interface MonkeyService {
   getAllMonkeys(): Promise<Monkey[]>;
-  getNavigationInformation(request: NavigationRequest): Promise<NavigationData>;
-  verifyDestination(token: string, locationId: number): Promise<boolean>;
+  createQRCode(request: NavigationRequest): Promise<NavigationData>;
+  verifyDestination(
+    token: string,
+    locationId: number,
+    journeyId: number
+  ): Promise<boolean>;
   getAllLocations(): Promise<Location[]>;
   getLocationById(id: number): Promise<Location | null>;
   getLocationByName(locationName: string): Promise<Location | null>;
@@ -42,6 +46,8 @@ interface MonkeyService {
   ): Promise<void>;
   updateRoute(data: Route): Promise<void>;
   getRoutesByLocation(sourceLocationId: number): Promise<Route[]>;
+  recordNewJourney(locationId: number): Promise<number>;
+  recordButtonPressEvent(monkeyId: number, journeyId: number): Promise<void>;
 }
 
 const monkeyWithLocationSelect = {
@@ -75,61 +81,20 @@ const monkeyService: MonkeyService = {
       .where(eq(monkeys.monkeyId, id));
   },
 
-  getNavigationInformation: async (
-    request: NavigationRequest
-  ): Promise<NavigationData> => {
-    const { currentLocation, destinationLocationName } = request;
-
+  createQRCode: async (request: NavigationRequest): Promise<NavigationData> => {
+    const { monkeyId, destinationLocationName, journeyId } = request;
+    const monkeyInfo = await monkeyService.getMonkeyById(monkeyId);
     const destination = await monkeyService.getLocationByName(
       destinationLocationName
     );
-    console.log('destinations: ', currentLocation, destinationLocationName);
-
-    if (!destination || !currentLocation) {
+    if (!monkeyInfo || !destination) {
       throw new Error(
-        `Destination location ${destinationLocationName} or current location ${currentLocation} not found`
+        `Monkey with ID ${request.monkeyId} or destination ${destination} not found`
       );
     }
 
+    // generate QR code
     const verificationToken = crypto.randomBytes(16).toString('hex');
-
-    const [route] = await db
-      .select()
-      .from(routes)
-      .where(
-        and(
-          eq(routes.sourceLocationId, currentLocation.id),
-          eq(routes.destinationLocationId, destination.id)
-        )
-      );
-
-    if (!route) {
-      throw new Error(
-        `Route information ${currentLocation} - ${destinationLocationName} not found`
-      );
-    }
-
-    const now = new Date();
-
-    await db.insert(journeys).values({
-      startTime: now,
-      status: 'qr_generated',
-      startLocationId: currentLocation.id,
-      requestedDestinationId: destination.id,
-      routeId: route.id,
-      qrToken: verificationToken,
-      qrGeneratedAt: now,
-    });
-
-    await db.insert(events).values({
-      eventType: 'qr_generated',
-      locationId: currentLocation.id,
-      timestamp: now,
-      metadata: JSON.stringify({
-        destinationId: destination.id,
-        token: verificationToken,
-      }),
-    });
 
     const qrData = JSON.stringify({
       token: verificationToken,
@@ -141,6 +106,41 @@ const monkeyService: MonkeyService = {
     const qrCodeImage = await QRCode.toDataURL(qrData);
     console.log(qrCodeImage);
 
+    // get journey and route information
+    const [journey] = await db
+      .select()
+      .from(journeys)
+      .where(eq(journeys.id, journeyId));
+
+    if (!journey) {
+      throw new Error(`Journey with ID ${journeyId} not found`);
+    }
+
+    const [route] = await db
+      .select()
+      .from(routes)
+      .where(
+        and(
+          eq(routes.sourceLocationId, monkeyInfo.location.id),
+          eq(routes.destinationLocationId, destination.id)
+        )
+      );
+
+    if (!route) {
+      throw new Error(
+        `Route information ${monkeyInfo.location.name} - ${destinationLocationName} not found`
+      );
+    }
+
+    // update journey information with qr code stuff
+    await db.update(journeys).set({
+      requestedDestinationId: destination.id,
+      routeId: route.id,
+      qrToken: verificationToken,
+      qrGeneratedAt: new Date(),
+      status: 'qr_generated',
+    });
+
     return {
       qrCode: qrCodeImage,
       routeDescription: route.description,
@@ -149,9 +149,11 @@ const monkeyService: MonkeyService = {
 
   verifyDestination: async (
     token: string,
-    locationId: number
+    locationId: number,
+    journeyId: number
   ): Promise<boolean> => {
     try {
+      // TODO: why do I get journey {journey: { id: 1, ... }} ? Fix this
       const [journey] = await db
         .select({
           journey: journeys,
@@ -164,6 +166,12 @@ const monkeyService: MonkeyService = {
       if (!journey) {
         // Journey doesn't exist (token is not right)
         return false;
+      }
+
+      if (journey.journey.id !== journeyId) {
+        // if journey id doesn't match the journey id of the qr code, then it's an ongoing journey
+        // and the new journey created on button press should be deleted
+        await db.delete(journeys).where(eq(journeys.id, journeyId));
       }
 
       if (journey.journey.qrScannedAt) {
@@ -187,25 +195,42 @@ const monkeyService: MonkeyService = {
         })
         .where(eq(journeys.qrToken, token));
 
-      const startTime = new Date(journey.journey.startTime);
-      const duration = now.getTime() - startTime.getTime();
-
-      await db.insert(events).values({
-        journeyId: journey.journey.id,
-        eventType: 'journey_completed',
-        locationId: locationId,
-        timestamp: now,
-        metadata: JSON.stringify({
-          startLocationId: journey.journey.startLocationId,
-          duration: duration,
-        }),
-      });
-
       return true;
     } catch (error) {
       console.error('Error verifying destination:', error);
       return false;
     }
+  },
+
+  recordNewJourney: async (locationId: number) => {
+    const [journeyData] = await db
+      .insert(journeys)
+      .values({
+        startTime: new Date(),
+        status: 'started',
+        startLocationId: locationId,
+        requestedDestinationId: null,
+        routeId: null,
+        qrToken: null,
+      })
+      .returning();
+
+    return journeyData.id;
+  },
+
+  recordButtonPressEvent: async (monkeyId: number, journeyId: number) => {
+    console.log('Recording button press event for monkeyId:', monkeyId);
+    const [monkey] = await db
+      .select()
+      .from(monkeys)
+      .where(eq(monkeys.monkeyId, monkeyId));
+
+    await db.insert(events).values({
+      eventType: 'button_press',
+      journeyId: journeyId,
+      locationId: monkey.locationId,
+      timestamp: new Date(),
+    });
   },
 
   getAllLocations: async (): Promise<Location[]> => {

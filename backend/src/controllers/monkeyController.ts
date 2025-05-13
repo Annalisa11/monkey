@@ -8,6 +8,7 @@ type CreateNavigationParams = {
 
 type CreateNavigationData = {
   destinationLocationName: string;
+  journeyId: number;
 };
 
 type VerifyQRCodeParams = {
@@ -17,6 +18,7 @@ type VerifyQRCodeParams = {
 type VerifyQRCodeData = {
   token: string;
   destinationId: number;
+  journeyId: number;
 };
 
 const getAllMonkeys: RequestHandler = async (req, res) => {
@@ -197,12 +199,12 @@ const createNavigation: RequestHandler<
       return;
     }
 
-    const { destinationLocationName } = req.body;
-    const navigationData = await monkeyService.getNavigationInformation({
+    const navigationData = await monkeyService.createQRCode({
       monkeyId,
-      destinationLocationName,
-      currentLocation: monkey.location,
+      journeyId: req.body.journeyId,
+      destinationLocationName: req.body.destinationLocationName,
     });
+
     res.json(navigationData);
   } catch (error: any) {
     console.error('Failed to get navigation data', error.message);
@@ -216,12 +218,13 @@ const verifyQRCode: RequestHandler<
   VerifyQRCodeData
 > = async (req, res) => {
   try {
-    const { token, destinationId } = req.body;
+    const { token, destinationId, journeyId } = req.body;
     console.log(token, destinationId);
 
     const isRightDestination = await monkeyService.verifyDestination(
       token,
-      destinationId
+      destinationId,
+      journeyId
     );
 
     if (!isRightDestination) {
@@ -234,6 +237,30 @@ const verifyQRCode: RequestHandler<
     res.status(200).json({ message: 'Destination verified successfully.' });
   } catch (err: any) {
     console.error('Failed to verify QR code', err.message);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+const handleButtonPressEvent: RequestHandler<{ id: string }, any, any> = async (
+  req,
+  res
+) => {
+  try {
+    const monkeyInfo = await monkeyService.getMonkeyById(
+      parseInt(req.params.id)
+    );
+    if (!monkeyInfo) {
+      res.status(404).json({ error: 'Monkey not found' });
+      return;
+    }
+
+    const journeyId = await monkeyService.recordNewJourney(
+      monkeyInfo.location.id
+    );
+    await monkeyService.recordButtonPressEvent(monkeyInfo.id, journeyId);
+    res.status(200).json({ journeyId });
+  } catch (err: any) {
+    console.error('Failed to record button press', err.message);
     res.status(400).json({ error: err.message });
   }
 };
@@ -252,5 +279,6 @@ export {
   getAllMonkeys,
   getLocations,
   getRoutes,
+  handleButtonPressEvent,
   verifyQRCode,
 };

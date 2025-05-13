@@ -56,7 +56,9 @@ export const journeys = sqliteTable('journeys', {
 
 export const events = sqliteTable('events', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  journeyId: integer('journey_id').references(() => journeys.id), // if applicable
+  journeyId: integer('journey_id').references(() => journeys.id, {
+    onDelete: 'set null',
+  }), // if applicable
   eventType: text('event_type').notNull(), //'banana_return'
   locationId: integer('location_id').references(() => locations.id),
   timestamp: integer('timestamp', { mode: 'timestamp' }).notNull(),

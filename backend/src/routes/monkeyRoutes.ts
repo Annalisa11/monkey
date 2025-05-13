@@ -19,6 +19,7 @@ import {
   getAllMonkeys,
   getLocations,
   getRoutes,
+  handleButtonPressEvent,
   verifyQRCode,
 } from '../controllers/monkeyController.js';
 
@@ -156,7 +157,7 @@ router.patch('/routes', validateRequest(routeFormSchema), editRoute);
  * @swagger
  * /v1/monkeys/{id}/navigation:
  *   post:
- *     summary: Generate navigation QR code
+ *     summary: Generate navigation QR code for a monkey
  *     tags: [Monkeys]
  *     parameters:
  *       - in: path
@@ -164,32 +165,50 @@ router.patch('/routes', validateRequest(routeFormSchema), editRoute);
  *         required: true
  *         schema:
  *           type: integer
+ *           description: The ID of the monkey to generate navigation for
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/NavigationRequest'
+ *             type: object
+ *             properties:
+ *               destinationLocationName:
+ *                 type: string
+ *                 description: The name of the destination location for the journey
+ *               journeyId:
+ *                 type: integer
+ *                 description: The ID of the journey
+ *             required:
+ *               - destinationLocationName
+ *               - journeyId
  *     responses:
  *       200:
- *         description: Navigation response
+ *         description: Successfully generated navigation QR code
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/NavigationResponse'
  *       404:
  *         description: Monkey or destination not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorMessage'
  *       500:
  *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorMessage'
  */
-
 router.post('/:id/navigation', createNavigation);
 
 /**
  * @swagger
  * /v1/monkeys/{id}/qr-check:
  *   post:
- *     summary: Verify a scanned QR code
+ *     summary: Verify a scanned QR code for a monkey's journey
  *     tags: [Monkeys]
  *     parameters:
  *       - in: path
@@ -197,15 +216,30 @@ router.post('/:id/navigation', createNavigation);
  *         required: true
  *         schema:
  *           type: integer
+ *           description: The ID of the monkey whose QR code is being verified
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/QRCodeVerificationRequest'
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: The QR code token to be verified
+ *               destinationId:
+ *                 type: integer
+ *                 description: The ID of the destination location
+ *               journeyId:
+ *                 type: integer
+ *                 description: The ID of the journey to verify
+ *             required:
+ *               - token
+ *               - destinationId
+ *               - journeyId
  *     responses:
  *       200:
- *         description: QR code verified
+ *         description: QR code verified successfully
  *         content:
  *           application/json:
  *             schema:
@@ -224,7 +258,50 @@ router.post('/:id/navigation', createNavigation);
  *               $ref: '#/components/schemas/ErrorMessage'
  *       500:
  *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorMessage'
  */
 router.post('/:id/qr-check', verifyQRCode);
+
+/**
+ * @swagger
+ * /v1/monkeys/{id}/button-press:
+ *   post:
+ *     summary: Record a button press event and create a new journey for a monkey
+ *     tags: [Monkeys]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: The ID of the monkey pressing the button
+ *     responses:
+ *       200:
+ *         description: Button press event recorded and new journey created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 journeyId:
+ *                   type: integer
+ *                   description: The ID of the newly created journey
+ *       404:
+ *         description: Monkey not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorMessage'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorMessage'
+ */
+router.post('/:id/button-press', handleButtonPressEvent);
 
 export default router;

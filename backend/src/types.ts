@@ -1,6 +1,5 @@
 import { InferSelectModel } from 'drizzle-orm';
-import { Location } from 'validation';
-import { locations, monkeys, navigationQrCodes, routes } from '../db/schema.js';
+import { locations, monkeys, routes } from '../db/schema.js';
 
 // ---------------------------
 // Database models infered from drizzle
@@ -9,7 +8,6 @@ import { locations, monkeys, navigationQrCodes, routes } from '../db/schema.js';
 export type DBMonkey = InferSelectModel<typeof monkeys>;
 export type DBLocation = InferSelectModel<typeof locations>;
 export type DBRoute = InferSelectModel<typeof routes>;
-export type DBNavigationQrCode = InferSelectModel<typeof navigationQrCodes>;
 
 // ---------------------------
 // Enums / constants
@@ -23,7 +21,7 @@ export interface NavigationData {
 }
 
 export interface NavigationRequest {
-  currentLocation: Location;
   destinationLocationName: string;
+  journeyId: number;
   monkeyId: number;
 }
