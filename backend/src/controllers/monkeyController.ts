@@ -221,6 +221,7 @@ const verifyQRCode: RequestHandler<
     const { token, destinationId, journeyId } = req.body;
     console.log(token, destinationId);
 
+    // TODO: handle errors better
     const isRightDestination = await monkeyService.verifyDestination(
       token,
       destinationId,

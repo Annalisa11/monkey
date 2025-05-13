@@ -99,6 +99,7 @@ const monkeyService: MonkeyService = {
     const qrData = JSON.stringify({
       token: verificationToken,
       destinationId: destination.id,
+      journeyId: journeyId,
     });
 
     console.log('TOKEN: ', verificationToken);
@@ -133,13 +134,17 @@ const monkeyService: MonkeyService = {
     }
 
     // update journey information with qr code stuff
-    await db.update(journeys).set({
-      requestedDestinationId: destination.id,
-      routeId: route.id,
-      qrToken: verificationToken,
-      qrGeneratedAt: new Date(),
-      status: 'qr_generated',
-    });
+    console.log('Updating journey with QR code data');
+    await db
+      .update(journeys)
+      .set({
+        requestedDestinationId: destination.id,
+        routeId: route.id,
+        qrGeneratedAt: new Date(),
+        status: 'qr_generated',
+        qrToken: verificationToken,
+      })
+      .where(eq(journeys.id, journeyId));
 
     return {
       qrCode: qrCodeImage,
@@ -165,21 +170,30 @@ const monkeyService: MonkeyService = {
 
       if (!journey) {
         // Journey doesn't exist (token is not right)
+        console.log('Journey not found');
         return false;
       }
 
       if (journey.journey.id !== journeyId) {
+        console.log(
+          'Journey ID does not match the one in the QR code. Deleting the new journey.'
+        );
         // if journey id doesn't match the journey id of the qr code, then it's an ongoing journey
         // and the new journey created on button press should be deleted
         await db.delete(journeys).where(eq(journeys.id, journeyId));
       }
 
       if (journey.journey.qrScannedAt) {
+        console.log('QR code already scanned');
         // The QR code has already been scanned before
         return false;
       }
 
       if (journey.route.destinationLocationId !== locationId) {
+        console.log(
+          'Patient is at the wrong destination. Expected:',
+          journey.route.destinationLocationId
+        );
         // Patient is at the wrong destination
         return false;
       }
