@@ -8,7 +8,6 @@ import { pingDB } from '../db/db.js';
 import seedData from '../db/seed.js';
 import { PORT } from './config.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
-import eventRoutes from './routes/eventRoutes.js';
 import monkeyRoutes from './routes/monkeyRoutes.js';
 import { swaggerDocs, swaggerUi } from './swagger/swagger.js';
 
@@ -21,7 +20,6 @@ app.use(helmet());
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/v1/monkeys', monkeyRoutes);
-app.use('/v1/events', eventRoutes);
 app.use('/v1/dashboard', dashboardRoutes);
 
 app.listen(PORT, (): void => {
