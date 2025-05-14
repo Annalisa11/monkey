@@ -28,5 +28,6 @@ yarn.lock
 **/*.d.ts
 **/*.min.js
 
-# shadcn ui components
+# specific frontend files
 /frontend/src/components/ui/*
+routeTree.gen.ts
