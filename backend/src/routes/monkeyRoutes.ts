@@ -1,5 +1,5 @@
 import express from 'express';
-import { validateRequest } from 'middleware/validateRequest.js';
+import { validateRequest } from 'src/middleware/validateRequest.js';
 import {
   createMonkeySchema,
   locationFormSchema,
