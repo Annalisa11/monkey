@@ -1,13 +1,13 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/about')({
-  component: DashboardHome,
+export const Route = createFileRoute('/stats')({
+  component: Stats,
 });
 
-function DashboardHome() {
+function Stats() {
   return (
     <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
       <Card className='col-span-1'>

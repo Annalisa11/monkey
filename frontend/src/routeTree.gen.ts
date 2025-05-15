@@ -11,12 +11,18 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as StatsImport } from './routes/stats'
 import { Route as MonkeysImport } from './routes/monkeys'
 import { Route as LocationsImport } from './routes/locations'
-import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const StatsRoute = StatsImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const MonkeysRoute = MonkeysImport.update({
   id: '/monkeys',
@@ -27,12 +33,6 @@ const MonkeysRoute = MonkeysImport.update({
 const LocationsRoute = LocationsImport.update({
   id: '/locations',
   path: '/locations',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -53,13 +53,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
-      parentRoute: typeof rootRoute
-    }
     '/locations': {
       id: '/locations'
       path: '/locations'
@@ -74,6 +67,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MonkeysImport
       parentRoute: typeof rootRoute
     }
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -81,47 +81,47 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/locations': typeof LocationsRoute
   '/monkeys': typeof MonkeysRoute
+  '/stats': typeof StatsRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/locations': typeof LocationsRoute
   '/monkeys': typeof MonkeysRoute
+  '/stats': typeof StatsRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/locations': typeof LocationsRoute
   '/monkeys': typeof MonkeysRoute
+  '/stats': typeof StatsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/locations' | '/monkeys'
+  fullPaths: '/' | '/locations' | '/monkeys' | '/stats'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/locations' | '/monkeys'
-  id: '__root__' | '/' | '/about' | '/locations' | '/monkeys'
+  to: '/' | '/locations' | '/monkeys' | '/stats'
+  id: '__root__' | '/' | '/locations' | '/monkeys' | '/stats'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
   LocationsRoute: typeof LocationsRoute
   MonkeysRoute: typeof MonkeysRoute
+  StatsRoute: typeof StatsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
   LocationsRoute: LocationsRoute,
   MonkeysRoute: MonkeysRoute,
+  StatsRoute: StatsRoute,
 }
 
 export const routeTree = rootRoute
@@ -135,22 +135,22 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about",
         "/locations",
-        "/monkeys"
+        "/monkeys",
+        "/stats"
       ]
     },
     "/": {
       "filePath": "index.tsx"
-    },
-    "/about": {
-      "filePath": "about.tsx"
     },
     "/locations": {
       "filePath": "locations.tsx"
     },
     "/monkeys": {
       "filePath": "monkeys.tsx"
+    },
+    "/stats": {
+      "filePath": "stats.tsx"
     }
   }
 }
