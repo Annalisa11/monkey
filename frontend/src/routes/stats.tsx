@@ -1,3 +1,6 @@
+import { DailyTrendsChart } from '@/components/features/stats/DailyTrendsChart';
+import { JourneyInteractionsChart } from '@/components/features/stats/JourneyInteractionsChart';
+import { PopularLocationsChart } from '@/components/features/stats/PopularLocationsChart';
 import SummaryCard from '@/components/features/stats/SummaryCard';
 import {
   Card,
@@ -85,7 +88,13 @@ function Stats() {
             </Card>
           </div>
         </TabsContent>
-        <TabsContent value='locations'></TabsContent>
+        <TabsContent value='locations'>
+          <div className='flex flex-col gap-4'>
+            <PopularLocationsChart />
+            <JourneyInteractionsChart />
+            <DailyTrendsChart />
+          </div>
+        </TabsContent>
         <TabsContent value='trends'>Change your password here.</TabsContent>
       </Tabs>
     </div>
