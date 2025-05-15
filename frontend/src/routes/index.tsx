@@ -49,7 +49,7 @@ function DashboardSummary() {
   return (
     <div className='flex flex-col gap-4'>
       <h3 className='text-xl font-bold mb-4 '> Metrics summary</h3>
-      <div className=' rounded-3xl w-fulln grid gap-4 grid-cols-4'>
+      <div className=' rounded-3xl w-full grid gap-4 grid-cols-4'>
         {summaryData.map((data, index) => (
           <SummaryCard
             key={index}
