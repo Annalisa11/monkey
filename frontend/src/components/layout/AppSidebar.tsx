@@ -10,26 +10,23 @@ import {
 import { Link } from '@tanstack/react-router';
 import {
   Banana,
-  Compass,
-  Flag,
-  Home,
-  Leaf,
+  ChartLine,
+  LayoutGrid,
   MapPinned,
   Settings,
-  User,
 } from 'lucide-react';
 import type * as React from 'react';
 
 const menuItems = [
   {
-    title: 'Home',
+    title: 'Summary',
     url: '/',
-    icon: Home,
+    icon: LayoutGrid,
   },
   {
-    title: 'About',
-    url: '/about',
-    icon: User,
+    title: 'Stats',
+    url: '/stats',
+    icon: ChartLine,
   },
   {
     title: 'Monkeys',
@@ -42,16 +39,6 @@ const menuItems = [
     icon: MapPinned,
   },
   {
-    title: 'Routes',
-    url: '/paths',
-    icon: Compass,
-  },
-  {
-    title: 'Reports',
-    url: '#',
-    icon: Flag,
-  },
-  {
     title: 'Settings',
     url: '#',
     icon: Settings,
@@ -62,9 +49,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible='icon' {...props} variant='floating'>
       <SidebarHeader className='flex flex-col items-center gap-4 py-6 px-4'>
-        <div className='flex aspect-square size-10 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground'>
-          <Leaf className='size-5' />
-        </div>
         <SidebarTrigger className='flex items-center justify-center w-8 h-8 rounded-full bg-sidebar-accent hover:bg-sidebar-accent/80 transition-colors' />
       </SidebarHeader>
       <SidebarContent className='p-4'>
