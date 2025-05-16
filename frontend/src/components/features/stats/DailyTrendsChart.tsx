@@ -18,7 +18,6 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 
-// Data: Daily Journey Interactions
 const chartData = [
   {
     date: '2025-04-15',

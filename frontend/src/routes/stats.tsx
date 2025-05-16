@@ -1,28 +1,38 @@
 import { DailyTrendsChart } from '@/components/features/stats/DailyTrendsChart';
 import { JourneyInteractionsChart } from '@/components/features/stats/JourneyInteractionsChart';
 import { PopularLocationsChart } from '@/components/features/stats/PopularLocationsChart';
+import StatsTable from '@/components/features/stats/StatsTable';
 import SummaryCard from '@/components/features/stats/SummaryCard';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/stats')({
   component: Stats,
 });
+
+const tableData = {
+  tableHeaders: ['Name', 'Location', 'Status', 'Last Interaction'],
+  tableRows: [
+    {
+      name: 'Monkey 1',
+      location: 'Main Lobby',
+      status: 'Active',
+      lastInteraction: '2023-10-01 12:00',
+    },
+    {
+      name: 'Monkey 2',
+      location: 'Radiology',
+      status: 'Inactive',
+      lastInteraction: '2023-10-01 12:00',
+    },
+    {
+      name: 'Monkey 3',
+      location: 'Emergency Room',
+      status: 'Active',
+      lastInteraction: '2023-10-01 12:00',
+    },
+  ],
+};
 
 function Stats() {
   return (
@@ -48,44 +58,7 @@ function Stats() {
                 contentDescription='currently not active monkeys'
               />
             </div>
-            <Card className='bg-background rounded-2xl shadow-none border-0 w-fit'>
-              <CardHeader>
-                <CardTitle>Monkey Usage </CardTitle>
-                <CardDescription>Interactions per Monkey</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow className=''>
-                      <TableHead className='font-bold uppercase  w-[100px]'>
-                        Monkey
-                      </TableHead>
-                      <TableHead>Total Interactions</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead className='text-right'>Active</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className='font-medium'>Bubbles</TableCell>
-                      <TableCell className='w-[100px]'>287</TableCell>
-                      <TableCell className='w-[100px]'>Main Lobby</TableCell>
-                      <TableCell className='text-right w-[100px]'>
-                        yes
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className='font-medium'>Bananas</TableCell>
-                      <TableCell className='w-[100px]'>232</TableCell>
-                      <TableCell className='w-[100px]'>Radiology</TableCell>
-                      <TableCell className='text-right w-[100px]'>
-                        yes
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+            <StatsTable title={'table title'} data={tableData} />
           </div>
         </TabsContent>
         <TabsContent value='locations'>
