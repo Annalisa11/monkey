@@ -1,5 +1,6 @@
 import JourneysTab from '@/components/pages/statsTabs/JourneysTab';
 import MonkeyTab from '@/components/pages/statsTabs/MonkeyTab';
+import TrendsTab from '@/components/pages/statsTabs/TrendsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCombinedStats } from '@/hooks/useCombinedStats';
 import { createFileRoute } from '@tanstack/react-router';
@@ -19,7 +20,7 @@ function Stats() {
   return (
     <div className='flex flex-col gap-4'>
       <h3 className='text-xl font-bold mb-4 '> Statistics</h3>
-      <Tabs defaultValue='monkeys' className='w-full border border-amber-400'>
+      <Tabs defaultValue='monkeys' className='w-full'>
         <TabsList>
           <TabsTrigger value='monkeys'>Monkeys</TabsTrigger>
           <TabsTrigger value='journeys'>Journeys</TabsTrigger>
@@ -31,7 +32,9 @@ function Stats() {
         <TabsContent value='journeys'>
           <JourneysTab data={allStats} />
         </TabsContent>
-        <TabsContent value='trends'>Change your password here.</TabsContent>
+        <TabsContent value='trends'>
+          <TrendsTab data={allStats} />
+        </TabsContent>
       </Tabs>
     </div>
   );

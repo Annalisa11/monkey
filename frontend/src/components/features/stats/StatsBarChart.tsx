@@ -1,5 +1,3 @@
-'use client';
-
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
@@ -39,7 +37,7 @@ export function StatsBarChart(data: StatsBarChartProps) {
 
   const yAxisMax = totalInteractions;
   return (
-    <Card className='w-fit '>
+    <Card className='w-fit min-w-min'>
       <CardHeader>
         <CardTitle>QR Code Analytics</CardTitle>
         <CardDescription>Performance Metrics Overview</CardDescription>
