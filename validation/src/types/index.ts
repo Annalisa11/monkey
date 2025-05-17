@@ -2,12 +2,16 @@ import { z } from 'zod';
 import {
   createMonkeySchema,
   CreateNavigationSchema,
+  journeyStatsSchema,
   locationFormSchema,
   locationSchema,
   monkeySchema,
+  monkeyStatsSchema,
+  overviewStatsSchema,
   routeFormSchema,
   routeSchema,
   StoreButtonPressDataSchema,
+  trendsStatsSchema,
   VerifyQRCodeSchema,
 } from '../schemas/index.js';
 
@@ -23,3 +27,8 @@ export type VerifyQRCodeData = z.infer<typeof VerifyQRCodeSchema>;
 
 export type RouteForm = z.infer<typeof routeFormSchema>;
 export type Route = z.infer<typeof routeSchema>;
+
+export type OverviewStats = z.infer<typeof overviewStatsSchema>;
+export type JourneysStats = z.infer<typeof journeyStatsSchema>;
+export type MonkeysStats = z.infer<typeof monkeyStatsSchema>;
+export type TrendsStats = z.infer<typeof trendsStatsSchema>;

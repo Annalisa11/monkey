@@ -72,3 +72,31 @@ export const routeSchema = z
   });
 
 export const routeFormSchema = routeSchema;
+
+////////////// STATS TYPES //////////////
+
+const abandonedInteractionsStatsSchema = z.object({
+  total: z.number(),
+  abandonedBeforeQR: z.number(),
+  abandonmentRateBeforeQR: z.number(),
+  abandonedBeforeScan: z.number(),
+  abandonmentRateBeforeScan: z.number(),
+  scannedRate: z.number(),
+  qrPrintedPercentage: z.number(),
+  completedJourneys: z.number(),
+  completionRate: z.number(),
+});
+
+export const overviewStatsSchema = z.object({
+  qrCodesPrinted: z.number(),
+  qrCodesScanned: z.number(),
+  bananasReturned: z.number(),
+  monkeyInteractions: z.number(),
+  activeMonkeys: z.number(),
+  totalMonkeys: z.number(),
+  abandonedInteractionsStats: abandonedInteractionsStatsSchema,
+});
+
+export const journeyStatsSchema = z.object({});
+export const monkeyStatsSchema = z.object({});
+export const trendsStatsSchema = z.object({});
