@@ -1,7 +1,7 @@
 import { LocationDialog } from '@/components/features/locations/LocationDialog';
 import LocationItem from '@/components/features/locations/LocationItem';
 import { useLocations } from '@/hooks/useLocations';
-import { deleteLocation } from '@/lib/api/monkeys';
+import { deleteLocation } from '@/lib/api/monkeys.api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { toast } from 'sonner';

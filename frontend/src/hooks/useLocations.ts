@@ -1,4 +1,4 @@
-import { getLocations } from '@/lib/api/monkeys';
+import { getLocations } from '@/lib/api/monkeys.api';
 import { useQuery } from '@tanstack/react-query';
 
 export const useLocations = () => {

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useLocations } from '@/hooks/useLocations';
-import { createMonkey, updateMonkey } from '@/lib/api/monkeys';
+import { createMonkey, updateMonkey } from '@/lib/api/monkeys.api';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

@@ -18,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { DialogTitle } from '@radix-ui/react-dialog';
 
-import { createLocation, updateLocation } from '@/lib/api/monkeys';
+import { createLocation, updateLocation } from '@/lib/api/monkeys.api';
 import { Location, LocationForm, locationFormSchema } from '@validation';
 
 interface LocationDialogProps {

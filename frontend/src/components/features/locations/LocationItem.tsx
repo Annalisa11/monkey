@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useLocations } from '@/hooks/useLocations';
-import { deleteRoute, getRoutes } from '@/lib/api/monkeys';
+import { deleteRoute, getRoutes } from '@/lib/api/monkeys.api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Location } from '@validation';
 import { toast } from 'sonner';

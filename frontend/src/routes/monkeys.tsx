@@ -1,6 +1,6 @@
 import { MonkeyDialog } from '@/components/features/monkeys/MonkeyDialog';
 import MonkeyItem from '@/components/features/monkeys/MonkeyItem';
-import { deleteMonkey, getMonkeys } from '@/lib/api/monkeys';
+import { deleteMonkey, getMonkeys } from '@/lib/api/monkeys.api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { toast } from 'sonner';
