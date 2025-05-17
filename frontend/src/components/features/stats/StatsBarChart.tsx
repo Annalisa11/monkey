@@ -39,13 +39,13 @@ export function StatsBarChart(data: StatsBarChartProps) {
 
   const yAxisMax = totalInteractions;
   return (
-    <Card>
+    <Card className='w-fit '>
       <CardHeader>
         <CardTitle>QR Code Analytics</CardTitle>
         <CardDescription>Performance Metrics Overview</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className='max-h-[250px] w-full'>
           <BarChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />
             <XAxis
