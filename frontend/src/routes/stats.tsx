@@ -1,6 +1,4 @@
-import { DailyTrendsChart } from '@/components/features/stats/DailyTrendsChart';
-import { JourneyInteractionsChart } from '@/components/features/stats/JourneyInteractionsChart';
-import { PopularLocationsChart } from '@/components/features/stats/PopularLocationsChart';
+import JourneysTab from '@/components/pages/statsTabs/JourneysTab';
 import MonkeyTab from '@/components/pages/statsTabs/MonkeyTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCombinedStats } from '@/hooks/useCombinedStats';
@@ -31,11 +29,7 @@ function Stats() {
           <MonkeyTab data={allStats} />
         </TabsContent>
         <TabsContent value='journeys'>
-          <div className='flex flex-col gap-4'>
-            <PopularLocationsChart />
-            <JourneyInteractionsChart />
-            <DailyTrendsChart />
-          </div>
+          <JourneysTab data={allStats} />
         </TabsContent>
         <TabsContent value='trends'>Change your password here.</TabsContent>
       </Tabs>
