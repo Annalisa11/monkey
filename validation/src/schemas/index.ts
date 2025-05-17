@@ -100,3 +100,91 @@ export const overviewStatsSchema = z.object({
 export const journeyStatsSchema = z.object({});
 export const monkeyStatsSchema = z.object({});
 export const trendsStatsSchema = z.object({});
+
+const PiSchema = z.object({
+  segments: z.object({
+    returnedJourneys: z.number(),
+    scannedOnly: z.number(),
+    printedOnly: z.number(),
+    interactionsWithoutPrint: z.number(),
+  }),
+  percentages: z.object({
+    returnedPercentage: z.number(),
+    scannedOnlyPercentage: z.number(),
+    printedOnlyPercentage: z.number(),
+    interactionsWithoutPrintPercentage: z.number(),
+  }),
+  stats: z.object({
+    totalInteractions: z.number(),
+    totalPrinted: z.number(),
+    scanRate: z.number(),
+    bananasReturnedRate: z.number(),
+  }),
+});
+
+const BarSchema = z.object({
+  routeId: z.number(),
+  qrGenerated: z.number(),
+  sourceLocation: locationSchema,
+  destinationLocation: locationSchema,
+});
+
+const EfficiencyTableSchema = z.object({
+  routeId: z.number(),
+  qrGeneratedCount: z.number(),
+  qrScannedCount: z.number(),
+  avgScanTime: z.string(),
+  avgCompletionTime: z.string(),
+  sourceLocation: locationSchema,
+  destinationLocation: locationSchema,
+  scanRate: z.number(),
+});
+
+const DailyTrendsSchema = z.object({
+  date: z.string(),
+  buttonPresses: z.number(),
+  qrCodesGenerated: z.number(),
+  journeysCompleted: z.number(),
+});
+
+const WeeklyTrendsSchema = z.object({
+  weekStartDate: z.string(),
+  weekEndDate: z.string(),
+  buttonPresses: z.number(),
+  qrCodesGenerated: z.number(),
+  journeysCompleted: z.number(),
+});
+
+const PeakHourSchema = z.object({
+  hourRange: z.string(),
+  buttonPresses: z.number(),
+  qrCodesGenerated: z.number(),
+  percentageOfDailyTotal: z.number(),
+});
+
+const WeekPeakHourSchema = z.object({
+  weekday: z.string(),
+  peakHourRange: z.string(),
+  percentageOfDailyTotalInteractions: z.string(),
+  percentageOfDailyTotalQrGenerated: z.string(),
+});
+
+const MonkeyOverviewDataSchema = z.object({
+  monkey: monkeySchema,
+  stats: z.object({
+    totalInteractions: z.number(),
+    qrCodesPrinted: z.number(),
+    qrCodesScanned: z.number(),
+  }),
+});
+
+export const StatsSchema = z.object({
+  pi: PiSchema,
+  bar: z.array(BarSchema),
+  efficiencyTable: z.array(EfficiencyTableSchema),
+  dailyTrends: z.array(DailyTrendsSchema),
+  weeklyTrends: z.array(WeeklyTrendsSchema),
+  peakHours: z.array(PeakHourSchema),
+  weekPeakHours: z.array(WeekPeakHourSchema),
+  monkeysTable: z.array(MonkeyOverviewDataSchema),
+});

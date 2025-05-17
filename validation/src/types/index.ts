@@ -10,6 +10,7 @@ import {
   overviewStatsSchema,
   routeFormSchema,
   routeSchema,
+  StatsSchema,
   StoreButtonPressDataSchema,
   trendsStatsSchema,
   VerifyQRCodeSchema,
@@ -32,3 +33,6 @@ export type OverviewStats = z.infer<typeof overviewStatsSchema>;
 export type JourneysStats = z.infer<typeof journeyStatsSchema>;
 export type MonkeysStats = z.infer<typeof monkeyStatsSchema>;
 export type TrendsStats = z.infer<typeof trendsStatsSchema>;
+
+export type StatsObject = z.infer<typeof StatsSchema>;
+export type Stats = OverviewStats & StatsObject;

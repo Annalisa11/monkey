@@ -28,7 +28,9 @@ import {
   generateDateRange,
   generateWeekIntervals,
 } from 'src/utils/datetime.js';
+import { Monkey } from 'validation';
 import db from '../../db/db.js';
+import monkeyService from './monkeyService.js';
 
 export interface OverviewMetrics {
   qrCodesPrinted: number;
@@ -124,16 +126,24 @@ export interface PeakHourAnalysis {
   percentageOfDailyTotal: number;
 }
 
-// StatsService interface
+// TODO: match these types with the zod schemas in validation
+export interface MonkeyOverviewData {
+  monkey: Monkey;
+  stats: {
+    totalInteractions: number;
+    qrCodesPrinted: number;
+    qrCodesScanned: number;
+  };
+}
 export interface StatsService {
   getOverviewMetrics(): Promise<OverviewMetrics>;
   getJourneyCompletionFunnel(): Promise<JourneyCompletionFunnel>;
   getPopularRoutesByQRGenerated(): Promise<PopularRoute[]>;
   getRouteEfficiencyMetrics(): Promise<RouteEfficiencyMetric[]>;
-  getQrCodesPrintedCount(): Promise<number>;
-  getQrCodesScannedCount(): Promise<number>;
+  getQrCodesPrintedCount(monkeyId?: number): Promise<number>;
+  getQrCodesScannedCount(monkeyId?: number): Promise<number>;
   getBananasReturnedCount(): Promise<number>;
-  getMonkeyInteractionsCount(): Promise<number>;
+  getMonkeyInteractionsCount(monkeyId?: number): Promise<number>;
   getCompletedJourneysCount(): Promise<number>;
   getAbandonedInteractionsStats(): Promise<AbandonedInteractionsStats>;
   getActiveMonkeysStats(): Promise<ActiveMonkeysStats>;
@@ -141,10 +151,35 @@ export interface StatsService {
   getWeeklyTrends(): Promise<WeeklyTrend[]>;
   getPeakHoursAnalysis(): Promise<PeakHourAnalysis[]>;
   getWeekdayPeakHours(): Promise<any[]>;
+  getMonkeyOverviewData(): Promise<MonkeyOverviewData[]>;
 }
 
-// Implementation of the StatsService interface
 export const statsService: StatsService = {
+  getMonkeyOverviewData: async (): Promise<MonkeyOverviewData[]> => {
+    const monkeys = await monkeyService.getAllMonkeys();
+
+    //TODO: think about the definition of interactions and if it's relevant to store the location of actions like scanned and printed.
+    const overviewData = await Promise.all(
+      monkeys.map(async (monkey) => {
+        return {
+          monkey: monkey,
+          stats: {
+            totalInteractions: await statsService.getMonkeyInteractionsCount(
+              monkey.id
+            ),
+            qrCodesPrinted: await statsService.getQrCodesPrintedCount(
+              monkey.id
+            ),
+            qrCodesScanned: await statsService.getQrCodesScannedCount(
+              monkey.id
+            ),
+          },
+        };
+      })
+    );
+
+    return overviewData;
+  },
   getOverviewMetrics: async (): Promise<OverviewMetrics> => {
     const qrCodesPrinted = await statsService.getQrCodesPrintedCount();
     const qrCodesScanned = await statsService.getQrCodesScannedCount();
@@ -351,7 +386,33 @@ export const statsService: StatsService = {
     });
   },
 
-  getQrCodesPrintedCount: async (): Promise<number> => {
+  getQrCodesPrintedCount: async (monkeyId?: number): Promise<number> => {
+    const getQrCodesPrintedCountByMonkeyId = async (
+      id: number
+    ): Promise<number> => {
+      const monkey = await monkeyService.getMonkeyById(id);
+
+      if (!monkey) {
+        throw new Error(`Monkey with ID ${id} not found`);
+      }
+
+      const result = await db
+        .select({ count: count() })
+        .from(journeys)
+        .where(
+          and(
+            isNotNull(journeys.qrGeneratedAt),
+            eq(journeys.startLocationId, monkey.location.id)
+          )
+        );
+
+      return result[0].count;
+    };
+
+    if (monkeyId !== undefined) {
+      return await getQrCodesPrintedCountByMonkeyId(monkeyId);
+    }
+
     const result = await db
       .select({ count: count() })
       .from(journeys)
@@ -360,7 +421,33 @@ export const statsService: StatsService = {
     return result[0].count;
   },
 
-  getQrCodesScannedCount: async (): Promise<number> => {
+  getQrCodesScannedCount: async (monkeyId?: number): Promise<number> => {
+    const getQrCodesScannedCountByMonkeyId = async (
+      id: number
+    ): Promise<number> => {
+      const monkey = await monkeyService.getMonkeyById(id);
+
+      if (!monkey) {
+        throw new Error(`Monkey with ID ${id} not found`);
+      }
+
+      const result = await db
+        .select({ count: count() })
+        .from(journeys)
+        .where(
+          and(
+            isNotNull(journeys.qrScannedAt),
+            eq(journeys.startLocationId, monkey.location.id)
+          )
+        );
+
+      return result[0].count;
+    };
+
+    if (monkeyId !== undefined) {
+      return await getQrCodesScannedCountByMonkeyId(monkeyId);
+    }
+
     const result = await db
       .select({ count: count() })
       .from(journeys)
@@ -378,7 +465,28 @@ export const statsService: StatsService = {
     return result[0].count;
   },
 
-  getMonkeyInteractionsCount: async (): Promise<number> => {
+  getMonkeyInteractionsCount: async (monkeyId?: number): Promise<number> => {
+    const getMonkeyInteractionsCountByMonkeyId = async (
+      id: number
+    ): Promise<number> => {
+      const monkey = await monkeyService.getMonkeyById(id);
+
+      if (!monkey) {
+        throw new Error(`Monkey with ID ${id} not found`);
+      }
+
+      const result = await db
+        .select({ count: count() })
+        .from(journeys)
+        .where(eq(journeys.startLocationId, monkey.location.id));
+
+      return result[0].count;
+    };
+
+    if (monkeyId !== undefined) {
+      return await getMonkeyInteractionsCountByMonkeyId(monkeyId);
+    }
+
     const result = await db.select({ count: count() }).from(journeys);
 
     return result[0].count;

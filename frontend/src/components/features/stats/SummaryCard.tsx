@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-type SummaryCardProps = {
+export type SummaryCardProps = {
   title: string;
   titleDescription?: string;
   content: string;

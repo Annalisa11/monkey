@@ -21,6 +21,7 @@ const test: RequestHandler = async (req, res) => {
     const weeklyTrends = await statsService.getWeeklyTrends();
     const peakHours = await statsService.getPeakHoursAnalysis();
     const weekPeakHours = await statsService.getWeekdayPeakHours();
+    const monkeyTableStats = await statsService.getMonkeyOverviewData();
 
     res.status(200).json({
       pi: pichart,
@@ -30,6 +31,7 @@ const test: RequestHandler = async (req, res) => {
       weeklyTrends,
       peakHours,
       weekPeakHours,
+      monkeysTable: monkeyTableStats,
     });
   } catch (error: any) {
     console.error(error.message);
