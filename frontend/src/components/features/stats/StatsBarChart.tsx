@@ -1,13 +1,11 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -17,11 +15,16 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-const chartData = [
-  { metric: 'Printed', value: 1287 },
-  { metric: 'Scanned', value: 985 },
-  { metric: 'Completed', value: 743 },
-];
+
+type StatsBarChartData = {
+  metric: string;
+  value: number;
+};
+
+type StatsBarChartProps = {
+  xAxis: StatsBarChartData[];
+  yAxis: number;
+};
 
 const chartConfig = {
   value: {
@@ -30,7 +33,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function StatsBarChart() {
+export function StatsBarChart(data: StatsBarChartProps) {
+  const chartData = data.xAxis;
+  const totalInteractions = data.yAxis;
+
+  const yAxisMax = totalInteractions;
   return (
     <Card>
       <CardHeader>
@@ -56,7 +63,8 @@ export function StatsBarChart() {
               }}
               axisLine={false}
               tickLine={false}
-              tickCount={1}
+              domain={[0, yAxisMax]}
+              ticks={[0, yAxisMax / 2, yAxisMax]}
             />
             <ChartTooltip
               cursor={false}
@@ -66,15 +74,6 @@ export function StatsBarChart() {
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className='flex-col items-start gap-2 text-sm'>
-        <div className='flex gap-2 font-medium leading-none'>
-          QR Codes Printed has the highest count{' '}
-          <TrendingUp className='h-4 w-4' />
-        </div>
-        <div className='leading-none text-muted-foreground'>
-          Showing key metrics for QR code engagement and journey completion
-        </div>
-      </CardFooter>
     </Card>
   );
 }
