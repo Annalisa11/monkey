@@ -37,7 +37,7 @@ export function StatsBarChart(data: StatsBarChartProps) {
 
   const yAxisMax = totalInteractions;
   return (
-    <Card className='w-fit min-w-min'>
+    <Card className='min-w-[400px] w-fit'>
       <CardHeader>
         <CardTitle>QR Code Analytics</CardTitle>
         <CardDescription>Performance Metrics Overview</CardDescription>
