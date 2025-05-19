@@ -1,7 +1,8 @@
 import math
-import pygame
 import random
 import time
+
+import pygame
 
 """
 Monkey Eyes Animation System
@@ -120,6 +121,8 @@ class EyePair:
         color (tuple): Eye color.
     """
     def __init__(self, left_x, right_x, y, width, height, distance, radius=30, color=(0, 0, 0)):
+        print(f"eye pair coordinates: {left_x}, {right_x}, {y}")
+        
         self.left_eye = Eye(left_x, y, width, height, radius, color)
         self.right_eye = Eye(right_x, y, width, height, radius, color)
         self.distance = distance
@@ -443,12 +446,14 @@ class MonkeyEyeApp:
         
         eye_width = 240
         eye_height = 240
-        eye_y = 100
         eye_distance = 100
-        eye_left_x = 380
-        eye_right_x = 780
         eye_radius = 30
         eye_color = (0, 0, 0)
+
+        center_x = self.screen_width // 2
+        eye_y = self.screen_height // 2 - eye_height // 2
+        eye_left_x = center_x - eye_width - (eye_distance // 2)
+        eye_right_x = center_x + (eye_distance // 2)
         
         self.eyes = EyePair(
             eye_left_x, eye_right_x, eye_y, 
