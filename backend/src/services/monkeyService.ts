@@ -104,7 +104,9 @@ const monkeyService: MonkeyService = {
 
     console.log('TOKEN: ', verificationToken);
     console.log('DESTINATION ID: ', destination.id);
-    const qrCodeImage = await QRCode.toDataURL(qrData);
+    const qrCodeImage = await QRCode.toString(qrData, {
+      type: 'svg',
+    });
     console.log(qrCodeImage);
 
     // get journey and route information
