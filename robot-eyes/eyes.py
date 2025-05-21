@@ -62,7 +62,7 @@ Args:
         """Returns the (x, y) center of the eye."""
         return (self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2)
 
-    def draw_circular(self, screen, background_color, vertical_offset=0, overlay_circle_offset=40):
+    def draw_circular(self, screen, background_color, vertical_offset=0, overlay_circle_offset=150):
         """
         Draws the eye as a circular laughing/smiling representation.
 
@@ -77,7 +77,7 @@ Args:
         radius = self.rect.height // 2
         
         pygame.draw.circle(screen, self.color, (center_x, center_y), radius)
-        pygame.draw.circle(screen, background_color, (center_x, center_y + overlay_circle_offset), radius)
+        pygame.draw.circle(screen, background_color, (center_x, center_y + overlay_circle_offset), radius + 60)
 
     def draw_star(self, screen, color=None, scale=1.0):
         """
