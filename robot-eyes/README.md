@@ -107,15 +107,20 @@ The `MonkeyEyeApp` class contains several configuration variables you can modify
 # Screen dimensions
 screen_width = 1280          # Window width in pixels
 screen_height = 720          # Window height in pixels
-background_color = (255, 255, 255)  # RGB background color (white)
+background_color = (255, 255, 255)  # RGB background color
 
 # Eye positioning and size
 eye_width = 240              # Width of each eye in pixels
 eye_height = 240             # Height of each eye in pixels
 eye_distance = 100           # Distance between the two eyes
 eye_radius = 30              # Corner radius for rounded rectangles
-eye_color = (0, 0, 0)        # RGB eye color (black)
+eye_color = (0, 0, 0)        # RGB eye color
+eye_y_offset = 100           # distance between the middle line and the middle of the eyes (0 = eyes are vertically centered)
 ```
+
+<div style="display: flex; justify-content: center;">
+<img src="./docs/python-eyes-variables.drawio.png" width="70%" alt="Python Eyes Variables Documentation" >
+</div>
 
 #### Animation Timing Configuration
 
