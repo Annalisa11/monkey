@@ -411,9 +411,11 @@ class MonkeyEyeApp:
         self.screen_height = 720
         self.eye_width = 240
         self.eye_height = 240
-        self.eye_distance = 100
+        self.eye_distance = 200
         self.eye_radius = 30
         self.eye_color = (0, 0, 0)
+
+        self.eye_y_offset = 100
 
     def _initialize_pygame_and_eyes(self):
         pygame.init()
@@ -422,7 +424,7 @@ class MonkeyEyeApp:
         self.clock = pygame.time.Clock()
         
         center_x = self.screen_width // 2
-        eye_y = self.screen_height // 2 - self.eye_height // 2
+        eye_y = self.screen_height // 2 - self.eye_height // 2 - self.eye_y_offset
         eye_left_x = center_x - self.eye_width - (self.eye_distance // 2)
         eye_right_x = center_x + (self.eye_distance // 2)
         
