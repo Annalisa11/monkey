@@ -150,7 +150,7 @@ class AnimationManager:
         
         # Blinking 
         self.shrinking = True
-        self.blink_speed = 15
+        self.blink_speed = 20
         self.last_blink_time = 0 
         self.blink_interval = random.uniform(2000, 4000)
         self.blink_type = "single"  # "single" or "double", single as default
@@ -438,7 +438,7 @@ class MonkeyEyeApp:
         self.eye_radius = 30
         self.eye_color = (0, 0, 0)
 
-        self.eye_y_offset = 190
+        self.eye_y_offset = 150
 
     def _initialize_pygame_and_eyes(self):
         pygame.init()
