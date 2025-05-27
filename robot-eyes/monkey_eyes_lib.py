@@ -101,12 +101,12 @@ class EyePair:
     """
     Manages a pair of eyes and their expressions.
     """
-    def __init__(self, left_x, right_x, y, width, height, distance, radius=30, color=(0, 0, 0)):
+    def __init__(self, left_x, right_x, y, width, height, distance, radius=30, color=(0, 0, 0), background_color=(255,255, 255), star_color=(255, 255, 0)):
         self.left_eye = Eye(left_x, y, width, height, radius, color)
         self.right_eye = Eye(right_x, y, width, height, radius, color)
         self.distance = distance
-        self.background_color = (255, 255, 255) 
-        self.star_color = (255, 255, 0)
+        self.background_color = background_color
+        self.star_color = star_color
 
     def draw_normal(self, screen):
         self.left_eye.draw(screen)
@@ -426,7 +426,7 @@ class MonkeyEyeApp:
         self.command_queue = command_queue
         self.screen = None
         self.clock = None
-        self.background_color = (255, 255, 255)
+        self.background_color = (0, 0, 0)
         self.eyes = None
         self.animation = None
         
@@ -436,7 +436,8 @@ class MonkeyEyeApp:
         self.eye_height = 300
         self.eye_distance = 300
         self.eye_radius = 30
-        self.eye_color = (0, 0, 0)
+        self.eye_color = (133, 242, 239)
+        self.star_color = self.eye_color
 
         self.eye_y_offset = 150
 
@@ -454,7 +455,7 @@ class MonkeyEyeApp:
         self.eyes = EyePair(
             eye_left_x, eye_right_x, eye_y, 
             self.eye_width, self.eye_height, self.eye_distance, 
-            self.eye_radius, self.eye_color
+            self.eye_radius, self.eye_color, self.background_color, self.star_color
         )
         self.animation = AnimationManager(self.eyes)
         
