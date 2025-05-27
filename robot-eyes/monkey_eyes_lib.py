@@ -153,6 +153,12 @@ class AnimationManager:
         self.blink_speed = 15
         self.last_blink_time = 0 
         self.blink_interval = random.uniform(2000, 4000)
+        self.blink_type = "single"  # "single" or "double", single as default
+        self.current_blink_count = 0
+        self.target_blink_count = 1
+        self.blink_pause_start_time = 0
+        self.blink_paused = False
+        self.blink_pause_duration = 150  
         
         # Laughing 
         self.laugh_up = True
@@ -270,8 +276,12 @@ class AnimationManager:
             self.set_state(AnimationState.BLINKING)
             self.shrinking = True
             self.last_blink_time = self.current_time 
-            self.blink_interval = random.uniform(2000, 4000)
-
+            self.blink_interval = random.uniform(3000, 8000)
+            
+            self.blink_type = random.choices(["single", "double"], weights=[3, 1])[0]
+            self.target_blink_count = 1 if self.blink_type == "single" else 2
+            self.current_blink_count = 0
+            self.blink_paused = False
 
     def trigger_look(self):
         if self.current_state == AnimationState.IDLE:
@@ -283,6 +293,12 @@ class AnimationManager:
             self.look_interval = random.uniform(10000, 20000)
 
     def _animate_blink(self):
+        if self.blink_paused:
+            if self.current_time - self.blink_pause_start_time > self.blink_pause_duration:
+                self.blink_paused = False
+                self.shrinking = True 
+            return
+        
         if self.shrinking:
             self.eye_pair.left_eye.grow(0, -self.blink_speed)
             self.eye_pair.right_eye.grow(0, -self.blink_speed)
@@ -292,8 +308,15 @@ class AnimationManager:
             self.eye_pair.left_eye.grow(0, self.blink_speed)
             self.eye_pair.right_eye.grow(0, self.blink_speed)
             if self.eye_pair.left_eye.rect.height >= self.eye_pair.left_eye.original_rect.height:
-                self.eye_pair.reset() 
-                self.set_state(AnimationState.IDLE)
+                self.current_blink_count += 1
+                
+                if self.current_blink_count < self.target_blink_count:
+                    self.eye_pair.reset()
+                    self.blink_paused = True
+                    self.blink_pause_start_time = self.current_time
+                else:
+                    self.eye_pair.reset() 
+                    self.set_state(AnimationState.IDLE)
     
     def _animate_concentrate(self):
         if self.shrinking:
