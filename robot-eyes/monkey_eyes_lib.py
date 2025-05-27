@@ -194,8 +194,8 @@ class AnimationManager:
         if self.current_state == AnimationState.IDLE:
             if self.current_time - self.last_blink_time > self.blink_interval:
                 self.trigger_blinking()
-            elif self.current_time - self.last_look_time > self.look_interval:
-                self.trigger_look()
+            # elif self.current_time - self.last_look_time > self.look_interval:
+                # self.trigger_look()
         
         if self.current_state == AnimationState.LAUGHING:
             self._animate_laugh()
