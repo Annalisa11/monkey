@@ -415,7 +415,7 @@ class MonkeyEyeApp:
         self.eye_radius = 30
         self.eye_color = (0, 0, 0)
 
-        self.eye_y_offset = 100
+        self.eye_y_offset = 110
 
     def _initialize_pygame_and_eyes(self):
         pygame.init()

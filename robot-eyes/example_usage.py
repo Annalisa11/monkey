@@ -27,8 +27,8 @@ if __name__ == "__main__":
         controller.stop_concentrate()
         time.sleep(2)
 
-        print("Idling for 5s")
-        time.sleep(5)
+        print("Idling for one minute")
+        time.sleep(60)
 
     except KeyboardInterrupt:
         print("Interrupted by user.")
