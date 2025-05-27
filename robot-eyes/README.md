@@ -1,18 +1,15 @@
 # Monkey Eyes Animation Library Documentation
 
+The Monkey Eyes Animation Library is a Python-based system for creating animated eye expressions using Pygame.
+
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Installation & Setup](#installation--setup)
+1. [Installation & Setup](#installation--setup)
 3. [Core Classes](#core-classes)
 4. [Configuration & Customization](#configuration--customization)
 5. [Animation States](#animation-states)
 6. [Usage Examples](#usage-examples)
 7. [API Reference](#api-reference)
-
-## Overview
-
-The Monkey Eyes Animation Library is a Python-based system for creating animated eye expressions using Pygame.
 
 ## Installation & Setup
 
@@ -67,12 +64,6 @@ Represents a single eye with position, size, and rendering capabilities.
 ### EyePair Class
 
 Manages both left and right eyes as a coordinated unit.
-
-**Initialization Parameters:**
-
-```python
-EyePair(left_x, right_x, y, width, height, distance, radius=30, color=(0,0,0))
-```
 
 ### AnimationManager Class
 
@@ -150,26 +141,6 @@ star_color = (255, 255, 0)   # RGB color for stars (yellow)
 smile_duration = 2000        # Default smile length
 star_duration = 3000         # Default star eyes length
 concentrate_duration = 2000  # Default concentration length
-```
-
-### Customization Examples
-
-#### Changing Eye Appearance
-
-```python
-# Create custom colored eyes
-app.eye_color = (0, 100, 200)      # Blue eyes
-app.background_color = (240, 240, 240)  # Light gray background
-app.eye_radius = 50                 # More rounded corners
-```
-
-#### Adjusting Animation Speed
-
-```python
-# In AnimationManager.__init__()
-self.blink_speed = 25              # Faster blinking
-self.laugh_speed = 1               # Slower laughing
-self.move_speed = 15               # Faster looking movements
 ```
 
 ## Animation States
@@ -333,57 +304,3 @@ Stops indefinite concentration animation.
 - **Notes**: Only affects indefinite concentration; timed concentration ends automatically
 - **Example**: `controller.stop_concentrate()`
 
-### Configuration Variables
-
-Located in `MonkeyEyeApp.__init__()`:
-
-```python
-# Screen settings
-screen_width: int = 1280          # Window width
-screen_height: int = 720          # Window height
-background_color: tuple = (255, 255, 255)  # RGB background
-
-# Eye appearance
-eye_width: int = 240              # Eye width in pixels
-eye_height: int = 240             # Eye height in pixels
-eye_distance: int = 100           # Distance between eyes
-eye_radius: int = 30              # Corner radius
-eye_color: tuple = (0, 0, 0)      # RGB eye color
-```
-
-Located in `AnimationManager.__init__()`:
-
-```python
-# Animation speeds (pixels per frame at 60 FPS)
-blink_speed: int = 15             # Blink animation speed
-laugh_speed: int = 2              # Laugh bounce speed
-move_speed: int = 10              # Sideways look speed
-star_speed: float = 0.05          # Star grow/shrink speed
-
-# Animation limits
-max_laugh_offset: int = 20        # Max vertical laugh movement
-max_move_distance: int = 200      # Max horizontal look movement
-squinting_degree: int = 5         # Height reduction when squinting
-
-# Timing intervals (milliseconds)
-blink_interval: float = 2000-4000 # Random time between blinks
-look_interval: float = 10000-20000 # Random time between looks
-
-# Default durations (milliseconds)
-smile_duration: int = 2000        # Default smile duration
-star_duration: int = 3000         # Default star duration
-concentrate_duration: int = 2000  # Default concentrate duration
-```
-
-### Animation States Enum
-
-```python
-class AnimationState:
-    IDLE = "idle"                 # Default state
-    BLINKING = "blinking"         # Eye blink animation
-    LAUGHING = "laughing"         # Bouncing laugh animation
-    SMILING = "smiling"           # Curved smile animation
-    STAR = "star"                 # Star-shaped eyes
-    MOVING = "moving"             # Sideways looking
-    CONCENTRATING = "concentrating" # Squinted/focused eyes
-```
