@@ -107,6 +107,7 @@ eye_height = 240             # Height of each eye in pixels
 eye_distance = 100           # Distance between the two eyes
 eye_radius = 30              # Corner radius for rounded rectangles
 eye_color = (0, 0, 0)        # RGB eye color
+star_color = eye_color       # RGB eye color for the star animation (default eye_color or if not defined yellow)
 eye_y_offset = 100           # distance between the middle line and the middle of the eyes (0 = eyes are vertically centered)
 ```
 
