@@ -432,8 +432,8 @@ class MonkeyEyeApp:
         
         self.screen_width = 1280
         self.screen_height = 720
-        self.eye_width = 240
-        self.eye_height = 240
+        self.eye_width = 300
+        self.eye_height = 300
         self.eye_distance = 300
         self.eye_radius = 30
         self.eye_color = (0, 0, 0)
