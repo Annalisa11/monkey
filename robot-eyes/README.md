@@ -5,11 +5,11 @@ The Monkey Eyes Animation Library is a Python-based system for creating animated
 ## Table of Contents
 
 1. [Installation & Setup](#installation--setup)
-3. [Core Classes](#core-classes)
-4. [Configuration & Customization](#configuration--customization)
-5. [Animation States](#animation-states)
-6. [Usage Examples](#usage-examples)
-7. [API Reference](#api-reference)
+2. [Core Classes](#core-classes)
+3. [Configuration & Customization](#configuration--customization)
+4. [Animation States](#animation-states)
+5. [Usage Examples](#usage-examples)
+6. [API Reference](#api-reference)
 
 ## Installation & Setup
 
@@ -75,6 +75,7 @@ Controls all animation states and transitions.
 - Timing management for animations
 - Natural behavior triggers (blinking, looking)
 - Smooth transitions between states
+- Blinking system with single/double blinks
 
 ### EyesController Class
 
@@ -121,6 +122,7 @@ Located in the `AnimationManager.__init__()` method:
 # Blinking behavior
 blink_speed = 15             # How fast eyes close/open (pixels per frame)
 blink_interval = random.uniform(2000, 4000)  # Time between blinks (ms)
+blink_pause_duration = 150   # Pause between double blinks (ms)
 
 # Laughing animation
 laugh_speed = 2              # Vertical movement speed
@@ -147,15 +149,28 @@ concentrate_duration = 2000  # Default concentration length
 
 ### Available States
 
-| State           | Description                                 | Trigger Method            | Duration     |
-| --------------- | ------------------------------------------- | ------------------------- | ------------ |
-| `IDLE`          | Default state with natural blinking/looking | Automatic                 | Continuous   |
-| `BLINKING`      | Eye closing and opening animation           | `trigger_blinking()`      | ~200ms       |
-| `LAUGHING`      | Up-down bouncing circular eyes              | `trigger_laugh()`         | ~2-3 seconds |
-| `SMILING`       | Slight upward curved circular eyes          | `trigger_smile(duration)` | Configurable |
-| `STAR`          | Star-shaped eyes that grow and shrink       | `trigger_star(duration)`  | Configurable |
-| `MOVING`        | Horizontal eye movement with squinting      | `trigger_look()`          | ~3-4 seconds |
-| `CONCENTRATING` | Narrowed/squinted eyes                      | `trigger_concentrate()`   | Configurable |
+| State           | Description                                 | Trigger Method            | Duration     | Special Features                |
+| --------------- | ------------------------------------------- | ------------------------- | ------------ | ------------------------------- |
+| `IDLE`          | Default state with natural blinking/looking | Automatic                 | Continuous   | Random single/double blinks     |
+| `BLINKING`      | Eye closing and opening animation           | `trigger_blinking()`      | ~200-500ms   | Single or double blink variants |
+| `LAUGHING`      | Up-down bouncing circular eyes              | `trigger_laugh()`         | ~2-3 seconds | 4 bounce cycles                 |
+| `SMILING`       | Slight upward curved circular eyes          | `trigger_smile(duration)` | Configurable | Static circular eyes            |
+| `STAR`          | Star-shaped eyes that grow and shrink       | `trigger_star(duration)`  | Configurable | Animated scaling                |
+| `MOVING`        | Horizontal eye movement with squinting      | `trigger_look()`          | ~3-4 seconds | Currently disabled in IDLE      |
+| `CONCENTRATING` | Narrowed/squinted eyes                      | `trigger_concentrate()`   | Configurable | Supports indefinite mode        |
+
+### Blinking System Details
+
+**Blink Types:**
+
+- **Single Blink**: Standard one-time eye closure and opening
+- **Double Blink**: Two rapid blinks with a short pause between them
+
+**Blink Mechanics:**
+
+- Random selection between single and double blinks during idle state
+- Configurable pause duration between double blinks (default: 150ms)
+- Natural timing intervals (3-8 seconds between blink sequences)
 
 **Note**: Direct transitions between non-IDLE states automatically reset eye position/size before starting the new animation.
 
@@ -172,10 +187,10 @@ controller = EyesController()
 try:
     # Start the eyes
     controller.start_eyes()
-    print("Eyes started - they'll blink and look around naturally")
+    print("Eyes started - they'll blink naturally (single and double blinks)")
 
-    # Let them idle for a few seconds
-    time.sleep(3)
+    # Let them idle for a few seconds to observe natural blinking
+    time.sleep(10)
 
     # Trigger a smile
     controller.trigger_smile()
@@ -200,6 +215,10 @@ def demo_sequence():
 
     try:
         controller.start_eyes()
+
+        # Observe natural blinking behavior
+        print("👀 Watching natural blinking behavior (single and double blinks)")
+        time.sleep(8)
 
         # Happy sequence
         print("😊 Smiling for 3 seconds")
@@ -230,7 +249,7 @@ def demo_sequence():
         time.sleep(2)
 
         print("Returning to idle state")
-        time.sleep(3)
+        time.sleep(8)
 
     except KeyboardInterrupt:
         print("Demo interrupted")
@@ -303,4 +322,3 @@ Stops indefinite concentration animation.
 - **Parameters**: None
 - **Notes**: Only affects indefinite concentration; timed concentration ends automatically
 - **Example**: `controller.stop_concentrate()`
-
