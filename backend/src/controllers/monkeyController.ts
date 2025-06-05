@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { CreateMonkey, LocationForm, RouteForm } from 'validation';
+import { LocationForm, MonkeyForm, RouteForm } from 'validation';
 import monkeyService from '../services/monkeyService.js';
 
 type CreateNavigationParams = {
@@ -31,10 +31,7 @@ const getAllMonkeys: RequestHandler = async (req, res) => {
   }
 };
 
-const createMonkey: RequestHandler<any, any, CreateMonkey> = async (
-  req,
-  res
-) => {
+const createMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
   try {
     await monkeyService.createMonkey(req.body);
 
@@ -59,7 +56,7 @@ const deleteMonkey: RequestHandler<{ id: string }> = async (req, res) => {
   }
 };
 
-const editMonkey: RequestHandler<any, any, CreateMonkey> = async (req, res) => {
+const editMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
   try {
     const monkeyId = parseInt(req.params.id, 10);
     const updateData = req.body;

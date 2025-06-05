@@ -1,9 +1,9 @@
 import { API_URL } from '@/constants';
 import type {
-  CreateMonkey,
   Location,
   LocationForm,
   Monkey,
+  MonkeyForm,
   Route,
   RouteForm,
 } from '@validation';
@@ -16,7 +16,7 @@ export async function getMonkeys(): Promise<Monkey[]> {
   return response.json();
 }
 
-export async function createMonkey(monkey: CreateMonkey): Promise<Monkey> {
+export async function createMonkey(monkey: MonkeyForm): Promise<Monkey> {
   const response = await fetch(`${API_URL}/v1/monkeys`, {
     method: 'POST',
     headers: {
@@ -43,7 +43,7 @@ export async function deleteMonkey(id: number): Promise<void> {
 
 export async function updateMonkey(
   id: number,
-  data: CreateMonkey
+  data: MonkeyForm
 ): Promise<void> {
   const response = await fetch(`${API_URL}/v1/monkeys/${id}`, {
     method: 'PATCH',

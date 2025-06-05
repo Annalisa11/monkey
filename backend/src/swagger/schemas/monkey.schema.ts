@@ -35,7 +35,7 @@
  *         location:
  *           $ref: '#/components/schemas/Location'
  *
- *     CreateMonkey:
+ *     MonkeyForm:
  *       type: object
  *       required:
  *         - name

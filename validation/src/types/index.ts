@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import {
-  createMonkeySchema,
   CreateNavigationSchema,
   journeyStatsSchema,
   locationFormSchema,
   locationSchema,
+  monkeyFormSchema,
   monkeySchema,
   monkeyStatsSchema,
   overviewStatsSchema,
@@ -17,7 +17,7 @@ import {
 } from '../schemas/index.js';
 
 export type Monkey = z.infer<typeof monkeySchema>;
-export type CreateMonkey = z.infer<typeof createMonkeySchema>;
+export type MonkeyForm = z.infer<typeof monkeyFormSchema>;
 
 export type Location = z.infer<typeof locationSchema>;
 export type LocationForm = z.infer<typeof locationFormSchema>;

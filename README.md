@@ -82,6 +82,6 @@ pnpm validation:watch     # Watch for changes and rebuild
 The `packages/validation` directory holds all **Zod schemas** and **shared types** used by both frontend and backend. This eliminates duplication and ensures consistency across the stack.
 
 ```ts
-import { createMonkeySchema, Monkey } from '@validation'; // example use in frontend
-import { createMonkeySchema, Monkey } from 'validation'; // example use in backend
+import { monkeyFormSchema, Monkey } from '@validation'; // example use in frontend
+import { monkeyFormSchema, Monkey } from 'validation'; // example use in backend
 ```

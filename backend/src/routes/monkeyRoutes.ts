@@ -1,8 +1,8 @@
 import express from 'express';
 import { validateRequest } from 'src/middleware/validateRequest.js';
 import {
-  createMonkeySchema,
   locationFormSchema,
+  monkeyFormSchema,
   routeFormSchema,
 } from 'validation';
 import {
@@ -61,7 +61,7 @@ router.get('/', getAllMonkeys);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateMonkey'
+ *             $ref: '#/components/schemas/MonkeyForm'
  *     responses:
  *       201:
  *         description: Monkey created successfully
@@ -75,7 +75,7 @@ router.get('/', getAllMonkeys);
  *                   example: 'Monkey created successfully'
  */
 
-router.post('/', validateRequest(createMonkeySchema), createMonkey);
+router.post('/', validateRequest(monkeyFormSchema), createMonkey);
 
 /**
  * @swagger
@@ -123,7 +123,7 @@ router.delete('/:id', deleteMonkey);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateMonkey'
+ *             $ref: '#/components/schemas/MonkeyForm'
  *     responses:
  *       200:
  *         description: Monkey updated successfully
@@ -137,7 +137,7 @@ router.delete('/:id', deleteMonkey);
  *                   example: 'Monkey updated successfully'
  */
 
-router.patch('/:id', validateRequest(createMonkeySchema), editMonkey);
+router.patch('/:id', validateRequest(monkeyFormSchema), editMonkey);
 
 /**
  * @swagger

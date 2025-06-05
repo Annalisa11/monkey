@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
-// Core entities
+
 export const locations = sqliteTable('locations', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().unique(),
@@ -15,7 +15,6 @@ export const monkeys = sqliteTable('monkeys', {
   isActive: integer('is_active', { mode: 'boolean' })
     .notNull()
     .default(sql`0`),
-  address: text('address').notNull(),
 });
 
 export const routes = sqliteTable(
@@ -40,7 +39,6 @@ export const journeys = sqliteTable('journeys', {
   startTime: integer('start_time', { mode: 'timestamp' }).notNull(),
   endTime: integer('end_time', { mode: 'timestamp' }),
   status: text('status'), // 'started', 'qr_generated', 'completed'
-
   startLocationId: integer('start_location_id')
     .notNull()
     .references(() => locations.id),
@@ -48,7 +46,6 @@ export const journeys = sqliteTable('journeys', {
     () => locations.id
   ),
   routeId: integer('route_id').references(() => routes.id),
-
   qrToken: text('qr_token').unique(),
   qrGeneratedAt: integer('qr_generated_at', { mode: 'timestamp' }),
   qrScannedAt: integer('qr_scanned_at', { mode: 'timestamp' }),
@@ -58,8 +55,8 @@ export const events = sqliteTable('events', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   journeyId: integer('journey_id').references(() => journeys.id, {
     onDelete: 'set null',
-  }), // if applicable
-  eventType: text('event_type').notNull(), //'banana_return'
+  }), // Nullable for events not directly tied to a journey
+  eventType: text('event_type').notNull(), // example: banana_return
   locationId: integer('location_id').references(() => locations.id),
   timestamp: integer('timestamp', { mode: 'timestamp' }).notNull(),
   metadata: text('metadata'), // JSON string for any additional event-specific data

@@ -22,7 +22,7 @@ import { createMonkey, updateMonkey } from '@/lib/api/monkeys.api';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CreateMonkey, createMonkeySchema, Monkey } from '@validation';
+import { Monkey, MonkeyForm, monkeyFormSchema } from '@validation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -52,13 +52,12 @@ export function MonkeyDialog({
     return {
       name: monkey.name,
       location: { name: monkey.location.name, id: monkey.location.id },
-      address: monkey.address,
       isActive: monkey.isActive,
     };
   };
 
-  const form = useForm<CreateMonkey>({
-    resolver: zodResolver(createMonkeySchema),
+  const form = useForm<MonkeyForm>({
+    resolver: zodResolver(monkeyFormSchema),
     defaultValues: monkey ? filledDefaultValues(monkey) : defaultValues,
     mode: 'onChange',
   });
@@ -78,7 +77,7 @@ export function MonkeyDialog({
   });
 
   const updateMutation = useMutation({
-    mutationFn: (values: CreateMonkey) => updateMonkey(monkey!.id, values),
+    mutationFn: (values: MonkeyForm) => updateMonkey(monkey!.id, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['monkeys'] });
       setOpen(false);
@@ -90,7 +89,7 @@ export function MonkeyDialog({
     },
   });
 
-  function onSubmit(values: CreateMonkey) {
+  function onSubmit(values: MonkeyForm) {
     if (isEdit && monkey) {
       updateMutation.mutate(values);
     } else {
@@ -177,20 +176,6 @@ export function MonkeyDialog({
                     Department name where a monkey stands or can direct people
                     to
                   </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='address'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>IP Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder='149.234.1.1' {...field} />
-                  </FormControl>
-                  <FormDescription>The robot's IP address</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

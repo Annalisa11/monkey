@@ -3,13 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
 import QRCode from 'qrcode';
 import { NavigationData, NavigationRequest } from 'src/types.js';
-import {
-  CreateMonkey,
-  Location,
-  LocationForm,
-  Monkey,
-  Route,
-} from 'validation';
+import { Location, LocationForm, Monkey, MonkeyForm, Route } from 'validation';
 import db from '../../db/db.js';
 import {
   events,
@@ -31,9 +25,9 @@ interface MonkeyService {
   getLocationById(id: number): Promise<Location | null>;
   getLocationByName(locationName: string): Promise<Location | null>;
   getMonkeyById(monkeyId: number): Promise<Monkey | null>;
-  createMonkey(newMonkey: CreateMonkey): Promise<void>;
+  createMonkey(newMonkey: MonkeyForm): Promise<void>;
   deleteMonkey(id: number): Promise<void>;
-  updateMonkey(id: number, data: CreateMonkey): Promise<void>;
+  updateMonkey(id: number, data: MonkeyForm): Promise<void>;
   getLocationIdByName(name: string): Promise<number>;
   createLocation(newLocation: LocationForm): Promise<void>;
   deleteLocation(id: number): Promise<void>;
@@ -54,7 +48,6 @@ const monkeyWithLocationSelect = {
   id: monkeys.monkeyId,
   name: monkeys.name,
   isActive: monkeys.isActive,
-  address: monkeys.address,
   location: {
     id: locations.id,
     name: locations.name,
@@ -69,13 +62,12 @@ const monkeyService: MonkeyService = {
       .innerJoin(locations, eq(monkeys.locationId, locations.id));
   },
 
-  updateMonkey: async (id: number, data: CreateMonkey): Promise<void> => {
+  updateMonkey: async (id: number, data: MonkeyForm): Promise<void> => {
     await db
       .update(monkeys)
       .set({
         name: data.name,
         isActive: data.isActive,
-        address: data.address,
         locationId: data.location.id,
       })
       .where(eq(monkeys.monkeyId, id));
@@ -281,11 +273,10 @@ const monkeyService: MonkeyService = {
 
     return location.id;
   },
-  createMonkey: async (newMonkey: CreateMonkey): Promise<void> => {
+  createMonkey: async (newMonkey: MonkeyForm): Promise<void> => {
     await db.insert(monkeys).values({
       name: newMonkey.name,
       isActive: newMonkey.isActive,
-      address: newMonkey.address,
       locationId: newMonkey.location.id,
     });
   },
