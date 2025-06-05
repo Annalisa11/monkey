@@ -15,9 +15,14 @@ export type DBRoute = InferSelectModel<typeof routes>;
 
 export type Emotion = 'concentrate' | 'smile' | 'laugh' | 'star';
 
+export type QRCodeData = {
+  token: string;
+  destinationId: number;
+  journeyId: number;
+};
 export interface NavigationData {
   routeDescription: string;
-  qrCode: string;
+  qrCode: QRCodeData;
 }
 
 export interface NavigationRequest {

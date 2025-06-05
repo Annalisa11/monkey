@@ -88,11 +88,13 @@ const monkeyService: MonkeyService = {
     // generate QR code
     const verificationToken = crypto.randomBytes(16).toString('hex');
 
-    const qrData = JSON.stringify({
+    const qrDataObject = {
       token: verificationToken,
       destinationId: destination.id,
       journeyId: journeyId,
-    });
+    };
+
+    const qrData = JSON.stringify(qrDataObject);
 
     console.log('TOKEN: ', verificationToken);
     console.log('DESTINATION ID: ', destination.id);
@@ -141,7 +143,7 @@ const monkeyService: MonkeyService = {
       .where(eq(journeys.id, journeyId));
 
     return {
-      qrCode: qrCodeImage,
+      qrCode: qrDataObject,
       routeDescription: route.description,
     };
   },
