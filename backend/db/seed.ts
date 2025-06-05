@@ -1,7 +1,6 @@
 import { and, count, eq } from 'drizzle-orm';
 import db from '../db/db.js';
 import monkeyService from '../src/services/monkeyService.js';
-import addPrivateData from './ip.js';
 import { events, journeys, locations, monkeys, routes } from './schema.js';
 
 const fetchAndLogMonkeys = async () => {
@@ -27,13 +26,11 @@ const seedMonkeys = async () => {
       name: 'George',
       locationId: lobbyId,
       isActive: true,
-      address: '192.168.1.105',
     },
     {
       name: 'Bonzo',
       locationId: optId,
       isActive: false,
-      address: '192.168.1.105',
     },
   ]);
 
@@ -362,9 +359,8 @@ const seedData = async () => {
     await seedLocations();
     await seedMonkeys();
     await seedRoutes();
-    await seedJourneys(); // Seed journeys
-    await seedEvents(); // Seed events
-    await addPrivateData();
+    await seedJourneys();
+    await seedEvents();
 
     await fetchAndLogMonkeys();
 
