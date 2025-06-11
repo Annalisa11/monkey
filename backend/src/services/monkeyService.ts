@@ -42,6 +42,7 @@ interface MonkeyService {
   getRoutesByLocation(sourceLocationId: number): Promise<Route[]>;
   recordNewJourney(locationId: number): Promise<number>;
   recordButtonPressEvent(monkeyId: number, journeyId: number): Promise<void>;
+  recordBananaReturnEvent(monkeyId: number): Promise<void>;
 }
 
 const monkeyWithLocationSelect = {
@@ -235,11 +236,37 @@ const monkeyService: MonkeyService = {
       .from(monkeys)
       .where(eq(monkeys.monkeyId, monkeyId));
 
+    const metaInfo = {
+      monkeyId: monkeyId,
+      action: 'button_press',
+    };
+
     await db.insert(events).values({
       eventType: 'button_press',
       journeyId: journeyId,
       locationId: monkey.locationId,
       timestamp: new Date(),
+      metadata: JSON.stringify(metaInfo),
+    });
+  },
+
+  recordBananaReturnEvent: async (monkeyId: number) => {
+    console.log('Recording banana return event for monkeyId:', monkeyId);
+    const [monkey] = await db
+      .select()
+      .from(monkeys)
+      .where(eq(monkeys.monkeyId, monkeyId));
+
+    const metaInfo = {
+      monkeyId: monkeyId,
+      action: 'banana_return',
+    };
+
+    await db.insert(events).values({
+      eventType: 'banana_return',
+      locationId: monkey.locationId,
+      timestamp: new Date(),
+      metadata: JSON.stringify(metaInfo),
     });
   },
 

@@ -19,6 +19,7 @@ import {
   getAllMonkeys,
   getLocations,
   getRoutes,
+  handleBananaReturnEvent,
   handleButtonPressEvent,
   verifyQRCode,
 } from '../controllers/monkeyController.js';
@@ -505,5 +506,25 @@ router.post('/:id/qr-check', verifyQRCode);
  *               $ref: '#/components/schemas/ErrorMessage'
  */
 router.post('/:id/button-press', handleButtonPressEvent);
+
+/**
+ * @swagger
+ * /v1/monkeys/{id}/banana-return:
+ *   post:
+ *     summary: Record a banana return event
+ *     tags: [Robots]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: The ID of the monkey where the banana was returned
+ *     responses:
+ *       200:
+ *         description: Banana return event recorded successfully
+ *
+ */
+router.post('/:id/banana-return', handleBananaReturnEvent);
 
 export default router;

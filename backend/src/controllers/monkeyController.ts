@@ -262,6 +262,29 @@ const handleButtonPressEvent: RequestHandler<{ id: string }, any, any> = async (
     res.status(400).json({ error: err.message });
   }
 };
+const handleBananaReturnEvent: RequestHandler<
+  { id: string },
+  any,
+  any
+> = async (req, res) => {
+  try {
+    const monkeyInfo = await monkeyService.getMonkeyById(
+      parseInt(req.params.id)
+    );
+    if (!monkeyInfo) {
+      res.status(404).json({ error: 'Monkey not found' });
+      return;
+    }
+
+    await monkeyService.recordBananaReturnEvent(monkeyInfo.id);
+    res
+      .status(200)
+      .json({ message: 'Banana return event recorded successfully' });
+  } catch (err: any) {
+    console.error('Failed to record banana return event', err.message);
+    res.status(400).json({ error: err.message });
+  }
+};
 
 export {
   createLocation,
@@ -277,6 +300,7 @@ export {
   getAllMonkeys,
   getLocations,
   getRoutes,
+  handleBananaReturnEvent,
   handleButtonPressEvent,
   verifyQRCode,
 };
