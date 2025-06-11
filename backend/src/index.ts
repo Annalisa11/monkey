@@ -5,7 +5,6 @@ import express, {
 } from 'express';
 import helmet from 'helmet';
 import { pingDB } from '../db/db.js';
-import seedData from '../db/seed.js';
 import { PORT } from './config.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import monkeyRoutes from './routes/monkeyRoutes.js';
@@ -48,7 +47,7 @@ console.log('check the database connection');
 
 const initDB = async () => {
   pingDB();
-  await seedData();
+  // await seedData();
 };
 
 initDB();

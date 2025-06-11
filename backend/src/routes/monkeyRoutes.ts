@@ -384,7 +384,7 @@ router.patch('/routes', validateRequest(routeFormSchema), editRoute);
  * /v1/monkeys/{id}/navigation:
  *   post:
  *     summary: Generate navigation description and QR code for a path request
- *     tags: [Monkeys]
+ *     tags: [Robots]
  *     parameters:
  *       - in: path
  *         name: id
@@ -425,7 +425,7 @@ router.post('/:id/navigation', createNavigation);
  * /v1/monkeys/{id}/qr-check:
  *   post:
  *     summary: Verify a scanned QR code for a monkey's journey
- *     tags: [Monkeys]
+ *     tags: [Robots]
  *     parameters:
  *       - in: path
  *         name: id
@@ -472,7 +472,7 @@ router.post('/:id/qr-check', verifyQRCode);
  * /v1/monkeys/{id}/button-press:
  *   post:
  *     summary: Record a button press event and create a new journey for a monkey
- *     tags: [Monkeys]
+ *     tags: [Robots]
  *     parameters:
  *       - in: path
  *         name: id

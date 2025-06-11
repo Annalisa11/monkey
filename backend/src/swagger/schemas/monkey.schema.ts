@@ -184,9 +184,22 @@
  *       type: object
  *       properties:
  *         qrCode:
- *           type: string
- *           format: uri
- *           description: Base64-encoded QR code
+ *           type: object
+ *           description: QR code data used for navigation and journey tracking
+ *           properties:
+ *             token:
+ *               type: string
+ *               description: Unique token identifying the QR code
+ *             destinationId:
+ *               type: integer
+ *               description: ID of the destination location
+ *             journeyId:
+ *               type: integer
+ *               description: ID of the associated journey
+ *           required:
+ *             - token
+ *             - destinationId
+ *             - journeyId
  *         routeDescription:
  *           type: string
  *           example: Go straight past reception...
