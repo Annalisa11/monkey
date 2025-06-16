@@ -49,7 +49,6 @@ const LocationItem = ({ location, onDelete }: MonkeyItemProps) => {
           <h2 className='font-bold text-lg'>{name}</h2>
           <span className='text-gray-400'>{`id: ${id}`}</span>
         </div>
-        <span className=''>{`${alreadyConfiguredRoutesCount}/${allLocationsCount} of possible routes configured from this location `}</span>
 
         <div className='flex gap-2 '>
           <LocationDialog isEdit location={location} />
@@ -60,7 +59,10 @@ const LocationItem = ({ location, onDelete }: MonkeyItemProps) => {
       </div>
 
       <div>
-        <RouteDialog startLocation={location} existingRoutes={routes} />
+        <div className='flex flex-col gap-2 mt-4'>
+          <span className=''>{`${alreadyConfiguredRoutesCount}/${allLocationsCount} possible routes configured from this location `}</span>
+          <RouteDialog startLocation={location} existingRoutes={routes} />
+        </div>
         <div className='flex flex-col gap-2 mt-6'>
           {isLoading && (
             <div className='p-4 text-muted-foreground'>Loading routes...</div>

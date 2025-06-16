@@ -19,7 +19,7 @@ function Stats() {
   console.log('Stats data:', allStats);
   return (
     <div className='flex flex-col gap-4'>
-      <h3 className='text-xl font-bold mb-4 '> Statistics</h3>
+      <h3 className='text-4xl font-bold mb-4 '> Statistics</h3>
       <Tabs defaultValue='monkeys' className='w-full'>
         <TabsList>
           <TabsTrigger value='monkeys'>Monkeys</TabsTrigger>

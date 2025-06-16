@@ -58,7 +58,7 @@ const JourneysTab = ({ data }: JourneysTabProps) => {
   const { monkeyInteractions } = data;
   return (
     <div className='flex flex-col gap-4'>
-      <div className=' rounded-3xl w-full grid gap-4 grid-cols-4'>
+      <div className='w-full flex gap-4 flex-wrap'>
         <SummaryCard
           title='Total Interactions'
           content={monkeyInteractions.toString()}
@@ -79,6 +79,8 @@ const JourneysTab = ({ data }: JourneysTabProps) => {
           content={data.bananasReturned.toString()}
           contentDescription={`bananas returned in total`}
         />
+      </div>
+      <div className='w-full flex gap-4 flex-wrap'>
         <JourneyInteractionsChart />
         <PopularLocationsChart />
       </div>

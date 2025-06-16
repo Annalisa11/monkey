@@ -50,7 +50,7 @@ const MonkeyTab = ({ data }: MonkeyTabProps) => {
   const { activeMonkeys, totalMonkeys } = data;
   return (
     <div className='flex flex-col gap-4'>
-      <div className=' rounded-3xl w-full grid gap-4 grid-cols-4'>
+      <div className='w-full flex gap-4 flex-wrap'>
         <SummaryCard
           title='active monkeys'
           content={activeMonkeys.toString()}

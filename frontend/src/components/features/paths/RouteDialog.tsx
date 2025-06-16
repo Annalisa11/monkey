@@ -60,6 +60,7 @@ const RouteDialog = ({
   });
 
   const defaultValues = {
+    id: undefined,
     sourceLocation: {
       id: startLocation.id,
       name: startLocation.name,
@@ -77,6 +78,8 @@ const RouteDialog = ({
       ...route,
     };
   };
+
+  console.log('RouteDialog form defaultValues:', route);
 
   const form = useForm<RouteForm>({
     resolver: zodResolver(routeFormSchema),
@@ -98,7 +101,7 @@ const RouteDialog = ({
   });
 
   const updateMutation = useMutation({
-    mutationFn: (values: RouteForm) => updateRoute(values),
+    mutationFn: (values: RouteForm) => updateRoute(route!.id, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['routes'] });
       setOpen(false);
@@ -133,18 +136,23 @@ const RouteDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant='default'>{isEdit ? 'Edit Route' : 'Add Route'}</Button>
+        <Button className='w-fit' variant='default'>
+          {isEdit ? 'Edit Route' : 'Add Route'}
+        </Button>
       </DialogTrigger>
-      <DialogContent className='space-y-4'>
+      <DialogContent className='space-y-4 max-w-full min-w-fit'>
         <DialogTitle>{dialogTitle}</DialogTitle>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
             {/* Location Selects Side-by-Side */}
-            <div className='flex items-end gap-4'>
+            <div className='flex items-center gap-4 '>
               {/* Source Location (disabled) */}
-              <FormItem className='w-full'>
+              <FormItem className=''>
                 <FormLabel>From</FormLabel>
                 <Input value={startLocation.name} disabled />
+                <FormDescription className='invisible'>
+                  Start department for this route
+                </FormDescription>
               </FormItem>
 
               <span className='text-xl mb-2'>→</span>
@@ -154,7 +162,7 @@ const RouteDialog = ({
                 control={form.control}
                 name='destinationLocation'
                 render={({ field }) => (
-                  <FormItem className='w-full'>
+                  <FormItem className=''>
                     <FormLabel>To</FormLabel>
                     <Select
                       onValueChange={(val) => {
@@ -190,7 +198,6 @@ const RouteDialog = ({
               />
             </div>
 
-            {/* Description Field */}
             <FormField
               control={form.control}
               name='description'

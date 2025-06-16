@@ -29,7 +29,7 @@ function Locations() {
 
   return (
     <div className='bg-background p-6 rounded-3xl w-full'>
-      <h1 className='text-2xl font-bold mb-4'>Locations</h1>
+      <h1 className='text-4xl font-bold mb-4'>Locations</h1>
       <LocationDialog />
       <div className='flex flex-col gap-2 mt-6'>
         {isLoading && (

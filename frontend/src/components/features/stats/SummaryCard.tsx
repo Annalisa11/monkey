@@ -20,7 +20,7 @@ const SummaryCard = ({
   titleDescription,
 }: SummaryCardProps) => {
   return (
-    <Card className='bg-background/75 rounded-xl border-0 shadow-none h-fit'>
+    <Card className='bg-background/75 rounded-xl border-0 shadow-none h-fit w-84'>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {titleDescription && (

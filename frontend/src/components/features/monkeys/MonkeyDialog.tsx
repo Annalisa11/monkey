@@ -155,6 +155,7 @@ export function MonkeyDialog({
                         selectedLocation?.name || ''
                       );
                     }}
+                    value={field.value?.toString()}
                   >
                     <FormControl>
                       <SelectTrigger className='w-[180px]'>
@@ -173,8 +174,7 @@ export function MonkeyDialog({
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Department name where a monkey stands or can direct people
-                    to
+                    Department name where the monkey stands
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

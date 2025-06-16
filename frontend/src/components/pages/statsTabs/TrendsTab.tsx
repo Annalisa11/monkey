@@ -63,11 +63,16 @@ const TrendsTab = ({ data }: TrendsTabProps) => {
   const weeklyTableData = transformToWeeklyPeakHoursTableData(data);
   return (
     <div className='flex flex-col gap-4'>
-      <div className=' rounded-3xl w-full grid gap-4 grid-cols-4'>
+      <div className='w-full flex gap-4 flex-wrap'>
         <DailyTrendsChart />
       </div>
-      <StatsTable title={'Peak Hours Analysis'} data={tableData} />
-      <StatsTable title={'Weekly Peak Hours Analysis'} data={weeklyTableData} />
+      <div className='w-full flex gap-4 flex-wrap'>
+        <StatsTable title={'Peak Hours Analysis'} data={tableData} />
+        <StatsTable
+          title={'Weekly Peak Hours Analysis'}
+          data={weeklyTableData}
+        />
+      </div>
     </div>
   );
 };

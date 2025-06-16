@@ -34,7 +34,7 @@ const StatsTable = <T extends Record<string, StatsTableValue>>({
   data,
 }: StatsTableProps<T>) => {
   return (
-    <Card className='bg-background rounded-2xl shadow-none border-0 w-fit'>
+    <Card className='bg-background rounded-2xl shadow-none border-0 w-fit h-fit'>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{titleDescription}</CardDescription>

@@ -8,13 +8,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Link } from '@tanstack/react-router';
-import {
-  Banana,
-  ChartLine,
-  LayoutGrid,
-  MapPinned,
-  Settings,
-} from 'lucide-react';
+import { Banana, ChartLine, LayoutGrid, MapPinned } from 'lucide-react';
 import type * as React from 'react';
 
 const menuItems = [
@@ -37,11 +31,6 @@ const menuItems = [
     title: 'Locations',
     url: '/locations',
     icon: MapPinned,
-  },
-  {
-    title: 'Settings',
-    url: '#',
-    icon: Settings,
   },
 ];
 
