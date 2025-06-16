@@ -1,11 +1,11 @@
 import { API_URL } from '@/constants';
-import type {
-  Location,
-  LocationForm,
-  Monkey,
-  MonkeyForm,
-  Route,
-  RouteForm,
+import {
+  type Location,
+  type LocationForm,
+  type Monkey,
+  type MonkeyForm,
+  type Route,
+  type RouteForm,
 } from '@validation';
 
 export async function getMonkeys(): Promise<Monkey[]> {
@@ -152,13 +152,17 @@ export async function deleteRoute({
   }
 }
 
-export async function updateRoute(data: RouteForm): Promise<void> {
+export async function updateRoute(id: number, data: RouteForm): Promise<void> {
+  const payload: Route = {
+    id: id,
+    ...data,
+  };
   const response = await fetch(`${API_URL}/v1/monkeys/routes`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {

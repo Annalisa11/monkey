@@ -4,6 +4,7 @@ import {
   locationFormSchema,
   monkeyFormSchema,
   routeFormSchema,
+  routeSchema,
 } from 'validation';
 import {
   createLocation,
@@ -50,6 +51,34 @@ const router = express.Router();
  */
 
 router.get('/', getAllMonkeys);
+
+/**
+ * @swagger
+ * /v1/monkeys/routes:
+ *   patch:
+ *     summary: Edit an existing route
+ *     tags: [Routes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RouteForm'
+ *     responses:
+ *       200:
+ *         description: Route updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 'Route updated successfully'
+
+ */
+
+router.patch('/routes', validateRequest(routeSchema), editRoute);
 
 /**
  * @swagger
@@ -351,34 +380,6 @@ router.post('/routes', validateRequest(routeFormSchema), createRoute);
  */
 
 router.delete('/routes/:startId/:destId', deleteRoute);
-
-/**
- * @swagger
- * /v1/monkeys/routes:
- *   patch:
- *     summary: Edit an existing route
- *     tags: [Routes]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/RouteForm'
- *     responses:
- *       200:
- *         description: Route updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: 'Route updated successfully'
-
- */
-
-router.patch('/routes', validateRequest(routeFormSchema), editRoute);
 
 /**
  * @swagger

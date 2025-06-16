@@ -42,21 +42,36 @@ export const VerifyQRCodeSchema = z.object({
   destinationId: z.number().int().min(1),
 });
 
-export const routeSchema = z
-  .object({
-    sourceLocation: locationSchema,
-    destinationLocation: locationSchema,
-    description: z
-      .string({ required_error: 'Description is required' })
-      .min(1, { message: 'Description must be at least 1 charachter long' }),
-    isAccessible: z.boolean().nullable(),
-  })
-  .refine((data) => data.sourceLocation.id !== data.destinationLocation.id, {
-    message: 'Source and destination must be different',
-    path: ['destinationLocation.id'],
-  });
+const baseRouteObject = z.object({
+  id: z.number().int().positive(),
+  sourceLocation: locationSchema,
+  destinationLocation: locationSchema,
+  description: z
+    .string({ required_error: 'Description is required' })
+    .min(1, { message: 'Description must be at least 1 character long' }),
+  isAccessible: z.boolean().nullable(),
+});
 
-export const routeFormSchema = routeSchema;
+const routeRefinementFn = (data: {
+  sourceLocation: { id: number };
+  destinationLocation: { id: number };
+}) => {
+  return data.sourceLocation.id !== data.destinationLocation.id;
+};
+
+const routeRefinementOptions = {
+  message: 'Source and destination must be different',
+  path: ['destinationLocation.id'],
+};
+
+export const routeSchema = baseRouteObject.refine(
+  routeRefinementFn,
+  routeRefinementOptions
+);
+
+export const routeFormSchema = baseRouteObject
+  .omit({ id: true })
+  .refine(routeRefinementFn, routeRefinementOptions);
 
 ////////////// STATS TYPES //////////////
 

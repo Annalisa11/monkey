@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { LocationForm, MonkeyForm, RouteForm } from 'validation';
+import { LocationForm, MonkeyForm, Route, RouteForm } from 'validation';
 import monkeyService from '../services/monkeyService.js';
 
 type CreateNavigationParams = {
@@ -167,10 +167,10 @@ const deleteRoute: RequestHandler<{ startId: string; destId: string }> = async (
   }
 };
 
-const editRoute: RequestHandler<any, any, RouteForm> = async (req, res) => {
+const editRoute: RequestHandler<any, any, Route> = async (req, res) => {
   try {
-    const locId = parseInt(req.params.id, 10);
     const updateData = req.body;
+    console.log('🔹 updateData: ', updateData);
 
     await monkeyService.updateRoute(updateData);
 

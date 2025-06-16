@@ -3,7 +3,14 @@ import { and, eq } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
 import QRCode from 'qrcode';
 import { NavigationData, NavigationRequest } from 'src/types.js';
-import { Location, LocationForm, Monkey, MonkeyForm, Route } from 'validation';
+import {
+  Location,
+  LocationForm,
+  Monkey,
+  MonkeyForm,
+  Route,
+  RouteForm,
+} from 'validation';
 import db from '../../db/db.js';
 import {
   events,
@@ -33,7 +40,7 @@ interface MonkeyService {
   deleteLocation(id: number): Promise<void>;
   updateLocation(id: number, data: LocationForm): Promise<void>;
   getLocations(): Promise<Location[]>;
-  createRoute(newRoute: Route): Promise<void>;
+  createRoute(newRoute: RouteForm): Promise<void>;
   deleteRoute(
     sourceLocationId: number,
     destinationLocationId: number
@@ -353,6 +360,7 @@ const monkeyService: MonkeyService = {
 
     const result = await db
       .select({
+        id: routes.id,
         sourceLocation: {
           id: routes.sourceLocationId,
           name: locations.name,
@@ -384,12 +392,7 @@ const monkeyService: MonkeyService = {
         description: data.description,
         isAccessible: data.isAccessible,
       })
-      .where(
-        and(
-          eq(routes.sourceLocationId, data.sourceLocation.id),
-          eq(routes.destinationLocationId, data.destinationLocation.id)
-        )
-      );
+      .where(eq(routes.id, data.id));
   },
 
   createRoute: async (newRoute) => {
