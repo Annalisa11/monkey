@@ -82,10 +82,11 @@ const monkeyService: MonkeyService = {
   },
 
   createQRCode: async (request: NavigationRequest): Promise<NavigationData> => {
-    const { monkeyId, destinationLocationName, journeyId } = request;
+    const { monkeyId, destinationLocationId, journeyId } = request;
     const monkeyInfo = await monkeyService.getMonkeyById(monkeyId);
-    const destination = await monkeyService.getLocationByName(
-      destinationLocationName
+    console.log('---> location id', destinationLocationId);
+    const destination = await monkeyService.getLocationById(
+      destinationLocationId
     );
     if (!monkeyInfo || !destination) {
       throw new Error(
@@ -133,7 +134,7 @@ const monkeyService: MonkeyService = {
 
     if (!route) {
       throw new Error(
-        `Route information ${monkeyInfo.location.name} - ${destinationLocationName} not found`
+        `Route information ${monkeyInfo.location.name} - ${destinationLocationId} not found`
       );
     }
 

@@ -7,7 +7,7 @@ type CreateNavigationParams = {
 };
 
 type CreateNavigationData = {
-  destinationLocationName: string;
+  destinationLocationId: number;
   journeyId: number;
 };
 
@@ -24,6 +24,7 @@ type VerifyQRCodeData = {
 const getAllMonkeys: RequestHandler = async (req, res) => {
   try {
     const monkeys = await monkeyService.getAllMonkeys();
+    console.log('------ TEST get monkeys call ', monkeys);
     res.json(monkeys);
   } catch (error: any) {
     console.error('Failed to get all monkeys', error.message);
@@ -73,6 +74,7 @@ const editMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
 const getLocations: RequestHandler = async (req, res) => {
   try {
     const locations = await monkeyService.getLocations();
+    console.log('Get Locations request received', locations);
     res.json(locations);
   } catch (error: any) {
     console.error('Failed to get all locations', error.message);
@@ -195,11 +197,12 @@ const createNavigation: RequestHandler<
       res.status(404).json({ error: `Monkey with ID ${monkeyId} not found` });
       return;
     }
+    console.log('🔹 req.body: ', req.body);
 
     const navigationData = await monkeyService.createQRCode({
       monkeyId,
       journeyId: req.body.journeyId,
-      destinationLocationName: req.body.destinationLocationName,
+      destinationLocationId: req.body.destinationLocationId,
     });
 
     res.json(navigationData);

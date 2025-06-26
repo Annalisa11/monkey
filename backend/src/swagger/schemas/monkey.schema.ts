@@ -157,9 +157,9 @@
  *     CreateNavigation:
  *       type: object
  *       required:
- *         - destinationLocationName
+ *         - destinationLocationId
  *       properties:
- *         destinationLocationName:
+ *         destinationLocationId:
  *           type: string
  *           minLength: 1
  *           example: Optometrist
@@ -173,9 +173,9 @@
  *     NavigationRequest:
  *       type: object
  *       required:
- *         - destinationLocationName
+ *         - destinationLocationId
  *       properties:
- *         destinationLocationName:
+ *         destinationLocationId:
  *           type: string
  *           example: Optometrist
  *           description: Name of the destination location

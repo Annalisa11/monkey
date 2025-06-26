@@ -21,7 +21,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/v1/monkeys', monkeyRoutes);
 app.use('/v1/dashboard', dashboardRoutes);
 
-app.listen(PORT, (): void => {
+app.listen(PORT, '0.0.0.0', (): void => {
   console.log(`Server is listening on port ${PORT}`);
 });
 

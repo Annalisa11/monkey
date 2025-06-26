@@ -34,7 +34,7 @@ export const StoreButtonPressDataSchema = z.object({
 });
 
 export const CreateNavigationSchema = z.object({
-  destinationLocationName: z.string().min(1),
+  destinationLocationId: z.string().min(1),
 });
 
 export const VerifyQRCodeSchema = z.object({

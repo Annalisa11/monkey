@@ -26,7 +26,7 @@ export interface NavigationData {
 }
 
 export interface NavigationRequest {
-  destinationLocationName: string;
+  destinationLocationId: number;
   journeyId: number;
   monkeyId: number;
 }

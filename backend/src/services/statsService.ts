@@ -347,7 +347,7 @@ export const statsService: StatsService = {
       .groupBy(journeys.routeId, sourceLocations.id, destinationLocations.id)
       .execute();
 
-    console.log('Journeys time result: ', metricsResult);
+    // console.log('Journeys time result: ', metricsResult);
 
     if (!metricsResult.length) return [];
 
@@ -637,9 +637,9 @@ export const statsService: StatsService = {
           completedJourneysQuery.execute(),
         ]);
 
-      console.log('Daily trends - button presses', buttonPressesResult);
-      console.log('Daily trends - QR generated', qrGeneratedResult);
-      console.log('Daily trends - completed journeys', completedJourneysResult);
+      // console.log('Daily trends - button presses', buttonPressesResult);
+      // console.log('Daily trends - QR generated', qrGeneratedResult);
+      // console.log('Daily trends - completed journeys', completedJourneysResult);
 
       const dateRange = generateDateRange(startDate, endDate);
 
@@ -736,12 +736,12 @@ export const statsService: StatsService = {
           completedJourneysQuery.execute(),
         ]);
 
-      console.log('Weekly trends - button presses', buttonPressesResult);
-      console.log(
-        'Weekly trends - completed journeys',
-        completedJourneysResult
-      );
-      console.log('Weekly trends - QR generated', qrGeneratedResult);
+      // console.log('Weekly trends - button presses', buttonPressesResult);
+      // console.log(
+      //   'Weekly trends - completed journeys',
+      //   completedJourneysResult
+      // );
+      // console.log('Weekly trends - QR generated', qrGeneratedResult);
 
       const weekIntervals = generateWeekIntervals(startDate, endDate);
 
@@ -828,11 +828,11 @@ export const statsService: StatsService = {
 
       const qrGeneratedByHourResult = await qrGeneratedByHourQuery.execute();
 
-      console.log('Peak hours analysis - button presses', hourlyResult);
-      console.log(
-        'Peak hours analysis - QR generated',
-        qrGeneratedByHourResult
-      );
+      // console.log('Peak hours analysis - button presses', hourlyResult);
+      // console.log(
+      //   'Peak hours analysis - QR generated',
+      //   qrGeneratedByHourResult
+      // );
 
       return hourlyResult.map((hourData) => {
         const hour = hourData.hour;
@@ -920,7 +920,7 @@ export const statsService: StatsService = {
       const weekdayQrGeneratedCount =
         await weekdayQrGeneratedCountQuery.execute();
 
-      console.log('Weekday hourly data', weekdayHourlyData);
+      // console.log('Weekday hourly data', weekdayHourlyData);
 
       const qrGeneratedByWeekdayHourQuery = db
         .select({
@@ -956,10 +956,10 @@ export const statsService: StatsService = {
           (item) => item.weekday === weekday
         );
 
-        console.log('-> weekday data', weekdayData);
+        // console.log('-> weekday data', weekdayData);
         weekdayData.sort((a, b) => b.buttonPresses - a.buttonPresses);
 
-        console.log('-> weekday data sorted', weekdayData);
+        // console.log('-> weekday data sorted', weekdayData);
 
         const peakHourData = weekdayData[0];
 
