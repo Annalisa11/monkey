@@ -8,12 +8,12 @@ import {
   monkeys,
   routes,
 } from '../../db/schema.js';
-import { NotFoundError } from '../errors.js';
-import eventService from './eventService.js';
-import journeyService from './journeyService.js';
-import locationService from './locationService.js';
-import monkeyService from './monkeyService.js';
-import routeService from './routeService.js';
+import { NotFoundError } from '../../src/errors.js';
+import eventService from '../../src/services/eventService.js';
+import journeyService from '../../src/services/journeyService.js';
+import locationService from '../../src/services/locationService.js';
+import monkeyService from '../../src/services/monkeyService.js';
+import routeService from '../../src/services/routeService.js';
 
 // Set test environment BEFORE importing db
 process.env.NODE_ENV = 'test';
