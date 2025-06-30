@@ -3,6 +3,6 @@ export default {
   out: './drizzle/migrations',
   dialect: 'sqlite',
   dbCredentials: {
-    url: './db/monkey.db',
+    url: './db/monkey-test.db',
   },
 };
