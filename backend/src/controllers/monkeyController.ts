@@ -1,6 +1,12 @@
 import { RequestHandler } from 'express';
 import { LocationForm, MonkeyForm, Route, RouteForm } from 'validation';
-import monkeyService from '../services/monkeyService.js';
+import {
+  JourneyService,
+  LocationService,
+  MonkeyService,
+  RouteService,
+} from '../services/index.js';
+import { recordEvent } from '../utils/eventUtils.js';
 
 type CreateNavigationParams = {
   id: string;
@@ -23,7 +29,7 @@ type VerifyQRCodeData = {
 
 const getAllMonkeys: RequestHandler = async (req, res) => {
   try {
-    const monkeys = await monkeyService.getAllMonkeys();
+    const monkeys = await MonkeyService.getAllMonkeys();
     console.log('------ TEST get monkeys call ', monkeys);
     res.json(monkeys);
   } catch (error: any) {
@@ -34,7 +40,7 @@ const getAllMonkeys: RequestHandler = async (req, res) => {
 
 const createMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
   try {
-    await monkeyService.createMonkey(req.body);
+    await MonkeyService.createMonkey(req.body);
 
     res.status(201).json({ message: 'Monkey created successfully' });
   } catch (error: any) {
@@ -48,7 +54,7 @@ const deleteMonkey: RequestHandler<{ id: string }> = async (req, res) => {
     const { id } = req.params;
     const monkeyId = parseInt(id, 10);
 
-    await monkeyService.deleteMonkey(monkeyId);
+    await MonkeyService.deleteMonkey(monkeyId);
 
     res.status(200).json({ message: 'Monkey deleted successfully' });
   } catch (error: any) {
@@ -62,7 +68,7 @@ const editMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
     const monkeyId = parseInt(req.params.id, 10);
     const updateData = req.body;
 
-    await monkeyService.updateMonkey(monkeyId, updateData);
+    await MonkeyService.updateMonkey(monkeyId, updateData);
 
     res.status(200).json({ message: 'Monkey updated successfully' });
   } catch (error: any) {
@@ -73,7 +79,7 @@ const editMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
 
 const getLocations: RequestHandler = async (req, res) => {
   try {
-    const locations = await monkeyService.getLocations();
+    const locations = await LocationService.getAllLocations();
     console.log('Get Locations request received', locations);
     res.json(locations);
   } catch (error: any) {
@@ -87,7 +93,7 @@ const createLocation: RequestHandler<any, any, LocationForm> = async (
   res
 ) => {
   try {
-    await monkeyService.createLocation(req.body);
+    await LocationService.createLocation(req.body);
 
     res.status(201).json({ message: 'Location created successfully' });
   } catch (error: any) {
@@ -101,7 +107,7 @@ const deleteLocation: RequestHandler<{ id: string }> = async (req, res) => {
     const { id } = req.params;
     const locId = parseInt(id, 10);
 
-    await monkeyService.deleteLocation(locId);
+    await LocationService.deleteLocation(locId);
 
     res.status(200).json({ message: 'Location deleted successfully' });
   } catch (error: any) {
@@ -118,7 +124,7 @@ const editLocation: RequestHandler<any, any, LocationForm> = async (
     const locId = parseInt(req.params.id, 10);
     const updateData = req.body;
 
-    await monkeyService.updateLocation(locId, updateData);
+    await LocationService.updateLocation(locId, updateData);
 
     res.status(200).json({ message: 'Location updated successfully' });
   } catch (error: any) {
@@ -133,7 +139,7 @@ const getRoutes: RequestHandler<{ sourceLocationId: number }> = async (
 ) => {
   try {
     const sourceLocationId = req.params.sourceLocationId;
-    const locations = await monkeyService.getRoutesByLocation(sourceLocationId);
+    const locations = await RouteService.getRoutesByLocation(sourceLocationId);
     res.json(locations);
   } catch (error: any) {
     console.error('Failed to get all locations', error.message);
@@ -143,7 +149,7 @@ const getRoutes: RequestHandler<{ sourceLocationId: number }> = async (
 
 const createRoute: RequestHandler<any, any, RouteForm> = async (req, res) => {
   try {
-    await monkeyService.createRoute(req.body);
+    await RouteService.createRoute(req.body);
 
     res.status(201).json({ message: 'Route created successfully' });
   } catch (error: any) {
@@ -160,7 +166,7 @@ const deleteRoute: RequestHandler<{ startId: string; destId: string }> = async (
     const startId = parseInt(req.params.startId);
     const destId = parseInt(req.params.destId);
 
-    await monkeyService.deleteRoute(startId, destId);
+    await RouteService.deleteRoute(startId, destId);
 
     res.status(200).json({ message: 'Route deleted successfully' });
   } catch (error: any) {
@@ -174,7 +180,7 @@ const editRoute: RequestHandler<any, any, Route> = async (req, res) => {
     const updateData = req.body;
     console.log('🔹 updateData: ', updateData);
 
-    await monkeyService.updateRoute(updateData);
+    await RouteService.updateRoute(updateData);
 
     res.status(200).json({ message: 'Route updated successfully' });
   } catch (error: any) {
@@ -190,7 +196,7 @@ const createNavigation: RequestHandler<
 > = async (req, res) => {
   try {
     const monkeyId = parseInt(req.params.id);
-    const monkey = await monkeyService.getMonkeyById(monkeyId);
+    const monkey = await MonkeyService.getMonkeyById(monkeyId);
     console.log('🔹 fetched monkey: ', monkey);
 
     if (!monkey || !monkey.location.id) {
@@ -199,7 +205,7 @@ const createNavigation: RequestHandler<
     }
     console.log('🔹 req.body: ', req.body);
 
-    const navigationData = await monkeyService.createQRCode({
+    const navigationData = await JourneyService.createQRCode({
       monkeyId,
       journeyId: req.body.journeyId,
       destinationLocationId: req.body.destinationLocationId,
@@ -228,7 +234,7 @@ const verifyQRCode: RequestHandler<
     console.log('destructured data: ', token, destinationId);
 
     // TODO: handle errors better
-    const isRightDestination = await monkeyService.verifyDestination(
+    const isRightDestination = await JourneyService.verifyDestination(
       token,
       destinationId,
       journeyId,
@@ -254,39 +260,49 @@ const handleButtonPressEvent: RequestHandler<{ id: string }, any, any> = async (
   res
 ) => {
   try {
-    const monkeyInfo = await monkeyService.getMonkeyById(
+    const monkeyInfo = await MonkeyService.getMonkeyById(
       parseInt(req.params.id)
     );
     if (!monkeyInfo) {
       res.status(404).json({ error: 'Monkey not found' });
       return;
     }
-
-    const journeyId = await monkeyService.recordNewJourney(
+    const journeyId = await JourneyService.recordNewJourney(
       monkeyInfo.location.id
     );
-    await monkeyService.recordButtonPressEvent(monkeyInfo.id, journeyId);
+    await recordEvent({
+      eventType: 'button_press',
+      journeyId,
+      locationId: monkeyInfo.location.id,
+      monkeyId: monkeyInfo.id,
+      action: 'button_press',
+    });
     res.status(200).json({ journeyId });
   } catch (err: any) {
     console.error('Failed to record button press', err.message);
     res.status(400).json({ error: err.message });
   }
 };
+
 const handleBananaReturnEvent: RequestHandler<
   { id: string },
   any,
   any
 > = async (req, res) => {
   try {
-    const monkeyInfo = await monkeyService.getMonkeyById(
+    const monkeyInfo = await MonkeyService.getMonkeyById(
       parseInt(req.params.id)
     );
     if (!monkeyInfo) {
       res.status(404).json({ error: 'Monkey not found' });
       return;
     }
-
-    await monkeyService.recordBananaReturnEvent(monkeyInfo.id);
+    await recordEvent({
+      eventType: 'banana_return',
+      locationId: monkeyInfo.location.id,
+      monkeyId: monkeyInfo.id,
+      action: 'banana_return',
+    });
     res
       .status(200)
       .json({ message: 'Banana return event recorded successfully' });
