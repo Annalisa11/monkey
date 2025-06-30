@@ -14,7 +14,7 @@ const logger = {
     console.error(format('ERROR', '❌', message));
   },
   request: (req: import('express').Request) => {
-    const reqLog = `--> [REQUEST] ${req.method} ${req.url} | params: ${JSON.stringify(req.params)} | body: ${JSON.stringify(req.body)}`;
+    const reqLog = `👉 [REQUEST] ${req.method} ${req.url} | params: ${JSON.stringify(req.params)} | body: ${JSON.stringify(req.body)}`;
     console.log(reqLog);
   },
 };
