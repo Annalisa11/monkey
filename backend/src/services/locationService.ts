@@ -2,26 +2,30 @@ import { eq } from 'drizzle-orm';
 import { Location, LocationForm } from 'validation';
 import db from '../../db/db.js';
 import { locations } from '../../db/schema.js';
+import { NotFoundError } from '../errors.js';
 
 const LocationService = {
   getAllLocations: async (): Promise<Location[]> => {
     return await db.select().from(locations);
   },
 
-  getLocationById: async (id: number): Promise<Location | null> => {
+  getLocationById: async (id: number): Promise<Location> => {
     const [location] = await db
       .select()
       .from(locations)
       .where(eq(locations.id, id));
-    return location || null;
+    if (!location) throw new NotFoundError(`Location with id ${id} not found`);
+    return location;
   },
 
-  getLocationByName: async (locationName: string): Promise<Location | null> => {
+  getLocationByName: async (locationName: string): Promise<Location> => {
     const [location] = await db
       .select()
       .from(locations)
       .where(eq(locations.name, locationName));
-    return location || null;
+    if (!location)
+      throw new NotFoundError(`Location with name ${locationName} not found`);
+    return location;
   },
 
   getLocationIdByName: async (name: string): Promise<number> => {
@@ -29,9 +33,8 @@ const LocationService = {
       .select()
       .from(locations)
       .where(eq(locations.name, name));
-    if (!location) {
-      throw new Error(`Location ${name} not found`);
-    }
+    if (!location)
+      throw new NotFoundError(`Location with name ${name} not found`);
     return location.id;
   },
 

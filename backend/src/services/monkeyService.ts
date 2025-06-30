@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { Monkey, MonkeyForm } from 'validation';
 import db from '../../db/db.js';
 import { locations, monkeys } from '../../db/schema.js';
+import { NotFoundError } from '../errors.js';
 
 const monkeyWithLocationSelect = {
   id: monkeys.monkeyId,
@@ -21,13 +22,15 @@ const MonkeyService = {
       .innerJoin(locations, eq(monkeys.locationId, locations.id));
   },
 
-  getMonkeyById: async (monkeyId: number): Promise<Monkey | null> => {
+  getMonkeyById: async (monkeyId: number): Promise<Monkey> => {
     const [monkey] = await db
       .select(monkeyWithLocationSelect)
       .from(monkeys)
       .innerJoin(locations, eq(monkeys.locationId, locations.id))
       .where(eq(monkeys.monkeyId, monkeyId));
-    return monkey || null;
+    if (!monkey)
+      throw new NotFoundError(`Monkey with id ${monkeyId} not found`);
+    return monkey;
   },
 
   createMonkey: async (newMonkey: MonkeyForm): Promise<void> => {
@@ -39,7 +42,7 @@ const MonkeyService = {
   },
 
   updateMonkey: async (id: number, data: MonkeyForm): Promise<void> => {
-    await db
+    const result = await db
       .update(monkeys)
       .set({
         name: data.name,
@@ -47,10 +50,18 @@ const MonkeyService = {
         locationId: data.location.id,
       })
       .where(eq(monkeys.monkeyId, id));
+
+    if (result.changes === 0) {
+      throw new NotFoundError(`Monkey with id ${id} not found`);
+    }
   },
 
   deleteMonkey: async (id: number): Promise<void> => {
-    await db.delete(monkeys).where(eq(monkeys.monkeyId, id));
+    const result = await db.delete(monkeys).where(eq(monkeys.monkeyId, id));
+
+    if (result.changes === 0) {
+      throw new NotFoundError(`Monkey with id ${id} not found`);
+    }
   },
 };
 

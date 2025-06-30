@@ -1,4 +1,3 @@
-// test/monkeyService.integration.test.ts
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import db from '../../db/db.js';
@@ -9,6 +8,7 @@ import {
   monkeys,
   routes,
 } from '../../db/schema.js';
+import { NotFoundError } from '../errors.js';
 import eventService from './eventService.js';
 import journeyService from './journeyService.js';
 import locationService from './locationService.js';
@@ -66,13 +66,15 @@ describe('MonkeyService Integration Tests', () => {
 
       await locationService.deleteLocation(1);
 
-      const location = await locationService.getLocationById(1);
-      expect(location).toBeNull();
+      await expect(locationService.getLocationById(1)).rejects.toBeInstanceOf(
+        NotFoundError
+      );
     });
 
-    it('should return null for non-existent location', async () => {
-      const location = await locationService.getLocationById(999);
-      expect(location).toBeNull();
+    it('should throw NotFoundError for non-existent location', async () => {
+      await expect(locationService.getLocationById(999)).rejects.toBeInstanceOf(
+        NotFoundError
+      );
     });
   });
 
@@ -154,8 +156,9 @@ describe('MonkeyService Integration Tests', () => {
 
       await monkeyService.deleteMonkey(1);
 
-      const monkey = await monkeyService.getMonkeyById(1);
-      expect(monkey).toBeNull();
+      await expect(monkeyService.getMonkeyById(1)).rejects.toBeInstanceOf(
+        NotFoundError
+      );
     });
   });
 
@@ -381,24 +384,19 @@ describe('MonkeyService Integration Tests', () => {
           destinationLocationId: 1,
           journeyId,
         })
-      ).rejects.toThrow();
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
 
     it('should throw error for non-existent location', async () => {
       await expect(
-        locationService.getLocationIdByName('Non-existent Location')
-      ).rejects.toThrow('Location Non-existent Location not found');
+        locationService.getLocationById(9999)
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
 
-    it('should return false for invalid destination verification', async () => {
-      const result = await journeyService.verifyDestination(
-        'invalid-token',
-        1,
-        1,
-        1
-      );
-
-      expect(result).toBe(false);
+    it('should throw error for invalid destination verification', async () => {
+      await expect(
+        journeyService.verifyDestination('invalid-token', 1, 1, 1)
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 });

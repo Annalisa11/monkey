@@ -27,29 +27,31 @@ type VerifyQRCodeData = {
   journeyId: number;
 };
 
-const getAllMonkeys: RequestHandler = async (req, res) => {
+const getAllMonkeys: RequestHandler = async (req, res, next) => {
   try {
     const monkeys = await MonkeyService.getAllMonkeys();
     console.log('------ TEST get monkeys call ', monkeys);
     res.json(monkeys);
   } catch (error: any) {
-    console.error('Failed to get all monkeys', error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const createMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
+const createMonkey: RequestHandler<any, any, MonkeyForm> = async (
+  req,
+  res,
+  next
+) => {
   try {
     await MonkeyService.createMonkey(req.body);
 
     res.status(201).json({ message: 'Monkey created successfully' });
   } catch (error: any) {
-    console.error('Failed to create new monkey', error.message);
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const deleteMonkey: RequestHandler<{ id: string }> = async (req, res) => {
+const deleteMonkey: RequestHandler<{ id: string }> = async (req, res, next) => {
   try {
     const { id } = req.params;
     const monkeyId = parseInt(id, 10);
@@ -58,12 +60,15 @@ const deleteMonkey: RequestHandler<{ id: string }> = async (req, res) => {
 
     res.status(200).json({ message: 'Monkey deleted successfully' });
   } catch (error: any) {
-    console.error('Failed to delete monkey', error.message);
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const editMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
+const editMonkey: RequestHandler<any, any, MonkeyForm> = async (
+  req,
+  res,
+  next
+) => {
   try {
     const monkeyId = parseInt(req.params.id, 10);
     const updateData = req.body;
@@ -72,37 +77,39 @@ const editMonkey: RequestHandler<any, any, MonkeyForm> = async (req, res) => {
 
     res.status(200).json({ message: 'Monkey updated successfully' });
   } catch (error: any) {
-    console.error('Failed to update monkey', error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const getLocations: RequestHandler = async (req, res) => {
+const getLocations: RequestHandler = async (req, res, next) => {
   try {
     const locations = await LocationService.getAllLocations();
     console.log('Get Locations request received', locations);
     res.json(locations);
   } catch (error: any) {
-    console.error('Failed to get all locations', error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
 const createLocation: RequestHandler<any, any, LocationForm> = async (
   req,
-  res
+  res,
+  next
 ) => {
   try {
     await LocationService.createLocation(req.body);
 
     res.status(201).json({ message: 'Location created successfully' });
   } catch (error: any) {
-    console.error('Failed to create new location', error.message);
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const deleteLocation: RequestHandler<{ id: string }> = async (req, res) => {
+const deleteLocation: RequestHandler<{ id: string }> = async (
+  req,
+  res,
+  next
+) => {
   try {
     const { id } = req.params;
     const locId = parseInt(id, 10);
@@ -111,14 +118,14 @@ const deleteLocation: RequestHandler<{ id: string }> = async (req, res) => {
 
     res.status(200).json({ message: 'Location deleted successfully' });
   } catch (error: any) {
-    console.error('Failed to delete location', error.message);
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
 const editLocation: RequestHandler<any, any, LocationForm> = async (
   req,
-  res
+  res,
+  next
 ) => {
   try {
     const locId = parseInt(req.params.id, 10);
@@ -128,39 +135,42 @@ const editLocation: RequestHandler<any, any, LocationForm> = async (
 
     res.status(200).json({ message: 'Location updated successfully' });
   } catch (error: any) {
-    console.error('Failed to update location', error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
 const getRoutes: RequestHandler<{ sourceLocationId: number }> = async (
   req,
-  res
+  res,
+  next
 ) => {
   try {
     const sourceLocationId = req.params.sourceLocationId;
     const locations = await RouteService.getRoutesByLocation(sourceLocationId);
     res.json(locations);
   } catch (error: any) {
-    console.error('Failed to get all locations', error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const createRoute: RequestHandler<any, any, RouteForm> = async (req, res) => {
+const createRoute: RequestHandler<any, any, RouteForm> = async (
+  req,
+  res,
+  next
+) => {
   try {
     await RouteService.createRoute(req.body);
 
     res.status(201).json({ message: 'Route created successfully' });
   } catch (error: any) {
-    console.error('Failed to create new route', error.message);
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
 const deleteRoute: RequestHandler<{ startId: string; destId: string }> = async (
   req,
-  res
+  res,
+  next
 ) => {
   try {
     const startId = parseInt(req.params.startId);
@@ -170,12 +180,11 @@ const deleteRoute: RequestHandler<{ startId: string; destId: string }> = async (
 
     res.status(200).json({ message: 'Route deleted successfully' });
   } catch (error: any) {
-    console.error('Failed to delete route', error.message);
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const editRoute: RequestHandler<any, any, Route> = async (req, res) => {
+const editRoute: RequestHandler<any, any, Route> = async (req, res, next) => {
   try {
     const updateData = req.body;
     console.log('🔹 updateData: ', updateData);
@@ -184,8 +193,7 @@ const editRoute: RequestHandler<any, any, Route> = async (req, res) => {
 
     res.status(200).json({ message: 'Route updated successfully' });
   } catch (error: any) {
-    console.error('Failed to update route', error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
@@ -193,16 +201,11 @@ const createNavigation: RequestHandler<
   CreateNavigationParams,
   any,
   CreateNavigationData
-> = async (req, res) => {
+> = async (req, res, next) => {
   try {
     const monkeyId = parseInt(req.params.id);
     const monkey = await MonkeyService.getMonkeyById(monkeyId);
     console.log('🔹 fetched monkey: ', monkey);
-
-    if (!monkey || !monkey.location.id) {
-      res.status(404).json({ error: `Monkey with ID ${monkeyId} not found` });
-      return;
-    }
     console.log('🔹 req.body: ', req.body);
 
     const navigationData = await JourneyService.createQRCode({
@@ -213,8 +216,7 @@ const createNavigation: RequestHandler<
 
     res.json(navigationData);
   } catch (error: any) {
-    console.error('Failed to get navigation data', error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
@@ -222,7 +224,7 @@ const verifyQRCode: RequestHandler<
   VerifyQRCodeParams,
   any,
   VerifyQRCodeData
-> = async (req, res) => {
+> = async (req, res, next) => {
   console.log('🔹 verifyQRCode called with body: ', req.body);
   try {
     const { token, destinationId, journeyId } = req.body;
@@ -242,31 +244,25 @@ const verifyQRCode: RequestHandler<
     );
 
     if (!isRightDestination) {
-      res.status(403).json({
-        error: 'Wrong destination or token is invalid/used or other error.',
-      });
       return;
     }
 
     res.status(200).json({ message: 'Destination verified successfully.' });
   } catch (err: any) {
-    console.error('Failed to verify QR code', err.message);
-    res.status(400).json({ error: err.message });
+    next(err);
   }
 };
 
 const handleButtonPressEvent: RequestHandler<{ id: string }, any, any> = async (
   req,
-  res
+  res,
+  next
 ) => {
   try {
     const monkeyInfo = await MonkeyService.getMonkeyById(
       parseInt(req.params.id)
     );
-    if (!monkeyInfo) {
-      res.status(404).json({ error: 'Monkey not found' });
-      return;
-    }
+
     const journeyId = await JourneyService.recordNewJourney(
       monkeyInfo.location.id
     );
@@ -279,8 +275,7 @@ const handleButtonPressEvent: RequestHandler<{ id: string }, any, any> = async (
     });
     res.status(200).json({ journeyId });
   } catch (err: any) {
-    console.error('Failed to record button press', err.message);
-    res.status(400).json({ error: err.message });
+    next(err);
   }
 };
 
@@ -288,15 +283,12 @@ const handleBananaReturnEvent: RequestHandler<
   { id: string },
   any,
   any
-> = async (req, res) => {
+> = async (req, res, next) => {
   try {
     const monkeyInfo = await MonkeyService.getMonkeyById(
       parseInt(req.params.id)
     );
-    if (!monkeyInfo) {
-      res.status(404).json({ error: 'Monkey not found' });
-      return;
-    }
+
     await eventService.recordEvent({
       eventType: 'banana_return',
       locationId: monkeyInfo.location.id,
@@ -307,8 +299,7 @@ const handleBananaReturnEvent: RequestHandler<
       .status(200)
       .json({ message: 'Banana return event recorded successfully' });
   } catch (err: any) {
-    console.error('Failed to record banana return event', err.message);
-    res.status(400).json({ error: err.message });
+    next(err);
   }
 };
 
