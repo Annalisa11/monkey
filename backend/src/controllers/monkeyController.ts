@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express';
+import eventService from 'src/services/eventService.js';
 import { LocationForm, MonkeyForm, Route, RouteForm } from 'validation';
 import {
   JourneyService,
@@ -6,7 +7,6 @@ import {
   MonkeyService,
   RouteService,
 } from '../services/index.js';
-import { recordEvent } from '../utils/eventUtils.js';
 
 type CreateNavigationParams = {
   id: string;
@@ -270,7 +270,7 @@ const handleButtonPressEvent: RequestHandler<{ id: string }, any, any> = async (
     const journeyId = await JourneyService.recordNewJourney(
       monkeyInfo.location.id
     );
-    await recordEvent({
+    await eventService.recordEvent({
       eventType: 'button_press',
       journeyId,
       locationId: monkeyInfo.location.id,
@@ -297,7 +297,7 @@ const handleBananaReturnEvent: RequestHandler<
       res.status(404).json({ error: 'Monkey not found' });
       return;
     }
-    await recordEvent({
+    await eventService.recordEvent({
       eventType: 'banana_return',
       locationId: monkeyInfo.location.id,
       monkeyId: monkeyInfo.id,

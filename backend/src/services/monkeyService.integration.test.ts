@@ -9,7 +9,11 @@ import {
   monkeys,
   routes,
 } from '../../db/schema.js';
+import eventService from './eventService.js';
+import journeyService from './journeyService.js';
+import locationService from './locationService.js';
 import monkeyService from './monkeyService.js';
+import routeService from './routeService.js';
 
 // Set test environment BEFORE importing db
 process.env.NODE_ENV = 'test';
@@ -29,18 +33,18 @@ describe('MonkeyService Integration Tests', () => {
     it('should create a new location', async () => {
       const locationData = { name: 'Test Location' };
 
-      await monkeyService.createLocation(locationData);
+      await locationService.createLocation(locationData);
 
-      const locations = await monkeyService.getAllLocations();
-      expect(locations).toHaveLength(1);
-      expect(locations[0].name).toBe('Test Location');
+      const locationsList = await locationService.getAllLocations();
+      expect(locationsList).toHaveLength(1);
+      expect(locationsList[0].name).toBe('Test Location');
     });
 
     it('should get location by ID', async () => {
       // Setup
       await db.insert(locations).values({ id: 1, name: 'Test Location' });
 
-      const location = await monkeyService.getLocationById(1);
+      const location = await locationService.getLocationById(1);
 
       expect(location).toBeDefined();
       expect(location?.name).toBe('Test Location');
@@ -50,9 +54,9 @@ describe('MonkeyService Integration Tests', () => {
       // Setup
       await db.insert(locations).values({ id: 1, name: 'Old Name' });
 
-      await monkeyService.updateLocation(1, { name: 'New Name' });
+      await locationService.updateLocation(1, { name: 'New Name' });
 
-      const location = await monkeyService.getLocationById(1);
+      const location = await locationService.getLocationById(1);
       expect(location?.name).toBe('New Name');
     });
 
@@ -60,14 +64,14 @@ describe('MonkeyService Integration Tests', () => {
       // Setup
       await db.insert(locations).values({ id: 1, name: 'Test Location' });
 
-      await monkeyService.deleteLocation(1);
+      await locationService.deleteLocation(1);
 
-      const location = await monkeyService.getLocationById(1);
+      const location = await locationService.getLocationById(1);
       expect(location).toBeNull();
     });
 
     it('should return null for non-existent location', async () => {
-      const location = await monkeyService.getLocationById(999);
+      const location = await locationService.getLocationById(999);
       expect(location).toBeNull();
     });
   });
@@ -93,11 +97,11 @@ describe('MonkeyService Integration Tests', () => {
 
       await monkeyService.createMonkey(monkeyData);
 
-      const monkeys = await monkeyService.getAllMonkeys();
-      expect(monkeys).toHaveLength(1);
-      expect(monkeys[0].name).toBe('Test Monkey One');
-      expect(monkeys[0].isActive).toBe(true);
-      expect(monkeys[0].location.name).toBe('Location A');
+      const monkeysList = await monkeyService.getAllMonkeys();
+      expect(monkeysList).toHaveLength(1);
+      expect(monkeysList[0].name).toBe('Test Monkey One');
+      expect(monkeysList[0].isActive).toBe(true);
+      expect(monkeysList[0].location.name).toBe('Location A');
     });
 
     it('should get monkey by ID', async () => {
@@ -174,12 +178,12 @@ describe('MonkeyService Integration Tests', () => {
         isAccessible: true,
       };
 
-      await monkeyService.createRoute(routeData);
+      await routeService.createRoute(routeData);
 
-      const routes = await monkeyService.getRoutesByLocation(1);
-      expect(routes).toHaveLength(1);
-      expect(routes[0].description).toBe('Route from A to B');
-      expect(routes[0].isAccessible).toBe(true);
+      const routesList = await routeService.getRoutesByLocation(1);
+      expect(routesList).toHaveLength(1);
+      expect(routesList[0].description).toBe('Route from A to B');
+      expect(routesList[0].isAccessible).toBe(true);
     });
 
     it('should get routes by source location', async () => {
@@ -205,7 +209,7 @@ describe('MonkeyService Integration Tests', () => {
         },
       ]);
 
-      const routesFromA = await monkeyService.getRoutesByLocation(1);
+      const routesFromA = await routeService.getRoutesByLocation(1);
 
       expect(routesFromA).toHaveLength(2);
       expect(routesFromA[0].sourceLocation.name).toBe('Location A');
@@ -246,7 +250,7 @@ describe('MonkeyService Integration Tests', () => {
     });
 
     it('should record a new journey', async () => {
-      const journeyId = await monkeyService.recordNewJourney(1);
+      const journeyId = await journeyService.recordNewJourney(1);
 
       expect(journeyId).toBeDefined();
       expect(typeof journeyId).toBe('number');
@@ -262,9 +266,9 @@ describe('MonkeyService Integration Tests', () => {
     });
 
     it('should create QR code for navigation request', async () => {
-      const journeyId = await monkeyService.recordNewJourney(1);
+      const journeyId = await journeyService.recordNewJourney(1);
 
-      const navigationData = await monkeyService.createQRCode({
+      const navigationData = await journeyService.createQRCode({
         monkeyId: 1,
         destinationLocationId: 2,
         journeyId,
@@ -286,14 +290,14 @@ describe('MonkeyService Integration Tests', () => {
 
     it('should verify destination successfully', async () => {
       // Setup complete journey flow
-      const journeyId = await monkeyService.recordNewJourney(1);
-      const navigationData = await monkeyService.createQRCode({
+      const journeyId = await journeyService.recordNewJourney(1);
+      const navigationData = await journeyService.createQRCode({
         monkeyId: 1,
         destinationLocationId: 2,
         journeyId,
       });
 
-      const isValid = await monkeyService.verifyDestination(
+      const isValid = await journeyService.verifyDestination(
         navigationData.qrCode.token,
         2, // location id
         journeyId,
@@ -325,9 +329,15 @@ describe('MonkeyService Integration Tests', () => {
     });
 
     it('should record button press event', async () => {
-      const journeyId = await monkeyService.recordNewJourney(1);
+      const journeyId = await journeyService.recordNewJourney(1);
 
-      await monkeyService.recordButtonPressEvent(1, journeyId);
+      await eventService.recordEvent({
+        eventType: 'button_press',
+        journeyId,
+        locationId: 1,
+        monkeyId: 1,
+        action: 'button_press',
+      });
 
       const allEvents = await db.select().from(events);
       expect(allEvents).toHaveLength(1);
@@ -341,7 +351,12 @@ describe('MonkeyService Integration Tests', () => {
     });
 
     it('should record banana return event', async () => {
-      await monkeyService.recordBananaReturnEvent(1);
+      await eventService.recordEvent({
+        eventType: 'banana_return',
+        locationId: 1,
+        monkeyId: 1,
+        action: 'banana_return',
+      });
 
       const allEvents = await db.select().from(events);
       expect(allEvents).toHaveLength(1);
@@ -358,10 +373,10 @@ describe('MonkeyService Integration Tests', () => {
   describe('Error Handling', () => {
     it('should throw error for non-existent monkey in QR code creation', async () => {
       await db.insert(locations).values({ id: 1, name: 'Location A' });
-      const journeyId = await monkeyService.recordNewJourney(1);
+      const journeyId = await journeyService.recordNewJourney(1);
 
       await expect(
-        monkeyService.createQRCode({
+        journeyService.createQRCode({
           monkeyId: 999, // Non-existent monkey
           destinationLocationId: 1,
           journeyId,
@@ -371,12 +386,12 @@ describe('MonkeyService Integration Tests', () => {
 
     it('should throw error for non-existent location', async () => {
       await expect(
-        monkeyService.getLocationIdByName('Non-existent Location')
+        locationService.getLocationIdByName('Non-existent Location')
       ).rejects.toThrow('Location Non-existent Location not found');
     });
 
     it('should return false for invalid destination verification', async () => {
-      const result = await monkeyService.verifyDestination(
+      const result = await journeyService.verifyDestination(
         'invalid-token',
         1,
         1,
