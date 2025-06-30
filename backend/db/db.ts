@@ -1,14 +1,16 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import * as schema from './schema.js';
 import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import * as schema from './schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const dbPath = path.resolve(__dirname, 'monkey.db');
+// Use different database file for tests
+const dbFileName =
+  process.env.NODE_ENV === 'test' ? 'monkey-test.db' : 'monkey.db';
+const dbPath = path.resolve(__dirname, dbFileName);
 
 const sqlite = new Database(dbPath);
 const db = drizzle(sqlite, { schema });
