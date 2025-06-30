@@ -217,15 +217,22 @@ const verifyQRCode: RequestHandler<
   any,
   VerifyQRCodeData
 > = async (req, res) => {
+  console.log('🔹 verifyQRCode called with body: ', req.body);
   try {
     const { token, destinationId, journeyId } = req.body;
-    console.log(token, destinationId);
+    const { id } = req.params;
+    const monkeyId = parseInt(id, 10);
+
+    //TODO: validate if monkey id is at the right location.
+
+    console.log('destructured data: ', token, destinationId);
 
     // TODO: handle errors better
     const isRightDestination = await monkeyService.verifyDestination(
       token,
       destinationId,
-      journeyId
+      journeyId,
+      monkeyId
     );
 
     if (!isRightDestination) {

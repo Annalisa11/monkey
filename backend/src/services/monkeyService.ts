@@ -26,7 +26,8 @@ interface MonkeyService {
   verifyDestination(
     token: string,
     locationId: number,
-    journeyId: number
+    journeyId: number,
+    monkeyId: number
   ): Promise<boolean>;
   getAllLocations(): Promise<Location[]>;
   getLocationById(id: number): Promise<Location | null>;
@@ -94,6 +95,7 @@ const monkeyService: MonkeyService = {
       );
     }
 
+    //TODO: improve error handling. Route from 1 to 1?
     // generate QR code
     const verificationToken = crypto.randomBytes(16).toString('hex');
 
@@ -160,7 +162,8 @@ const monkeyService: MonkeyService = {
   verifyDestination: async (
     token: string,
     locationId: number,
-    journeyId: number
+    journeyId: number,
+    monkeyId: number
   ): Promise<boolean> => {
     try {
       // TODO: why do I get journey {journey: { id: 1, ... }} ? Fix this
@@ -173,6 +176,7 @@ const monkeyService: MonkeyService = {
         .innerJoin(routes, eq(journeys.routeId, routes.id))
         .where(eq(journeys.qrToken, token));
 
+      // TODO: throw errors or messages or something
       if (!journey) {
         // Journey doesn't exist (token is not right)
         console.log('Journey not found');
@@ -194,12 +198,23 @@ const monkeyService: MonkeyService = {
         return false;
       }
 
-      if (journey.route.destinationLocationId !== locationId) {
+      const scanningMonkeyInfo = await monkeyService.getMonkeyById(monkeyId);
+
+      console.log(
+        'Scanning monkey info:',
+        monkeyId,
+        journey.route.destinationLocationId,
+        locationId,
+        scanningMonkeyInfo
+      );
+      if (
+        (scanningMonkeyInfo && scanningMonkeyInfo.location.id !== locationId) ||
+        locationId !== journey.route.destinationLocationId
+      ) {
         console.log(
           'Patient is at the wrong destination. Expected:',
           journey.route.destinationLocationId
         );
-        // Patient is at the wrong destination
         return false;
       }
 
