@@ -53,7 +53,7 @@
     "globals": "^16.0.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
-    "vite": "5.2.10"
+    "vite": "^6.3.5"
   },
   "overrides": {
     "react-is": "^19.0.0-rc-69d4b800-20241021"

@@ -8,76 +8,32 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as StatsRouteImport } from './routes/stats'
+import { Route as MonkeysRouteImport } from './routes/monkeys'
+import { Route as LocationsRouteImport } from './routes/locations'
+import { Route as IndexRouteImport } from './routes/index'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as StatsImport } from './routes/stats'
-import { Route as MonkeysImport } from './routes/monkeys'
-import { Route as LocationsImport } from './routes/locations'
-import { Route as IndexImport } from './routes/index'
-
-// Create/Update Routes
-
-const StatsRoute = StatsImport.update({
+const StatsRoute = StatsRouteImport.update({
   id: '/stats',
   path: '/stats',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const MonkeysRoute = MonkeysImport.update({
+const MonkeysRoute = MonkeysRouteImport.update({
   id: '/monkeys',
   path: '/monkeys',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const LocationsRoute = LocationsImport.update({
+const LocationsRoute = LocationsRouteImport.update({
   id: '/locations',
   path: '/locations',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/locations': {
-      id: '/locations'
-      path: '/locations'
-      fullPath: '/locations'
-      preLoaderRoute: typeof LocationsImport
-      parentRoute: typeof rootRoute
-    }
-    '/monkeys': {
-      id: '/monkeys'
-      path: '/monkeys'
-      fullPath: '/monkeys'
-      preLoaderRoute: typeof MonkeysImport
-      parentRoute: typeof rootRoute
-    }
-    '/stats': {
-      id: '/stats'
-      path: '/stats'
-      fullPath: '/stats'
-      preLoaderRoute: typeof StatsImport
-      parentRoute: typeof rootRoute
-    }
-  }
-}
-
-// Create and export the route tree
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -85,22 +41,19 @@ export interface FileRoutesByFullPath {
   '/monkeys': typeof MonkeysRoute
   '/stats': typeof StatsRoute
 }
-
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/locations': typeof LocationsRoute
   '/monkeys': typeof MonkeysRoute
   '/stats': typeof StatsRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute
+  __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/locations': typeof LocationsRoute
   '/monkeys': typeof MonkeysRoute
   '/stats': typeof StatsRoute
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths: '/' | '/locations' | '/monkeys' | '/stats'
@@ -109,12 +62,44 @@ export interface FileRouteTypes {
   id: '__root__' | '/' | '/locations' | '/monkeys' | '/stats'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LocationsRoute: typeof LocationsRoute
   MonkeysRoute: typeof MonkeysRoute
   StatsRoute: typeof StatsRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/monkeys': {
+      id: '/monkeys'
+      path: '/monkeys'
+      fullPath: '/monkeys'
+      preLoaderRoute: typeof MonkeysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations': {
+      id: '/locations'
+      path: '/locations'
+      fullPath: '/locations'
+      preLoaderRoute: typeof LocationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -123,35 +108,6 @@ const rootRouteChildren: RootRouteChildren = {
   MonkeysRoute: MonkeysRoute,
   StatsRoute: StatsRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/locations",
-        "/monkeys",
-        "/stats"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/locations": {
-      "filePath": "locations.tsx"
-    },
-    "/monkeys": {
-      "filePath": "monkeys.tsx"
-    },
-    "/stats": {
-      "filePath": "stats.tsx"
-    }
-  }
-}
-ROUTE_MANIFEST_END */
