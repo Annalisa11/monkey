@@ -67,7 +67,7 @@ This builds the validation package so that the frontend and backend can import i
 
 ### 3. Run the whole system
 
-run these commands in two different terminal windows
+run each commands in a different terminal window
 
 ```bash
 pnpm backend:dev
@@ -95,14 +95,14 @@ All scripts follow the format: `section:command` (e.g., `frontend:dev`).
 
 ```bash
 pnpm format           # Run Prettier on the whole project
-pnpm typecheck        # Run TypeScript in all packages
+pnpm build            # build validation, frontend and backend
 ```
 
 ### Frontend
 
 ```bash
 pnpm frontend:dev         # Start Vite dev server
-pnpm frontend:build       # Build production frontend
+pnpm frontend:build       # Build frontend
 ```
 
 ### Backend
@@ -115,11 +115,9 @@ pnpm backend:build       # Build backend
 ### Shared Validation
 
 ```bash
-pnpm validation:build     # Build validation package
+pnpm validation:build     # Build validation package once
 pnpm validation:watch     # Watch for changes and rebuild
 ```
-
----
 
 ## Shared Types & Validation
 
