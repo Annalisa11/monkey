@@ -19,7 +19,9 @@ import {
 } from '../../db/schema.js';
 
 import { alias } from 'drizzle-orm/sqlite-core';
-import { calculatePercentage } from 'src/utils/calculations.js';
+import { Monkey } from 'validation';
+import db from '../../db/db.js';
+import { calculatePercentage } from '../utils/calculations.js';
 import {
   formatDate,
   formatDateToUnix,
@@ -27,9 +29,7 @@ import {
   formatTime,
   generateDateRange,
   generateWeekIntervals,
-} from 'src/utils/datetime.js';
-import { Monkey } from 'validation';
-import db from '../../db/db.js';
+} from '../utils/datetime.js';
 import monkeyService from './monkeyService.js';
 
 export interface OverviewMetrics {

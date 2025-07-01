@@ -1,5 +1,4 @@
 import express from 'express';
-import { validateRequest } from 'src/middleware/validateRequest.js';
 import {
   locationFormSchema,
   monkeyFormSchema,
@@ -24,8 +23,9 @@ import {
   handleButtonPressEvent,
   verifyQRCode,
 } from '../controllers/monkeyController.js';
+import { validateRequest } from '../middleware/validateRequest.js';
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 /**
  * @swagger

@@ -2,9 +2,9 @@ import express from 'express';
 import {
   getOverviewMetrics,
   test,
-} from 'src/controllers/dashboardController.js';
+} from '../controllers/dashboardController.js';
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 /**
  * @swagger

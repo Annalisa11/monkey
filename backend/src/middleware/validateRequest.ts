@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import logger from 'src/logger.js';
 import { ZodSchema } from 'zod';
+import logger from '../logger.js';
 
 export function validateRequest<T>(schema: ZodSchema<T>) {
   return (req: Request, res: Response, next: NextFunction) => {

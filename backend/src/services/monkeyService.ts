@@ -14,7 +14,7 @@ const monkeyWithLocationSelect = {
   },
 };
 
-const MonkeyService = {
+const monkeyService = {
   getAllMonkeys: async (): Promise<Monkey[]> => {
     return await db
       .select(monkeyWithLocationSelect)
@@ -65,4 +65,4 @@ const MonkeyService = {
   },
 };
 
-export default MonkeyService;
+export default monkeyService;

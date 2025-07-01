@@ -5,7 +5,7 @@ import db from '../../db/db.js';
 import { locations, routes } from '../../db/schema.js';
 import { ConflictError, NotFoundError } from '../errors.js';
 
-const RouteService = {
+const routeService = {
   getRoutesByLocation: async (sourceLocationId: number): Promise<Route[]> => {
     const destinationLocations = alias(locations, 'destinationLocations');
     return await db
@@ -116,4 +116,4 @@ const RouteService = {
   },
 };
 
-export default RouteService;
+export default routeService;

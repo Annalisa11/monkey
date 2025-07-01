@@ -1,16 +1,16 @@
 import { and, eq } from 'drizzle-orm';
-import { NavigationData, NavigationRequest } from 'src/types.js';
 import db from '../../db/db.js';
 import { journeys, locations, routes } from '../../db/schema.js';
 import { NotFoundError, SemanticError } from '../errors.js';
+import { NavigationData, NavigationRequest } from '../types.js';
 import { generateQRCode, generateVerificationToken } from '../utils/qrUtils.js';
-import MonkeyService from './monkeyService.js';
+import monkeyService from './monkeyService.js';
 
-const JourneyService = {
+const journeyService = {
   createQRCode: async (request: NavigationRequest): Promise<NavigationData> => {
     const { monkeyId, destinationLocationId, journeyId } = request;
 
-    const monkeyInfo = await MonkeyService.getMonkeyById(monkeyId);
+    const monkeyInfo = await monkeyService.getMonkeyById(monkeyId);
 
     const [destination] = await db
       .select()
@@ -107,7 +107,7 @@ const JourneyService = {
       throw error;
     }
 
-    const scanningMonkeyInfo = await MonkeyService.getMonkeyById(monkeyId);
+    const scanningMonkeyInfo = await monkeyService.getMonkeyById(monkeyId);
     if (
       (scanningMonkeyInfo && scanningMonkeyInfo.location.id !== locationId) ||
       locationId !== journey.route.destinationLocationId
@@ -146,4 +146,4 @@ const JourneyService = {
   },
 };
 
-export default JourneyService;
+export default journeyService;

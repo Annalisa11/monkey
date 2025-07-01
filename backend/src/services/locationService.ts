@@ -4,7 +4,7 @@ import db from '../../db/db.js';
 import { locations } from '../../db/schema.js';
 import { NotFoundError } from '../errors.js';
 
-const LocationService = {
+const locationService = {
   getAllLocations: async (): Promise<Location[]> => {
     return await db.select().from(locations);
   },
@@ -54,4 +54,4 @@ const LocationService = {
   },
 };
 
-export default LocationService;
+export default locationService;

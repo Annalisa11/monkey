@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { statsService } from 'src/services/statsService.js';
+import { statsService } from '../services/statsService.js';
 
 const getOverviewMetrics: RequestHandler = async (req, res) => {
   try {
