@@ -9,11 +9,12 @@ An Express + TypeScript API for managing interactive monkey robots that assist h
 - **SQLite** (local file DB)
 - **Drizzle ORM**
 - **Swagger (OpenAPI)** docs
+- **Vitest** (unit/integration testing)
 
 ### Prerequisites
 
 - Node.js (v20 recommended)
-- npm
+- pnpm
 
 ## 📁 Project Structure
 
@@ -23,7 +24,7 @@ backend/
 ├── .env                        # Environment variables
 ├── .gitignore                  # Git ignored files
 ├── tsconfig.json               # TypeScript configuration
-├── package.json
+├── package.json                # Project metadata & scripts
 │
 ├── db/
 │   ├── db.ts                   # Drizzle DB connection
@@ -32,7 +33,7 @@ backend/
 │   └── ip.ts                   # Add local network monkey addresses
 │
 ├── src/
-│   ├── swagger/                # Swagger config
+│   ├── swagger/                # Swagger config & docs
 │   ├── routes/
 │   │   ├── monkeyRoutes.ts     # Monkey endpoints
 │   │   └── eventRoutes.ts      # Event endpoints
@@ -40,12 +41,17 @@ backend/
 │   │   ├── monkeyService.ts    # Monkey logic
 │   │   └── eventService.ts     # Event logic
 │   ├── controllers/
-│   │   └── monkeyController.ts # Monkey request handlers
+│   │   ├── monkeyController.ts # Monkey request handlers
 │   │   └── eventController.ts  # Event request handlers
+│   ├── types.ts                # All exported type definitions
+│   ├── config.ts               # Application configuration consts
 │   └── index.ts                # Application entry point
-│   └── types.ts                # All exported type definitions
-│   └── config.ts               # Application configuration consts
-
+│
+├── tests/                      # All test files (unit/integration)
+│   ├── monkey.test.ts
+│   └── event.test.ts
+│
+└── README.md                   # Project documentation
 ```
 
 ## ⚙️ Setup
@@ -55,25 +61,41 @@ backend/
 ```bash
 git clone https://github.com/Annalisa11/monkey
 cd backend
-npm install
+pnpm install
 ```
 
 ### 2. Environmental Variables `.env`
 
-create a `.env` file in the project root and fill it with following variables (values are only examples)
+Create a `.env` file in the project root and fill it with the following variables (values are only examples):
 
 ```env
-PORT=7000             # Port your backend will listen on
-ROBOT_API_PORT=8000   # Port of the api your monkey robots are using
+DATABASE_URL=./db/monkey.db         # Path to SQLite DB file
 ```
 
 ### 3. Start the server (dev)
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 > Runs with `tsx` and watches changes live.
+
+<!-- ### 4. Build & Run (production)
+
+```bash
+npm run build
+npm start
+```
+
+> Compiles TypeScript to `dist/` and runs the compiled app. -->
+
+### 5. Run Tests
+
+```bash
+pnpm test
+```
+
+> Runs all Vitest tests in the `tests/` directory.
 
 ## 🧠 API Overview
 
@@ -89,7 +111,7 @@ http://localhost:7000
 http://localhost:7000/api-docs
 ```
 
-You can test endpoints and their responses through swagger or manually using curl.
+You can test endpoints and their responses through Swagger UI or manually using curl.
 
 Example using curl to get all monkeys:
 
@@ -99,14 +121,14 @@ curl -X GET "http://localhost:7000/v1/monkeys" -H "Content-Type: application/jso
 
 ## 🗃️ SQLite Database
 
-Database file is created automatically.
+Database file is created automatically at first run.
 
 📄 File: `db/monkey.db`
 
-If you want to initialize the db with empty tables on first run, run following command
+If you want to initialize the DB with empty tables on first run, run the following command:
 
 ```bash
-npm run push-db
+pnpm run push-db
 ```
 
 ### ✅ Tables created
@@ -114,9 +136,8 @@ npm run push-db
 - `monkeys` – interactive monkey robots
 - `locations` – places in the hospital
 - `routes` – directions between locations
-- `navigation_qr_codes` – generated QR codes with tokens
-- `button_press_events` – monkey button press logs
-- `journey_completions` – end-of-journey logs
+- `journeys` – tracks a visitor's journey, QR tokens, and status
+- `events` – logs of events (button presses etc.)
 
 All tables are initialized on startup, with foreign key relationships where needed.
 
@@ -133,9 +154,10 @@ const initDB = async () => {
 
 ## 📦 Scripts
 
-| Script            | Description                                   |
-| ----------------- | --------------------------------------------- |
-| `npm run dev`     | Run dev server with auto-reload (tsx)         |
-| `npm run build`   | Compile to `dist/`                            |
-| `npm run start`   | Run compiled app from `dist/index.js`         |
-| `npm run push-db` | Push latest Drizzle schema directly to the DB |
+| Script             | Description                                   |
+| ------------------ | --------------------------------------------- |
+| `pnpm run dev`     | Run dev server with auto-reload (tsx)         |
+| `pnpm run build`   | Compile to `dist/`                            |
+| `pnpm run start`   | Run compiled app from `dist/index.js`         |
+| `pnpm run push-db` | Push latest Drizzle schema directly to the DB |
+| `pnpm test`        | Run all Vitest tests                          |
