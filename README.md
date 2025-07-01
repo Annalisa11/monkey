@@ -76,16 +76,12 @@ pnpm frontend:dev
 
 Runs both frontend and backend in dev mode.
 
----
-
 ## Development Workflow
 
 - **Frontend**: Develop UI in `frontend/`. Use `pnpm frontend:dev` to start the dev server.
 - **Backend**: Develop API and logic in `backend/`. Use `pnpm backend:dev` to start the backend server.
 - **Validation**: Edit or add Zod schemas/types in `validation/`. Rebuild with `pnpm validation:build` or run in watch mode with `pnpm validation:watch`.
 - **Robot Eyes**: (Optional) Run Python scripts in `robot-eyes/` as needed.
-
----
 
 ## Available Scripts
 
