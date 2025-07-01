@@ -24,70 +24,81 @@ backend/
 ├── .env                        # Environment variables
 ├── .gitignore                  # Git ignored files
 ├── tsconfig.json               # TypeScript configuration
+├── drizzle.config.ts           # Drizzle configuration
 ├── package.json                # Project metadata & scripts
 │
 ├── db/
 │   ├── db.ts                   # Drizzle DB connection
 │   ├── schema.ts               # Table definitions
-│   ├── seed.ts                 # Seed function & sample data
-│   └── ip.ts                   # Add local network monkey addresses
+│   ├── monkey.db               # Sqlite DB file
+│   └── seed.ts                 # Seed sample data
 │
 ├── src/
 │   ├── swagger/                # Swagger config & docs
 │   ├── routes/
 │   │   ├── monkeyRoutes.ts     # Monkey endpoints
-│   │   └── eventRoutes.ts      # Event endpoints
+│   │   └── dashboardRoutes.ts  # Dashboard endpoints
 │   ├── services/
-│   │   ├── monkeyService.ts    # Monkey logic
-│   │   └── eventService.ts     # Event logic
+│   │   ├── monkeyService.ts    # DB interaction for monkey logic
+│   │   ├── locationService.ts  # DB interaction for location logic
+│   │   └── ...
 │   ├── controllers/
 │   │   ├── monkeyController.ts # Monkey request handlers
-│   │   └── eventController.ts  # Event request handlers
-│   ├── types.ts                # All exported type definitions
+│   │   └── dashboardController.ts  # Dashboard request handlers
+│   ├── utils/
+│   │   └── ...                 # All utility functions
+│   ├── types.ts                # Typescript types only used in the backend
 │   ├── config.ts               # Application configuration consts
+│   ├── logger.ts               # Custom logging functions
+│   ├── errors.ts               # Custom application errors
 │   └── index.ts                # Application entry point
 │
 ├── tests/                      # All test files (unit/integration)
-│   ├── monkey.test.ts
-│   └── event.test.ts
+│   └── monkeyService.integration.test.ts
 │
 └── README.md                   # Project documentation
 ```
 
-## ⚙️ Setup
+## ⚙️ How to Run
 
-### 1. Clone & Install
+### 1. Install
 
 ```bash
-git clone https://github.com/Annalisa11/monkey
-cd backend
 pnpm install
 ```
 
 ### 2. Environmental Variables `.env`
 
-Create a `.env` file in the project root and fill it with the following variables (values are only examples):
+Create an `.env` file in the backend folder and fill it with the following variables (values are only examples):
 
 ```env
 DATABASE_URL=./db/monkey.db         # Path to SQLite DB file
 ```
 
-### 3. Start the server (dev)
+### 3. Start the server and DB
+
+On first run: initialize the DB with tables by running
 
 ```bash
-pnpm run dev
+pnpm init-db
 ```
 
-> Runs with `tsx` and watches changes live.
-
-<!-- ### 4. Build & Run (production)
+then start the server
 
 ```bash
-npm run build
-npm start
+pnpm dev
 ```
 
-> Compiles TypeScript to `dist/` and runs the compiled app. -->
+> Runs with `tsx` and watches changes live. No need to manually reload or restart
+
+### 4. Build
+
+```bash
+pnpm build
+pnpm start
+```
+
+> Compiles TypeScript to `dist/` and runs the compiled app.
 
 ### 5. Run Tests
 
@@ -128,8 +139,10 @@ Database file is created automatically at first run.
 If you want to initialize the DB with empty tables on first run, run the following command:
 
 ```bash
-pnpm run push-db
+pnpm init-db
 ```
+
+If you want to run tests, you will have to create a `monkey-test.db` file on the same level as the normal DB file.
 
 ### ✅ Tables created
 
@@ -154,10 +167,10 @@ const initDB = async () => {
 
 ## 📦 Scripts
 
-| Script             | Description                                   |
-| ------------------ | --------------------------------------------- |
-| `pnpm run dev`     | Run dev server with auto-reload (tsx)         |
-| `pnpm run build`   | Compile to `dist/`                            |
-| `pnpm run start`   | Run compiled app from `dist/index.js`         |
-| `pnpm run push-db` | Push latest Drizzle schema directly to the DB |
-| `pnpm test`        | Run all Vitest tests                          |
+| Script         | Description                                   |
+| -------------- | --------------------------------------------- |
+| `pnpm dev`     | Run dev server with auto-reload (tsx)         |
+| `pnpm build`   | Compile to `dist/`                            |
+| `pnpm start`   | Run compiled app from `dist/index.js`         |
+| `pnpm init-db` | Push latest Drizzle schema directly to the DB |
+| `pnpm test`    | Run all Vitest tests                          |
