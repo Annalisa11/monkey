@@ -102,7 +102,7 @@ const journeyService = {
 
     if (journey.journey.qrScannedAt) {
       const error = new SemanticError(
-        `Journey ${journey.journey.id} has already been scanned`
+        `Oh Oh, der QR Code wurde bereits gescanned.`
       );
       throw error;
     }
@@ -113,7 +113,7 @@ const journeyService = {
       locationId !== journey.route.destinationLocationId
     ) {
       throw new SemanticError(
-        'Monkey location does not match scan location. Patient is at wrong destination.'
+        'Oh nein, es scheint als wärst du am falschen Ort. Tut mir leid!'
       );
     }
 

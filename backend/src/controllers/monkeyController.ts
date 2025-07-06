@@ -253,7 +253,11 @@ const verifyQRCode: RequestHandler<
     }
 
     logger.info(`QR code verification successful for monkey ${monkeyId}`);
-    res.status(200).json({ message: 'Destination verified successfully.' });
+    res
+      .status(200)
+      .json({
+        message: 'Juhu, du hast es geschafft, du bist richtig! Sehr gut.',
+      });
   } catch (err: any) {
     next(err);
   }
