@@ -63,6 +63,8 @@ backend/
 
 ### 1. Install
 
+You might want to install pnpm from the monorepo root instead. Take a look at the root `README.md` for more information.
+
 ```bash
 pnpm install
 ```
@@ -77,7 +79,10 @@ DATABASE_URL=./db/monkey.db         # Path to SQLite DB file
 
 ### 3. Start the server and DB
 
-On first run: initialize the DB with tables by running
+> make sure you build the validation package before trying to run the server!
+> in the monorepo root (`monkey/`) run `pnpm validation:build`
+
+On first run: initialize the DB with empty tables by running
 
 ```bash
 pnpm init-db
