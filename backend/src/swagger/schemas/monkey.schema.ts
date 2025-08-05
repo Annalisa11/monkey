@@ -8,7 +8,6 @@
  *         - id
  *         - name
  *         - isActive
- *         - address
  *         - location
  *       properties:
  *         id:
@@ -27,11 +26,6 @@
  *           type: boolean
  *           example: true
  *           description: Whether the monkey is currently active
- *         address:
- *           type: string
- *           format: ipv4
- *           example: 192.168.178.42
- *           description: IP address of the monkey
  *         location:
  *           $ref: '#/components/schemas/Location'
  *
@@ -40,7 +34,6 @@
  *       required:
  *         - name
  *         - isActive
- *         - address
  *         - location
  *       properties:
  *         name:
@@ -53,11 +46,6 @@
  *           type: boolean
  *           example: true
  *           description: Whether the monkey is currently active
- *         address:
- *           type: string
- *           format: ipv4
- *           example: 192.168.178.42
- *           description: IP address of the monkey
  *         location:
  *           $ref: '#/components/schemas/Location'
  *
@@ -76,7 +64,6 @@
  *         name:
  *           type: string
  *           minLength: 1
- *           maxLength: 100
  *           example: Main Lobby
  *           description: Name of the location
  *
@@ -88,7 +75,6 @@
  *         name:
  *           type: string
  *           minLength: 1
- *           maxLength: 100
  *           example: Main Lobby
  *           description: Name of the location
  *
@@ -160,10 +146,9 @@
  *         - destinationLocationId
  *       properties:
  *         destinationLocationId:
- *           type: string
- *           minLength: 1
- *           example: Optometrist
- *           description: Name of the destination location
+ *           type: integer
+ *           example: 1
+ *           description: ID of the destination location
  *         journeyId:
  *           type: integer
  *           format: int32
@@ -177,8 +162,8 @@
  *       properties:
  *         destinationLocationId:
  *           type: string
- *           example: Optometrist
- *           description: Name of the destination location
+ *           example: 2
+ *           description: ID of the destination location
  *
  *     NavigationResponse:
  *       type: object
@@ -190,12 +175,15 @@
  *             token:
  *               type: string
  *               description: Unique token identifying the QR code
+ *               example: "205299c9467fcd596f3d629f99364602"
  *             destinationId:
  *               type: integer
  *               description: ID of the destination location
+ *               example: 2
  *             journeyId:
  *               type: integer
  *               description: ID of the associated journey
+ *               example: 123
  *           required:
  *             - token
  *             - destinationId
