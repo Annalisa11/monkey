@@ -10,7 +10,6 @@ A full-stack monorepo for the Monkey Navigation System.
 - [Getting Started](#getting-started)
 - [Development Workflow](#development-workflow)
 - [Available Scripts](#available-scripts)
-- [Shared Types & Validation](#shared-types--validation)
 - [Troubleshooting](#troubleshooting)
 
 ## Project Overview
@@ -56,6 +55,8 @@ This repository contains all code for the Monkey Navigation System, including:
 cd monkey
 pnpm install
 ```
+
+once you have done this, you won't have to run `pnpm install` for the individual packages anymore. This will instsall for ALL subprojects.
 
 ### 2. Build shared types and schemas
 
@@ -112,18 +113,7 @@ pnpm backend:build       # Build backend
 
 ```bash
 pnpm validation:build     # Build validation package once
-pnpm validation:watch     # Watch for changes and rebuild
-```
-
-## Shared Types & Validation
-
-The `validation/` directory holds all **Zod schemas** and **shared types** used by both frontend and backend. This eliminates duplication and ensures consistency across the stack.
-
-Example usage:
-
-```ts
-import { monkeyFormSchema, Monkey } from '@validation'; // in frontend
-import { monkeyFormSchema, Monkey } from 'validation'; // in backend
+pnpm validation:watch     # Watch for changes and rebuild automatically
 ```
 
 ## Troubleshooting
