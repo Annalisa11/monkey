@@ -68,6 +68,9 @@ This builds the validation package so that the frontend and backend can import i
 
 ### 3. Run the whole system
 
+If it's your first time running the system take a look at the backend and frontend `README.md` files, you will first have to add the corresponding `.env` variables and initilize the database.
+Once you set up both systems according to their documentations you can start them without problems.  
+
 run each commands in a different terminal window
 
 ```bash
