@@ -1,5 +1,6 @@
 # 🐵 Monkey - Monorepo
 
+Practical Part of my Bachelor Thesis in Media Informatics at LMU.  
 A full-stack monorepo for the Monkey Navigation System.
 
 ## 📖 Table of Contents
